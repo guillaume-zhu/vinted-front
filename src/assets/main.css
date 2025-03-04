@@ -1,5 +1,12 @@
 @import './base.css';
 
+:root {
+  /* dimensions */
+  --header-height: 98px;
+  --header-main-height: 52px;
+  --header-nav-height: 44px;
+}
+
 body {
   font-family: 'Inter', Arial, sans-serif;
 }
@@ -17,4 +24,9 @@ h2 {
 p {
   font-size: 12px;
   font-weight: 375;
+}
+
+.container {
+  max-width: 1240px;
+  margin: 0 auto;
 }
