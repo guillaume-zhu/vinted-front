@@ -30,7 +30,7 @@ let page = 1
 const offersListPlus = ref([])
 let pageSize = 0
 
-// Fonction pour découper le tableau d'id en 80-80-80
+/////////// Fonction pour découper le tableau d'id en 80-80-80
 const cutArray = (array, size) => {
   let result = []
   for (let i = 0; i < array.length; i += size) {
@@ -39,7 +39,7 @@ const cutArray = (array, size) => {
   return result
 }
 
-///// Récupérer tout les id des offres seulement dans un tableau
+/////////// Récupérer tout les id des offres seulement dans un tableau
 onMounted(async () => {
   isLoading.value = true
   try {
@@ -132,9 +132,9 @@ onMounted(async () => {
   }
 })
 
-// <!-- LOGIQUE POUR AJOUTER UN BOUTON VOIR PLUS ET AFFICHER LA SUITE DES REQUÊTES -->
-//         <!-- ajouter un bouton voir plus, lors du clic lancer nouvelle requête de 80 offres de la div présente derrière avec un v-if -->
-//         <!-- lancer une requete a partir du 2e tableau de 80 id, puis faire une incrémentation de {pageSize + 80} lors du clic de voir plus -->
+/////////// LOGIQUE POUR AJOUTER UN BOUTON VOIR PLUS ET AFFICHER LA SUITE DES REQUÊTES
+// - ajouter un bouton voir plus, lors du clic lancer nouvelle requête de 80 offres de la div présente derrière avec un v-if
+// - lancer une requete a partir du 2e tableau de 80 id, puis faire une incrémentation de {pageSize + 80} lors du clic de voir plus
 const loadMoreOffer = async () => {
   pageSize += 80
 
