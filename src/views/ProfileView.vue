@@ -41,7 +41,7 @@ onMounted(async () => {
       <div>
         <p>À propos :</p>
         <font-awesome-icon :icon="['fas', 'map-marker-alt']" />
-        <span>
+        <span v-if="userInfo.city && userInfo.country">
           {{ userInfo.city[0].toUpperCase() }}{{ userInfo.city.slice(1) }},
           {{ userInfo.country.displayName }}</span
         >

@@ -446,7 +446,7 @@ const fetchDynamicCities = async (searchQuery) => {
             v-model="selectedCountry"
             :options="countries"
             label="displayName"
-            :placeholder="userInfo.country.displayName"
+            :placeholder="userInfo.country ? userInfo.country.displayName : 'Sélectionne un pays'"
             @update:modelValue="fetchCities"
           />
         </div>
@@ -459,7 +459,7 @@ const fetchDynamicCities = async (searchQuery) => {
             :options="cities"
             label="name"
             :placeholder="
-              !selectedCountry
+              userInfo.city
                 ? userInfo.city[0].toUpperCase() + userInfo.city.slice(1)
                 : 'Sélectionne une ville'
             "
