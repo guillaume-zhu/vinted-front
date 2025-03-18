@@ -39,7 +39,27 @@ const cutArray = (array, size) => {
   return result
 }
 
-/////////// Récupérer tout les id des offres seulement dans un tableau
+const searchDressingWithOffers = async (ownersQueue) => {
+  while (ownersQueue.length > 0) {
+    const owner = ownersQueue.shift()
+    try {
+      const response = await axios.get(
+        `http://localhost:1337/api/users/${owner.id}?populate[0]=avatar&populate[1]=offers.images&populate[2]=offers.category&populate[3]=offers.brand&populate[4]=offers.size&populate[5]=offers.materials&populate[6]=offers.colors`,
+      )
+
+      if (response.data.offers.length > 0) {
+        return response.data
+      }
+    } catch (error) {
+      console.log(
+        `Erreur lors de la boucle pour récupérer un dressing de l'utilisateur ${owner.id}`,
+      )
+    }
+  }
+  return null
+}
+
+/////////// REQUETE POUR AFFICHER OFFRES ET DRESSING
 onMounted(async () => {
   isLoading.value = true
   try {
@@ -106,25 +126,37 @@ onMounted(async () => {
     randomizedAllOwnersId.value = _.shuffle(allOwnersId.value)
     console.log('randomizedAllOwnersId ---->', randomizedAllOwnersId.value)
 
-    // Afficher un dressing pour le premier id du tableau
-    const responseOwner = await axios.get(
-      `http://localhost:1337/api/users/${randomizedAllOwnersId.value[0].id}?populate[0]=avatar&populate[1]=offers.images&populate[2]=offers.category&populate[3]=offers.brand&populate[4]=offers.size&populate[5]=offers.materials&populate[6]=offers.colors`,
-    )
-    firstDressingLine.value = responseOwner.data
+    // // Afficher un dressing pour le premier id du tableau
+    // const responseOwner = await axios.get(
+    //   `http://localhost:1337/api/users/${randomizedAllOwnersId.value[0].id}?populate[0]=avatar&populate[1]=offers.images&populate[2]=offers.category&populate[3]=offers.brand&populate[4]=offers.size&populate[5]=offers.materials&populate[6]=offers.colors`,
+    // )
+    // firstDressingLine.value = responseOwner.data
+    // console.log('firstDressingLine ---->', firstDressingLine.value)
+
+    // // Afficher un dressing pour le deuxieme id du tableau
+    // const responseOwner2 = await axios.get(
+    //   `http://localhost:1337/api/users/${randomizedAllOwnersId.value[1].id}?populate[0]=avatar&populate[1]=offers.images&populate[2]=offers.category&populate[3]=offers.brand&populate[4]=offers.size&populate[5]=offers.materials&populate[6]=offers.colors`,
+    // )
+    // secondDressingLine.value = responseOwner2.data
+    // console.log('secondDressingLine ---->', secondDressingLine.value)
+
+    // // Afficher un dressing pour le troisième id du tableau
+    // const responseOwner3 = await axios.get(
+    //   `http://localhost:1337/api/users/${randomizedAllOwnersId.value[2].id}?populate[0]=avatar&populate[1]=offers.images&populate[2]=offers.category&populate[3]=offers.brand&populate[4]=offers.size&populate[5]=offers.materials&populate[6]=offers.colors`,
+    // )
+    // thirdDressingLine.value = responseOwner3.data
+
+    // Copie de la liste des tableaux d'id utilisateurs pour la transformer en file d'attente mutable
+    const ownersQueue = [...randomizedAllOwnersId.value]
+
+    // Afficher les dressing avec au moins une offre
+    firstDressingLine.value = await searchDressingWithOffers(ownersQueue)
+    secondDressingLine.value = await searchDressingWithOffers(ownersQueue)
+    thirdDressingLine.value = await searchDressingWithOffers(ownersQueue)
+
     console.log('firstDressingLine ---->', firstDressingLine.value)
-
-    // Afficher un dressing pour le deuxieme id du tableau
-    const responseOwner2 = await axios.get(
-      `http://localhost:1337/api/users/${randomizedAllOwnersId.value[1].id}?populate[0]=avatar&populate[1]=offers.images&populate[2]=offers.category&populate[3]=offers.brand&populate[4]=offers.size&populate[5]=offers.materials&populate[6]=offers.colors`,
-    )
-    secondDressingLine.value = responseOwner2.data
     console.log('secondDressingLine ---->', secondDressingLine.value)
-
-    // Afficher un dressing pour le troisième id du tableau
-    const responseOwner3 = await axios.get(
-      `http://localhost:1337/api/users/${randomizedAllOwnersId.value[2].id}?populate[0]=avatar&populate[1]=offers.images&populate[2]=offers.category&populate[3]=offers.brand&populate[4]=offers.size&populate[5]=offers.materials&populate[6]=offers.colors`,
-    )
-    thirdDressingLine.value = responseOwner3.data
+    console.log('thirdDressingLine ---->', thirdDressingLine.value)
   } catch (error) {
     errorMessage.value = error
   } finally {
