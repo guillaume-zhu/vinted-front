@@ -2,7 +2,9 @@
 import { ref, inject } from 'vue'
 import axios from 'axios'
 import router from '@/router'
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
 const GlobalStore = inject('GlobalStore')
 // console.log('GlobalStore ---->', GlobalStore)
 
@@ -81,7 +83,7 @@ const logIn = async () => {
       // Mettre à jour la valeur userInfoCookie pour actualiser la ref
       GlobalStore.updateInfoCookie()
 
-      router.push({ name: 'home' })
+      router.push({ name: route.query.redirect || 'home' })
     } catch (error) {
       errorMessage.value = 'Identifiants incorrects ou erreur serveur'
     } finally {
@@ -116,7 +118,7 @@ const signUp = async () => {
       // Mettre à jour la valeur userInfoCookie pour actualiser la ref
       GlobalStore.updateInfoCookie()
 
-      router.push({ name: 'home' })
+      router.push({ name: route.query.route || 'home' })
     } catch (error) {
       errorMessage.value = error.message
     } finally {

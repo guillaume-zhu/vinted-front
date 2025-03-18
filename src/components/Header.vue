@@ -1,8 +1,9 @@
 <script setup>
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 import { computed, inject } from 'vue'
 import { ref, onMounted, onUnmounted } from 'vue'
 
+const router = useRouter()
 const GlobalStore = inject('GlobalStore')
 console.log('is connected ? global userInfoCookie ---->', GlobalStore.userInfoCookie.value)
 
@@ -21,6 +22,8 @@ const toggleMenu = () => {
 
 // Fonction de navigation qui ferme le menu après un clic
 const navigate = (route) => {
+  console.log('hey')
+
   router.push({ name: route })
   isOpen.value = false
 }
