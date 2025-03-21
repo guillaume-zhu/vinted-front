@@ -1,6 +1,6 @@
 <script setup>
 import { RouterLink, useRouter } from 'vue-router'
-import { computed, inject } from 'vue'
+import { computed, inject, watchEffect } from 'vue'
 import { ref, onMounted, onUnmounted } from 'vue'
 
 const router = useRouter()
@@ -76,7 +76,11 @@ onUnmounted(() => {
         <div class="header-main__profile-container" v-else-if="GlobalStore.userInfoCookie.value">
           <!-- Avatar utilisateur -->
           <div class="header-main__avatar" @click="toggleMenu" ref="avatarRef">
-            <img :src="GlobalStore.avatarUrl.value" alt="Avatar utilisateur" />
+            <img
+              :src="GlobalStore.avatarUrl.value"
+              :key="GlobalStore.avatarUrl.value"
+              alt="Avatar utilisateur"
+            />
           </div>
         </div>
 

@@ -11,6 +11,7 @@ const userInfo = ref('')
 const isLoading = ref(false)
 const errorMessage = ref('')
 
+// Requête pour récupérer userInfo
 onMounted(async () => {
   isLoading.value = true
   try {
@@ -34,7 +35,7 @@ onMounted(async () => {
 const selectedCountry = ref(null)
 const countries = ref([])
 
-// Fonction pour récupérer la liste des pays
+// Requête fonction pour récupérer la liste des pays depuis le back
 const fetchCountries = async () => {
   try {
     const { data } = await axios.get('http://localhost:1337/api/countries')
@@ -358,7 +359,7 @@ const fetchCities = async () => {
   }
 }
 
-// Fonction Nominatim pour récupérer toutes les villes dynamiques
+// Fonction Geonames pour récupérer toutes les villes dynamiques
 const fetchDynamicCities = async (searchQuery) => {
   if (!selectedCountry.value || !selectedCountry.value.isoCode || searchQuery.length < 2) return
 
@@ -402,6 +403,120 @@ const fetchDynamicCities = async (searchQuery) => {
     console.log('Erreur lors du chargement des villes API dynamiques :', error)
   }
 }
+
+////// SUBMISSION UPDATE FORM
+// Variables pour form
+const image = ref(null)
+const description = ref('')
+const isPublishing = ref(false)
+
+// Requete UPDATE
+const handleSubmit = async () => {
+  isPublishing.value = true
+
+  ///// Si le formulaire contient IMAGE
+  if (image.value) {
+    //// Création du formdata
+    const formData = new FormData()
+
+    //// Ajout de l'image au formData
+    formData.append('avatar', image.value)
+
+    /// S'il contient DESCRIPTION
+    if (description.value) {
+      formData.append('description', description.value)
+      // console.log('added description ---->', formData)
+    }
+    /// S'il contient COUNTRY/CITY
+    if (selectedCountry.value && selectedCity.value) {
+      formData.append('country', selectedCountry.value.value)
+      formData.append('city', selectedCity.value.name)
+      // console.log('added country & city ---->', formData)
+    }
+
+    console.log('formData a envoyer ---->', formData)
+    formData.forEach((value, key) => {
+      console.log(`${key}:`, value)
+    })
+
+    //// Faire la requête
+    try {
+      const response = await axios.put(
+        `http://localhost:1337/api/users/${userInfo.value.id}?populate[0]=avatar`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ` + GlobalStore.userInfoCookie.value.token,
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      )
+
+      console.log('Réponse requete update formData ---->', response.data)
+
+      if (response.data.avatar) {
+        GlobalStore.userInfoCookie.value = {
+          ...GlobalStore.userInfoCookie.value,
+          avatarUrl: response.data.avatar.url,
+        }
+
+        GlobalStore.setUserInfoCookie(
+          GlobalStore.userInfoCookie.value.token,
+          response.data.id,
+          response.data.username,
+          response.data.avatar.url,
+        )
+      }
+
+      // console.log(
+      //   'Avatar mis à jour dans GlobalStore ---->',
+      //   GlobalStore.userInfoCookie.value.avatarUrl,
+      // )
+    } catch (error) {
+      console.log(`Erreur lors de l'update formData`, error)
+    }
+  }
+
+  ///// Si le formulaire contient DESCRIPTION ou COUNTRY/CITY
+  else if (description.value || (selectedCountry.value && selectedCity.value)) {
+    /// Déclarer le body vide a envoyer
+    let body = {}
+
+    /// S'il contient DESCRIPTION, ajouter au body
+    if (description.value) {
+      body.description = description.value
+    }
+    /// S'il contient COUNTRY/CITY, ajouter au body
+    if (selectedCountry.value && selectedCity.value) {
+      body.country = selectedCountry.value.value
+      body.city = selectedCity.value.name
+    }
+
+    console.log('body a envoyer ---->', body)
+
+    /// Faire la requête
+
+    try {
+      const response = await axios.put(
+        `http://localhost:1337/api/users/${userInfo.value.id}`,
+        body,
+        {
+          headers: { Authorization: `Bearer ` + GlobalStore.userInfoCookie.value.token },
+        },
+      )
+
+      console.log('Réponse requete update body ---->', response.data)
+    } catch (error) {
+      console.log(`Erreur lors de l'update des informations sans avatar`)
+    }
+  }
+  isPublishing.value = false
+}
+
+// COMPUTED POUR CRÉER PREVIEW UPLOAD IMAGE
+const imagePreview = computed(() => {
+  return URL.createObjectURL(image.value)
+})
 </script>
 
 <template>
@@ -424,52 +539,61 @@ const fetchDynamicCities = async (searchQuery) => {
     <!-- PARTIE DÉTAILS DROITE ---------------------------->
     <div class="settings__details">
       <!-- TOP AVATAR & DESCRIPTION -->
-      <div>
+      <form @submit.prevent="handleSubmit()">
         <div>
-          <h2>Ta photo de profil</h2>
-          <img :src="GlobalStore.avatarUrl.value" alt="avatar utilisateur" />
+          <div>
+            <h2>Ta photo de profil</h2>
+            <div>
+              <img :src="imagePreview" alt="avatar utilisateur" v-if="image" />
+              <img :src="GlobalStore.avatarUrl.value" alt="avatar utilisateur" v-else />
+              <input type="file" @change="(event) => (image = event.target.files[0])" />
+            </div>
+          </div>
+
+          <div>
+            <h2>À propos de toi</h2>
+            <textarea
+              placeholder="Présente-toi aux autres membres"
+              v-model="description"
+            ></textarea>
+          </div>
         </div>
 
+        <!-- MID COUNTRY & CITY --------->
         <div>
-          <h2>À propos de toi</h2>
-          <textarea placeholder="Présente-toi aux autres membres"></textarea>
-        </div>
-      </div>
+          <p>Ma position</p>
+          <!-- Sélecteur de pays -->
+          <div>
+            <label for="country">Pays</label>
+            <v-select
+              v-model="selectedCountry"
+              :options="countries"
+              label="displayName"
+              :placeholder="userInfo.country ? userInfo.country.displayName : 'Sélectionne un pays'"
+              @update:modelValue="fetchCities"
+            />
+          </div>
 
-      <!-- MID COUNTRY & CITY --------->
-      <div>
-        <p>Ma position</p>
-        <!-- Sélecteur de pays -->
-        <div>
-          <label for="country">Pays</label>
-          <v-select
-            v-model="selectedCountry"
-            :options="countries"
-            label="displayName"
-            :placeholder="userInfo.country ? userInfo.country.displayName : 'Sélectionne un pays'"
-            @update:modelValue="fetchCities"
-          />
+          <!-- Sélecteur de villes -->
+          <div>
+            <label for="city">Ville</label>
+            <v-select
+              v-model="selectedCity"
+              :options="cities"
+              label="name"
+              :placeholder="
+                userInfo.city
+                  ? userInfo.city[0].toUpperCase() + userInfo.city.slice(1)
+                  : 'Sélectionne une ville'
+              "
+              :filterable="true"
+              :no-options-text="'Aucune ville trouvée'"
+              @search="fetchDynamicCities"
+            ></v-select>
+          </div>
+          <button>Mettre à jour</button>
         </div>
-
-        <!-- Sélecteur de villes -->
-        <div>
-          <label for="city">Ville</label>
-          <v-select
-            v-model="selectedCity"
-            :options="cities"
-            label="name"
-            :placeholder="
-              userInfo.city
-                ? userInfo.city[0].toUpperCase() + userInfo.city.slice(1)
-                : 'Sélectionne une ville'
-            "
-            :filterable="true"
-            :no-options-text="'Aucune ville trouvée'"
-            @search="fetchDynamicCities"
-          ></v-select>
-        </div>
-        <button>Mettre à jour</button>
-      </div>
+      </form>
     </div>
   </div>
 </template>

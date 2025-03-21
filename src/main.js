@@ -59,11 +59,11 @@ const logOut = () => {
 import userProfileImg from '@/assets/img/user-profile.webp'
 
 const avatarUrl = computed(() => {
-  const cookie = $cookies.get('userToken')
+  console.log('Mise à jour avatarUrl détectée') // Vérifie si ça s'affiche dans la console
 
   // Si cookie existe et contient avatarUrl
-  if (cookie && cookie.avatarUrl) {
-    return cookie.avatarUrl
+  if (userInfoCookie.value && userInfoCookie.value.avatarUrl) {
+    return userInfoCookie.value.avatarUrl
 
     // Sinon retourner l'image par défaut
   } else {
