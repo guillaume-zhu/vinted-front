@@ -517,6 +517,13 @@ const handleSubmit = async () => {
 const imagePreview = computed(() => {
   return URL.createObjectURL(image.value)
 })
+
+// REMPLIR DESCRIPTION SI USERINFO EXISTE
+watchEffect(() => {
+  if (userInfo.value && userInfo.value.description) {
+    description.value = userInfo.value.description
+  }
+})
 </script>
 
 <template>
@@ -526,7 +533,9 @@ const imagePreview = computed(() => {
       <ul>
         <h1>Mes paramètres</h1>
         <li>Détails du profil</li>
-        <li>Paramètres du compte</li>
+        <RouterLink :to="{ name: 'account' }">
+          <li>Paramètres du compte</li>
+        </RouterLink>
         <li>Envoi</li>
         <li>Paiements</li>
         <li>Réductions sur les lots</li>
@@ -595,6 +604,10 @@ const imagePreview = computed(() => {
         </div>
       </form>
     </div>
+  </div>
+
+  <div class="container" v-else>
+    <p>En cours de chargement</p>
   </div>
 </template>
 
