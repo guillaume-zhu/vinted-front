@@ -5,6 +5,7 @@ import LoginView from '@/views/LoginView.vue'
 import ProfileView from '@/views/ProfileView.vue'
 import SettingsView from '@/views/SettingsView.vue'
 import AccountView from '@/views/AccountView.vue'
+import PasswordView from '@/views/PasswordView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -37,13 +38,20 @@ const router = createRouter({
       component: AccountView,
       meta: { requireAuth: true },
     },
+    {
+      path: '/account/password',
+      name: 'password',
+      component: PasswordView,
+      meta: { requireAuth: true },
+    },
   ],
 })
 
 // NAVIGATION GUARD
 router.beforeEach((to, from) => {
-  const GlobalStore = inject('GlobalStore')
-  if (to.meta.requireAuth && !GlobalStore.userInfoCookie.value) {
+  // const GlobalStore = inject('GlobalStore')
+  const userToken = $cookies.get('userToken')
+  if (to.meta.requireAuth && !userToken) {
     return { name: 'login', query: { redirect: to.name } }
   }
 })

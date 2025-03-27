@@ -173,14 +173,15 @@ watchEffect(() => {
     <!-- PARTIE DÉTAILS DROITE ---------------------------->
     <div class="settings__details">
       <!-- TOP EMAIL & PHONE -------------------->
+      <!-- <div> -->
       <!-- EMAIL -->
-      <div>
+      <!-- <div>
         <p>{{ userInfo.email }}</p>
         <div>Changer</div>
-      </div>
+      </div> -->
 
       <!-- PHONE -->
-      <div>
+      <!-- <div>
         <p>{{ userInfo.phone ? userInfo.phone : 'Numéro de téléphone' }}</p>
         <div>Changer</div>
       </div>
@@ -188,6 +189,7 @@ watchEffect(() => {
         Ton numéro de téléphone ne sera utilisé que pour t'aider à te connecter. Il ne sera pas
         rendu public, ni utilisé à des fins marketing.
       </p>
+      </div> -->
 
       <!-- MID NAME & GENDER & BIRTH ------------>
       <form @submit.prevent="handleSubmit()">
@@ -248,7 +250,7 @@ watchEffect(() => {
         <!-- BOT PASSWORD -->
         <div>
           <p>Mot de passe</p>
-          <RouterLink to="">
+          <RouterLink :to="{ name: 'password' }">
             <button type="button">Modifier</button>
           </RouterLink>
         </div>
