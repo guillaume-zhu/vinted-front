@@ -8,11 +8,13 @@ import VueCookies from 'vue-cookies'
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+
 import {
   faChevronLeft,
   faChevronRight,
   faMapMarkerAlt,
   faPen,
+  faShieldAlt,
 } from '@fortawesome/free-solid-svg-icons'
 import { faFacebookSquare, faInstagram, faLinkedin } from '@fortawesome/free-brands-svg-icons'
 import { faEye, faEyeSlash } from '@fortawesome/free-regular-svg-icons'
@@ -27,6 +29,7 @@ library.add(
   faEyeSlash,
   faMapMarkerAlt,
   faPen,
+  faShieldAlt,
 )
 
 const app = createApp(App).component('font-awesome-icon', FontAwesomeIcon)

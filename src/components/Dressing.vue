@@ -1,6 +1,7 @@
 <script setup>
 ///// Partie pour gérer le scroll du dressing
 import { ref } from 'vue'
+import { RouterLink } from 'vue-router'
 
 const props = defineProps({
   dressingInfo: {
@@ -49,11 +50,13 @@ const scrollRight = () => {
 
     <div class="offers__dressing-offers" ref="dressingContainer" @scroll="checkScroll">
       <div class="offers__dressing-card" v-for="offer in dressingInfo.offers" :key="offer.id">
-        <img class="offers__dressing-card-image" :src="offer.images[0].url" alt="" />
-        <p>{{ offer.brand.displayName }}</p>
-        <p v-if="offer.size">{{ offer.size.displayName }}</p>
-        <p>{{ offer.price.toFixed(2) }} €</p>
-        <p>{{ (offer.price + offer.price * (9.38 / 100)).toFixed(2) }} €</p>
+        <RouterLink :to="{ name: 'product', params: { id: offer.id } }">
+          <img class="offers__dressing-card-image" :src="offer.images[0].url" alt="" />
+          <p>{{ offer.brand.displayName }}</p>
+          <p v-if="offer.size">{{ offer.size.displayName }}</p>
+          <p>{{ offer.price.toFixed(2) }} €</p>
+          <p>{{ (offer.price + offer.price * (9.38 / 100)).toFixed(2) }} €</p>
+        </RouterLink>
       </div>
     </div>
 

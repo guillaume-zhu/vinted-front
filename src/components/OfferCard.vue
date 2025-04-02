@@ -1,4 +1,6 @@
 <script setup>
+import { RouterLink } from 'vue-router'
+
 const props = defineProps({
   offer: {
     type: Object,
@@ -9,16 +11,18 @@ const props = defineProps({
 
 <template>
   <div class="offer-card">
-    <img v-if="offer.attributes.images" :src="offer.attributes.images.data[0].attributes.url" />
-    <p v-if="offer.attributes.brand.data?.attributes.displayName">
-      {{ offer.attributes.brand.data.attributes.displayName }}
-    </p>
-    <p v-if="offer.attributes.size.data?.attributes.displayName">
-      {{ offer.attributes.size.data.attributes.displayName }}
-    </p>
-    <p v-else>{{ offer.attributes.condition }}</p>
-    <p>{{ offer.attributes.price.toFixed(2) }} €</p>
-    <p>{{ (offer.attributes.price + offer.attributes.price * (9.38 / 100)).toFixed(2) }} €</p>
+    <RouterLink :to="{ name: 'product', params: { id: offer.id } }">
+      <img v-if="offer.attributes.images" :src="offer.attributes.images.data[0].attributes.url" />
+      <p v-if="offer.attributes.brand.data?.attributes.displayName">
+        {{ offer.attributes.brand.data.attributes.displayName }}
+      </p>
+      <p v-if="offer.attributes.size.data?.attributes.displayName">
+        {{ offer.attributes.size.data.attributes.displayName }}
+      </p>
+      <p v-else>{{ offer.attributes.condition }}</p>
+      <p>{{ offer.attributes.price.toFixed(2) }} €</p>
+      <p>{{ (offer.attributes.price + offer.attributes.price * (9.38 / 100)).toFixed(2) }} €</p>
+    </RouterLink>
   </div>
 </template>
 

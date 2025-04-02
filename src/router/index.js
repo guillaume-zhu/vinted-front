@@ -6,6 +6,7 @@ import ProfileView from '@/views/ProfileView.vue'
 import SettingsView from '@/views/SettingsView.vue'
 import AccountView from '@/views/AccountView.vue'
 import PasswordView from '@/views/PasswordView.vue'
+import ProductView from '@/views/ProductView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -43,6 +44,12 @@ const router = createRouter({
       name: 'password',
       component: PasswordView,
       meta: { requireAuth: true },
+    },
+    {
+      path: '/product/:id',
+      name: 'product',
+      component: ProductView,
+      props: true,
     },
   ],
 })
