@@ -34,6 +34,7 @@ library.add(
   faChevronLeft,
   faChevronRight,
   faTimes,
+  faMapMarkerAlt,
 )
 
 const app = createApp(App).component('font-awesome-icon', FontAwesomeIcon)

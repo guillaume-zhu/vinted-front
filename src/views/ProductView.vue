@@ -1,10 +1,13 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, inject } from 'vue'
 import axios from 'axios'
 
 import Breadcrumb from '@/components/Breadcrumb.vue'
 import OfferGallery from '@/components/OfferGallery.vue'
 import OfferCard from '@/components/OfferCard.vue'
+
+const GlobalStore = inject('GlobalStore')
+console.log('Global store userInfoCookie.id ---->', GlobalStore.userInfoCookie.value.id)
 
 const props = defineProps({
   id: { type: String },
@@ -47,7 +50,7 @@ onMounted(async () => {
 
     // Récupérer ownerInfo
     const responseOwnerInfo = await axios.get(
-      `http://localhost:1337/api/users/${ownerId.value}?populate[0]=avatar&populate[1]=offers.images&populate[2]=offers.category&populate[3]=offers.brand&populate[4]=offers.size&populate[5]=offers.materials&populate[6]=offers.colors`,
+      `http://localhost:1337/api/users/${ownerId.value}?populate[0]=avatar&populate[1]=offers.images&populate[2]=offers.category&populate[3]=offers.brand&populate[4]=offers.size&populate[5]=offers.materials&populate[6]=offers.colors&populate[7]=country`,
     )
 
     ownerInfo.value = responseOwnerInfo.data
@@ -119,77 +122,127 @@ const SeeMore = () => {
 
       <!-- DETAILS BLOC -------------------------------->
       <div class="details" v-if="offerInfo">
-        <!-- TOP PART -->
-        <div class="details__top">
-          <p>{{ offerInfo.attributes.name }}</p>
-          <span v-if="offerInfo.attributes.condition">{{ offerInfo.attributes.condition }} · </span>
-          <span>{{ offerInfo.attributes.brand.data.attributes.displayName }}</span>
+        <!-- PRODUCT INFO -------->
+        <div class="details__product">
+          <!-- TOP PART -->
+          <div class="details__top">
+            <p>{{ offerInfo.attributes.name }}</p>
+            <span v-if="offerInfo.attributes.condition"
+              >{{ offerInfo.attributes.condition }} ·
+            </span>
+            <span>{{ offerInfo.attributes.brand.data.attributes.displayName }}</span>
 
-          <p>{{ offerInfo.attributes.price.toFixed(2) }} €</p>
-          <p>
-            {{
-              (offerInfo.attributes.price + offerInfo.attributes.price * (9.38 / 100)).toFixed(2)
-            }}
-            €
-          </p>
-          <p>Inclut la Protection acheteurs <font-awesome-icon :icon="['fas', 'shield-alt']" /></p>
-        </div>
-
-        <!-- MID PART -->
-        <div class="details__mid">
-          <!-- condition -->
-          <div class="details__mid-info" v-if="offerInfo.attributes.condition.data">
-            <p>État</p>
-            <p>{{ offerInfo.attributes.condition }}</p>
-          </div>
-
-          <!-- size -->
-          <div class="details__mid-info" v-if="offerInfo.attributes.size.data">
-            <p>Taille</p>
-            <p>
-              {{ offerInfo.attributes.size.data.attributes.displayName }}
-            </p>
-          </div>
-
-          <!-- brand -->
-          <div class="details__mid-info" v-if="offerInfo.attributes.brand.data">
-            <p>Marque</p>
-            <p>
-              {{ offerInfo.attributes.brand.data.attributes.displayName }}
-            </p>
-          </div>
-
-          <!-- color -->
-          <div class="details__mid-info" v-if="offerInfo.attributes.colors.data">
-            <p>Couleur</p>
+            <p>{{ offerInfo.attributes.price.toFixed(2) }} €</p>
             <p>
               {{
-                offerInfo.attributes.colors.data
-                  .map(
-                    (color) =>
-                      color.attributes.displayName[0].toUpperCase() +
-                      color.attributes.displayName.slice(1),
-                  )
-                  .join(', ')
+                (offerInfo.attributes.price + offerInfo.attributes.price * (9.38 / 100)).toFixed(2)
               }}
+              €
+            </p>
+            <p>
+              Inclut la Protection acheteurs <font-awesome-icon :icon="['fas', 'shield-alt']" />
             </p>
           </div>
 
-          <!-- Ajouté -->
-          <div class="details__mid-info" v-if="offerInfo.attributes.publishedAt">
-            <p>Ajouté</p>
-            <p>{{ addedAgo }}</p>
+          <!-- MID PART -->
+          <div class="details__mid">
+            <!-- condition -->
+            <div class="details__mid-info" v-if="offerInfo.attributes.condition.data">
+              <p>État</p>
+              <p>{{ offerInfo.attributes.condition }}</p>
+            </div>
+
+            <!-- size -->
+            <div class="details__mid-info" v-if="offerInfo.attributes.size.data">
+              <p>Taille</p>
+              <p>
+                {{ offerInfo.attributes.size.data.attributes.displayName }}
+              </p>
+            </div>
+
+            <!-- brand -->
+            <div class="details__mid-info" v-if="offerInfo.attributes.brand.data">
+              <p>Marque</p>
+              <p>
+                {{ offerInfo.attributes.brand.data.attributes.displayName }}
+              </p>
+            </div>
+
+            <!-- color -->
+            <div class="details__mid-info" v-if="offerInfo.attributes.colors.data">
+              <p>Couleur</p>
+              <p>
+                {{
+                  offerInfo.attributes.colors.data
+                    .map(
+                      (color) =>
+                        color.attributes.displayName[0].toUpperCase() +
+                        color.attributes.displayName.slice(1),
+                    )
+                    .join(', ')
+                }}
+              </p>
+            </div>
+
+            <!-- Ajouté -->
+            <div class="details__mid-info" v-if="offerInfo.attributes.publishedAt">
+              <p>Ajouté</p>
+              <p>{{ addedAgo }}</p>
+            </div>
+          </div>
+
+          <!-- DESCRIPTION PART -->
+          <div class="details__description" v-if="offerInfo.attributes.description">
+            <p>{{ offerInfo.attributes.description }}</p>
+          </div>
+
+          <!-- BOT PART -->
+          <div class="details__bot">
+            <div v-if="GlobalStore.userInfoCookie.value.id === offerInfo.attributes.owner.data.id">
+              <button>Modifier l'annonce</button>
+              <button>Supprimer</button>
+            </div>
+            <button v-else>Acheter</button>
           </div>
         </div>
 
-        <!-- DESCRIPTION PART -->
-        <div class="details__description" v-if="offerInfo.attributes.description">
-          <p>{{ offerInfo.attributes.description }}</p>
+        <!-- PROTECTION INFO ----->
+        <div class="details__protection">
+          <div>
+            <font-awesome-icon :icon="['fas', 'shield-alt']" />
+          </div>
+          <div>
+            <h2>Frais de Protection acheteurs</h2>
+            <p>
+              Pour tout achat effectué par le biais du bouton Acheter, nous appliquons des frais
+              couvrant notre Protection acheteurs. Cette Protection acheteurs comprend notre
+              Politique de remboursement.
+            </p>
+          </div>
         </div>
 
-        <!-- BOT PART -->
-        <div class="details__bot">
-          <button>Acheter</button>
+        <!-- OWNER INFO --------->
+        <div class="details__owner" v-if="ownerInfo">
+          <div>
+            <div class="details__owner-avatar">
+              <img :src="ownerInfo.avatar.url" alt="" />
+              <p>{{ ownerInfo.username }}</p>
+            </div>
+
+            <font-awesome-icon :icon="['fas', 'chevron-right']" />
+          </div>
+
+          <div>
+            <font-awesome-icon :icon="['fas', 'map-marker-alt']" />
+            <p>
+              {{ ownerInfo.city[0].toUpperCase() + ownerInfo.city.slice(1) }},
+              {{ ownerInfo.country.displayName }}
+            </p>
+          </div>
+
+          <div>
+            <a href="">Suivre</a>
+          </div>
         </div>
       </div>
     </div>
@@ -228,6 +281,8 @@ const SeeMore = () => {
   width: 33%;
 }
 
+/* PRODUCT INFO ---------------------------*/
+
 /* TOP PART --------------------*/
 .details__top {
   border-bottom: 1px solid grey;
@@ -250,5 +305,24 @@ const SeeMore = () => {
 /* BOT PART ------------------- */
 .details__bot {
   border-bottom: 1px solid grey;
+}
+
+/* PROTECTION INFO ---------------------------*/
+
+/* OWNER INFO --------------------------------*/
+.details__owner > div {
+  display: flex;
+  justify-content: space-between;
+  border: 1px solid grey;
+}
+
+.details__owner-avatar {
+  display: flex;
+}
+
+.details__owner-avatar > img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50px;
 }
 </style>
