@@ -3,6 +3,7 @@ import { inject } from 'vue'
 import { RouterLink } from 'vue-router'
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
+import OfferCard from '@/components/OfferCard.vue'
 
 const GlobalStore = inject('GlobalStore')
 console.log('userInfoCookie ---->', GlobalStore.userInfoCookie.value)
@@ -32,39 +33,58 @@ onMounted(async () => {
 
 <template>
   <div class="container profile" v-if="userInfo">
-    <div class="profile__detail">
-      <div>
-        <img :src="GlobalStore.avatarUrl.value" alt="" />
-        <h1>{{ GlobalStore.userInfoCookie.value.username }}</h1>
-      </div>
+    <div class="profile__details">
+      <img :src="GlobalStore.avatarUrl.value" alt="" />
 
-      <div>
-        <p>À propos :</p>
-        <font-awesome-icon :icon="['fas', 'map-marker-alt']" />
-        <span v-if="userInfo.city && userInfo.country">
-          {{ userInfo.city[0].toUpperCase() }}{{ userInfo.city.slice(1) }},
-          {{ userInfo.country.displayName }}</span
-        >
-      </div>
+      <div class="profile__infos">
+        <div class="profile__infos-name-edit">
+          <h1>{{ userInfo.username }}</h1>
 
-      <div>
-        <RouterLink :to="{ name: 'settings' }">
-          <button><font-awesome-icon :icon="['fas', 'pen']" /> Modifier mon profil</button>
-        </RouterLink>
+          <RouterLink :to="{ name: 'settings' }">
+            <button><font-awesome-icon :icon="['fas', 'pen']" /> Modifier mon profil</button>
+          </RouterLink>
+        </div>
+
+        <div class="profile__infos-about">
+          <div>
+            <p>À propos</p>
+
+            <font-awesome-icon :icon="['fas', 'map-marker-alt']" />
+            <span
+              >{{ userInfo.city[0].toUpperCase() + userInfo.city.slice(1) }},
+              {{ userInfo.country.displayName }}</span
+            >
+          </div>
+
+          <div>
+            <p>Informations verifiées</p>
+            <font-awesome-icon :icon="['fas', 'check-circle']" />
+            <span>Email</span>
+          </div>
+        </div>
+
+        <div class="profile__infos-description">
+          <p v-if="userInfo.description">{{ userInfo.description }}</p>
+        </div>
       </div>
     </div>
-    <div class="profile__dressing">
-      <h3>Dressing</h3>
+
+    <div class="dressing" v-if="userInfo.offers">
+      <div>
+        <h3>Dressing</h3>
+      </div>
 
       <h2>
         {{ userInfo.offers.length > 0 ? userInfo.offers.length + ' articles' : `Pas d'articles` }}
       </h2>
 
-      <div class="profile__dressing-content">
-        <div class="profile__dressing-card" v-for="offer in userInfo.offers" :key="offer.id">
-          <img :src="offer.images[0].url" alt="offer image" />
-          <p>{{ offer.price.toFixed(2) }} €</p>
-        </div>
+      <div class="dressing__content">
+        <OfferCard
+          v-for="offer in userInfo.offers"
+          :key="offer.id"
+          :offer="offer"
+          :fromProfile="true"
+        />
       </div>
     </div>
   </div>
@@ -74,45 +94,42 @@ onMounted(async () => {
 
 <style scoped>
 /* PROFILE ------------------------------------ */
-.profile {
+.profile__details {
+  border: 1px solid blue;
+  display: flex;
+  width: 100%;
+  height: fit-content;
+}
+
+/* DETAIL -------------------- */
+.profile__details > img {
+  width: 192px;
+  height: 192px;
+  border-radius: 200px;
+}
+
+.profile__infos {
+  border: 1px solid red;
+  width: 100%;
+  height: 100%;
+}
+
+.profile__infos-name-edit {
+  border: 1px solid peru;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.profile__infos-about {
   display: flex;
   gap: 50px;
 }
 
-/* DETAIL -------------------- */
-.profile__detail {
-  border: 1px solid pink;
-  max-width: 360px;
-  padding: 20px;
-}
-
-.profile__detail img {
-  width: 200px;
-  height: 200px;
-  object-fit: cover;
-  border-radius: 200px;
-}
-
 /* DRESSING ------------------ */
-.profile__dressing {
-  border: 1px solid green;
-  flex: 1;
-}
-
-.profile__dressing-content {
+.dressing__content {
   display: flex;
   flex-wrap: wrap;
   gap: 15px;
-}
-
-.profile__dressing-card {
-  width: calc(((100% - 45px) / 4));
-  border: 1px solid salmon;
-}
-
-.profile__dressing-card img {
-  width: 100%;
-  height: 276px;
-  object-fit: cover;
 }
 </style>
