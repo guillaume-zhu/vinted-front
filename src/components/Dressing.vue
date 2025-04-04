@@ -38,10 +38,12 @@ const scrollRight = () => {
 <template>
   <div class="container offers__dressing">
     <div class="offers__dressing-header">
-      <div class="offers__dressing-user-info">
-        <img class="offers__dressing-user-avatar" :src="dressingInfo.avatar.url" alt="" />
-        <p>{{ dressingInfo.username }}</p>
-      </div>
+      <RouterLink :to="{ name: 'profile', params: { id: dressingInfo.id } }">
+        <div class="offers__dressing-user-info">
+          <img class="offers__dressing-user-avatar" :src="dressingInfo.avatar.url" alt="" />
+          <p>{{ dressingInfo.username }}</p>
+        </div>
+      </RouterLink>
 
       <button>
         <a href="">Explorer le Dressing</a>

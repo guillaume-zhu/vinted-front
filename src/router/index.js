@@ -22,10 +22,11 @@ const router = createRouter({
       component: LoginView,
     },
     {
-      path: '/profile',
+      path: '/profile/:id',
       name: 'profile',
       component: ProfileView,
-      meta: { requireAuth: true },
+      // meta: { requireAuth: true },
+      props: true,
     },
     {
       path: '/settings',

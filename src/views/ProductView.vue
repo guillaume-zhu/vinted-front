@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, computed, inject } from 'vue'
 import axios from 'axios'
+import { RouterLink } from 'vue-router'
 
 import Breadcrumb from '@/components/Breadcrumb.vue'
 import OfferGallery from '@/components/OfferGallery.vue'
@@ -224,12 +225,16 @@ const SeeMore = () => {
         <!-- OWNER INFO --------->
         <div class="details__owner" v-if="ownerInfo">
           <div>
-            <div class="details__owner-avatar">
-              <img :src="ownerInfo.avatar.url" alt="" />
-              <p>{{ ownerInfo.username }}</p>
-            </div>
+            <RouterLink :to="{ name: 'profile', params: { id: ownerInfo.id } }">
+              <div class="details__owner-avatar">
+                <img :src="ownerInfo.avatar.url" alt="" />
+                <p>{{ ownerInfo.username }}</p>
+              </div>
+            </RouterLink>
 
-            <font-awesome-icon :icon="['fas', 'chevron-right']" />
+            <RouterLink :to="{ name: 'profile', params: { id: ownerInfo.id } }">
+              <font-awesome-icon :icon="['fas', 'chevron-right']" />
+            </RouterLink>
           </div>
 
           <div>

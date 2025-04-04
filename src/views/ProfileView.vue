@@ -11,6 +11,11 @@ console.log('userInfoCookie ---->', GlobalStore.userInfoCookie.value)
 const userInfo = ref('')
 const isLoading = ref(false)
 const errorMessage = ref('')
+const props = defineProps({
+  id: {
+    type: String,
+  },
+})
 
 // REQUETE POUR RÉCUPÉRER LES INFORMATIONS DE L'UTILISATEUR
 onMounted(async () => {
@@ -18,7 +23,7 @@ onMounted(async () => {
 
   try {
     const { data } = await axios.get(
-      `http://localhost:1337/api/users/${GlobalStore.userInfoCookie.value.id}?populate[0]=country&populate[1]=offers.images`,
+      `http://localhost:1337/api/users/${props.id}?populate[0]=country&populate[1]=offers.images&populate[2]=avatar`,
     )
     userInfo.value = data
     console.log('userInfo ---->', userInfo.value)
@@ -34,13 +39,17 @@ onMounted(async () => {
 <template>
   <div class="container profile" v-if="userInfo">
     <div class="profile__details">
-      <img :src="GlobalStore.avatarUrl.value" alt="" />
+      <img :src="userInfo.avatar.url" alt="" v-if="userInfo.avatar?.url" />
+      <img src="../assets/img/user-profile.webp" alt="" v-else />
 
       <div class="profile__infos">
         <div class="profile__infos-name-edit">
           <h1>{{ userInfo.username }}</h1>
 
-          <RouterLink :to="{ name: 'settings' }">
+          <RouterLink
+            :to="{ name: 'settings' }"
+            v-if="GlobalStore.userInfoCookie.value.id.toString() === id"
+          >
             <button><font-awesome-icon :icon="['fas', 'pen']" /> Modifier mon profil</button>
           </RouterLink>
         </div>
@@ -98,19 +107,21 @@ onMounted(async () => {
   border: 1px solid blue;
   display: flex;
   width: 100%;
-  height: fit-content;
+  height: 100%;
 }
 
 /* DETAIL -------------------- */
 .profile__details > img {
   width: 192px;
   height: 192px;
-  border-radius: 200px;
+  border-radius: 500px;
+  object-fit: cover;
 }
 
 .profile__infos {
   border: 1px solid red;
-  width: 100%;
+  /* width: 100%; */
+  flex: 1;
   height: 100%;
 }
 

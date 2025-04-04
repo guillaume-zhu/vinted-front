@@ -22,9 +22,11 @@ const toggleMenu = () => {
 
 // Fonction de navigation qui ferme le menu après un clic
 const navigate = (route) => {
-  console.log('hey')
-
-  router.push({ name: route })
+  if (route === 'settings') {
+    router.push({ name: route })
+  } else if (route === 'profile') {
+    router.push({ name: route, params: { id: GlobalStore.userInfoCookie.value.id } })
+  }
   isOpen.value = false
 }
 
@@ -148,11 +150,17 @@ header {
 }
 
 .header-main__buttons img {
-  height: 100%;
+  height: 30px;
   width: 30px;
   object-fit: cover;
   border-radius: 50px;
   cursor: pointer;
+}
+
+.header-main__avatar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 /* HEADER PROFILE DROPDOWN */
@@ -160,6 +168,7 @@ header {
 .header-main__profile-container {
   position: relative;
   background-color: red;
+  display: flex;
 }
 
 .header-main__dropdown {
