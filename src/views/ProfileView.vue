@@ -48,7 +48,10 @@ onMounted(async () => {
 
           <RouterLink
             :to="{ name: 'settings' }"
-            v-if="GlobalStore.userInfoCookie.value.id.toString() === id"
+            v-if="
+              GlobalStore.userInfoCookie.value &&
+              GlobalStore.userInfoCookie?.value?.id.toString() === id
+            "
           >
             <button><font-awesome-icon :icon="['fas', 'pen']" /> Modifier mon profil</button>
           </RouterLink>

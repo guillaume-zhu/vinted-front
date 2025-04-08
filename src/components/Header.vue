@@ -2,6 +2,8 @@
 import { RouterLink, useRouter } from 'vue-router'
 import { computed, inject, watchEffect } from 'vue'
 import { ref, onMounted, onUnmounted } from 'vue'
+import axios from 'axios'
+import CategoryDropdown from './CategoryDropdown.vue'
 
 const router = useRouter()
 const GlobalStore = inject('GlobalStore')
@@ -115,15 +117,7 @@ onUnmounted(() => {
     </div>
 
     <!-- NAV LINKS -->
-    <div class="header-nav container">
-      <RouterLink to="">Femmes</RouterLink>
-      <RouterLink to="">Hommes</RouterLink>
-      <RouterLink to="">Enfants</RouterLink>
-      <RouterLink to="">Maison</RouterLink>
-      <RouterLink to="">Électronique</RouterLink>
-      <RouterLink to="">À propos</RouterLink>
-      <RouterLink to="">Notre plateforme</RouterLink>
-    </div>
+    <CategoryDropdown />
   </header>
 </template>
 
@@ -133,6 +127,7 @@ header {
   height: var(--header-height);
   max-width: 100vw;
   /* border: 1px solid black;  */
+  margin-bottom: 1000px;
 }
 
 /* HEADER MAIN --------------------------*/
@@ -208,5 +203,7 @@ header {
 .header-nav {
   border: 1px solid red;
   height: var(--header-nav-height);
+  display: flex;
+  gap: 20px;
 }
 </style>
