@@ -74,17 +74,23 @@ onMounted(async () => {
       `http://localhost:1337/api/categories/?filters[categoryLevel][$eq]=level1&populate[children][populate]=children`,
     )
 
-    categories.value = response.data.data.filter(
+    const desiredOrder = ['femmes', 'hommes', 'enfants', 'maison']
+
+    const filtered = response.data.data.filter(
       (cat) => !['electronique', 'divertissement'].includes(cat.attributes.name),
     )
-    console.log('categories.value ---->', categories.value)
+
+    categories.value = desiredOrder
+      .map((name) => filtered.find((cat) => cat.attributes.name === name))
+      .filter(Boolean)
+    // console.log('categories.value ---->', categories.value)
 
     // Initialiser openStates
     categories.value.forEach((cat) => {
       openStates.value[cat.attributes.name] = false
     })
 
-    console.log('openStates', openStates.value)
+    // console.log('openStates', openStates.value)
   } catch (error) {
     console.log('Erreur lors du chargement des catégories', error)
   }
@@ -187,7 +193,7 @@ const aboutLinks = [
                   .data"
                 :key="child.id"
               >
-                <RouterLink :to="{}">
+                <RouterLink :to="{ name: 'catalog', params: { id: child.id } }">
                   {{ child.attributes.displayName }}
                 </RouterLink>
               </li>

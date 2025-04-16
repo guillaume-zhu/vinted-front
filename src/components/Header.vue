@@ -127,7 +127,7 @@ header {
   height: var(--header-height);
   max-width: 100vw;
   /* border: 1px solid black;  */
-  margin-bottom: 1000px;
+  /* margin-bottom: 1000px; */
 }
 
 /* HEADER MAIN --------------------------*/

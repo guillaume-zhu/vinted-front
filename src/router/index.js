@@ -7,6 +7,7 @@ import SettingsView from '@/views/SettingsView.vue'
 import AccountView from '@/views/AccountView.vue'
 import PasswordView from '@/views/PasswordView.vue'
 import ProductView from '@/views/ProductView.vue'
+import CatalogView from '@/views/CatalogView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -50,6 +51,12 @@ const router = createRouter({
       path: '/product/:id',
       name: 'product',
       component: ProductView,
+      props: true,
+    },
+    {
+      path: '/catalog/:id',
+      name: 'catalog',
+      component: CatalogView,
       props: true,
     },
   ],
