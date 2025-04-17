@@ -9,14 +9,25 @@ const props = defineProps({
   fromProfile: {
     type: Boolean,
   },
+  fromCatalog: {
+    type: Boolean,
+  },
 })
 </script>
 
 <template>
-  <!-- FROM HOME -->
-  <div class="offer-card" v-if="offer.attributes">
+  <!-- FROM HOME & CATALOG -->
+  <div
+    class="offer-card"
+    :class="{ 'offer-card-from-catalog': fromCatalog }"
+    v-if="offer.attributes"
+  >
     <RouterLink :to="{ name: 'product', params: { id: offer.id } }">
-      <img v-if="offer.attributes.images" :src="offer.attributes.images.data[0].attributes.url" />
+      <img
+        :class="{ 'img-from-catalog': fromCatalog }"
+        v-if="offer.attributes.images"
+        :src="offer.attributes.images.data[0].attributes.url"
+      />
       <p v-if="offer.attributes.brand.data?.attributes.displayName">
         {{ offer.attributes.brand.data.attributes.displayName }}
       </p>
@@ -91,6 +102,19 @@ img {
 .img-from-profile {
   width: 100%;
   height: 339px;
+  object-fit: cover;
+}
+
+/* FROM CATALOG */
+.offer-card-from-catalog {
+  border: 1px solid royalblue;
+  width: calc((100% - (3 * 15px)) / 4);
+  height: 422px;
+}
+
+.img-from-catalog {
+  width: 100%;
+  height: 329px;
   object-fit: cover;
 }
 </style>

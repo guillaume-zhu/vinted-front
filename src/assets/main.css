@@ -30,3 +30,7 @@ p {
   max-width: 1240px;
   margin: 0 auto;
 }
+
+.container__catalog {
+  max-width: 925px;
+}
