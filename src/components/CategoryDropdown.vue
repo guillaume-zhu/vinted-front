@@ -67,6 +67,13 @@ const handleClickOutside = (event) => {
   }
 }
 
+const closeAllMenus = () => {
+  for (const key in openStates.value) {
+    openStates.value[key] = false
+  }
+  aboutOpen.value = false
+}
+
 // Requete pour récupérer les catégories
 onMounted(async () => {
   try {
@@ -171,6 +178,17 @@ const aboutLinks = [
           <div class="dropdown-category__container">
             <!-- Colonne gauche -->
             <ul class="dropdown-category__left">
+              <li class="voir-tout">
+                <RouterLink
+                  :to="{ name: 'catalog', params: { id: cat.id } }"
+                  @click.stop
+                  @click="closeAllMenus"
+                >
+                  <span class="voir-tout-icon">...</span>
+                  <strong>Voir tout</strong>
+                </RouterLink>
+              </li>
+
               <li
                 v-for="sub in cat.attributes.children.data"
                 :key="sub.id"
@@ -188,12 +206,28 @@ const aboutLinks = [
                 activeSubCategoryByRoot[cat.attributes.name]?.attributes?.children?.data?.length
               "
             >
+              <li class="voir-tout">
+                <RouterLink
+                  :to="{
+                    name: 'catalog',
+                    params: { id: activeSubCategoryByRoot[cat.attributes.name].id },
+                  }"
+                  @click.stop
+                  @click="closeAllMenus"
+                >
+                  <strong>Voir tout</strong>
+                </RouterLink>
+              </li>
+
               <li
                 v-for="child in activeSubCategoryByRoot[cat.attributes.name].attributes.children
                   .data"
                 :key="child.id"
               >
-                <RouterLink :to="{ name: 'catalog', params: { id: child.id } }">
+                <RouterLink
+                  :to="{ name: 'catalog', params: { id: child.id } }"
+                  @click="closeAllMenus"
+                >
                   {{ child.attributes.displayName }}
                 </RouterLink>
               </li>

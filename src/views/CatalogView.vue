@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
+import Breadcrumb from '@/components/Breadcrumb.vue'
 
 const props = defineProps({
   id: {
@@ -14,7 +15,6 @@ console.log('main category id ---->', props.id)
 const categoryData = ref([])
 const offersList = ref([])
 const isLoading = ref(false)
-const allCategoriesId = []
 
 // Fonction récursive pour trouver les id en arborescence
 // const collectCategoryIds = (category) => {
@@ -29,6 +29,7 @@ const allCategoriesId = []
 // }
 
 // Requete pour récupérer les id de la category et des enfants
+
 onMounted(async () => {
   isLoading.value = true
   try {
@@ -58,7 +59,8 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="container">
+  <div class="container" v-if="categoryData">
+    <!-- <Breadcrumb :category="categoryData" /> -->
     <p v-if="categoryData.attributes">
       {{ categoryData.attributes.name }}
     </p>
