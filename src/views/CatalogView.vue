@@ -34,7 +34,7 @@ onMounted(async () => {
   isLoading.value = true
   try {
     const response = await axios.get(
-      `http://localhost:1337/api/categories/${props.id}?populate[0]=children&populate[1]=children.children&populate[2]=children.children.children&populate[3]=children.children.children.children`,
+      `http://localhost:1337/api/categories/${props.id}?populate[0]=children&populate[1]=children.children&populate[2]=children.children.children&populate[3]=children.children.children.children?populate[4]=parent&populate[5]=parent.parent&populate[6]=parent.parent.parent&populate[7]=parent.parent.parent.parent&populate[8]=parent.parent.parent.parent.parent`,
     )
     categoryData.value = response.data.data
     console.log('categoryData ---->', categoryData.value)
@@ -59,8 +59,8 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="container" v-if="categoryData">
-    <!-- <Breadcrumb :category="categoryData" /> -->
+  <div class="container">
+    <Breadcrumb v-if="categoryData.attributes" :category="categoryData" />
     <p v-if="categoryData.attributes">
       {{ categoryData.attributes.name }}
     </p>
