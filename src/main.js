@@ -11,8 +11,10 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 import {
   faCheckCircle,
+  faChevronDown,
   faChevronLeft,
   faChevronRight,
+  faChevronUp,
   faMapMarkerAlt,
   faPen,
   faShieldAlt,
@@ -37,6 +39,8 @@ library.add(
   faTimes,
   faMapMarkerAlt,
   faCheckCircle,
+  faChevronDown,
+  faChevronUp,
 )
 
 const app = createApp(App).component('font-awesome-icon', FontAwesomeIcon)
