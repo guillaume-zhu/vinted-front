@@ -64,9 +64,13 @@ const filteredBrands = computed(() => {
     return availableBrands.value.filter((b) => b.isPopular)
   } else {
     return availableBrands.value.filter((b) =>
-      b.name.toLowerCase().includes(inputBrand.value.toLowerCase),
+      b.displayName.toLowerCase().includes(inputBrand.value.toLowerCase()),
     )
   }
+})
+
+watch(filteredBrands, (val) => {
+  console.log('🧠 filteredBrands :', val)
 })
 
 // 5. Condition
@@ -108,10 +112,10 @@ const initFiltersFromQuery = () => {
     : route.query.condition
       ? [route.query.condition]
       : []
-  filters.value.color = Array.isArray(route.query.condition)
-    ? route.query.condition
-    : route.query.condition
-      ? [route.query.condition]
+  filters.value.color = Array.isArray(route.query.color)
+    ? route.query.color
+    : route.query.color
+      ? [route.query.color]
       : []
   filters.value.priceMin = route.query.priceMin || null
   filters.value.priceMax = route.query.priceMax || null
@@ -216,7 +220,7 @@ onMounted(async () => {
   isLoading.value = true
   try {
     const response = await axios.get(
-      `http://localhost:1337/api/categories/${props.id}?populate[0]=children&populate[1]=children.children&populate[2]=children.children.children&populate[3]=children.children.children.children?populate[4]=parent&populate[5]=parent.parent&populate[6]=parent.parent.parent&populate[7]=parent.parent.parent.parent&populate[8]=parent.parent.parent.parent.parent`,
+      `http://localhost:1337/api/categories/${props.id}?populate[0]=children&populate[1]=children.children&populate[2]=children.children.children&populate[3]=children.children.children.children&populate[4]=parent&populate[5]=parent.parent&populate[6]=parent.parent.parent&populate[7]=parent.parent.parent.parent&populate[8]=parent.parent.parent.parent.parent`,
     )
     categoryData.value = response.data.data
     console.log('categoryData ---->', categoryData.value)
@@ -259,12 +263,12 @@ onMounted(async () => {
       }
 
       // condition
-      if (filters.value.condition.length > 0) {
+      if (filters.value.condition?.length > 0) {
         params['filters[condition][$in]'] = filters.value.condition
       }
 
       // colors
-      if (filters.value.color.length > 0) {
+      if (filters.value.color?.length > 0) {
         params['filters[colors][id][$in]'] = filters.value.color
       }
 
