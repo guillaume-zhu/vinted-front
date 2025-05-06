@@ -1,9 +1,10 @@
 <script setup>
-import { ref, onMounted, watchEffect, watch, computed } from 'vue'
+import { ref, onMounted, watchEffect, watch, computed, onBeforeUnmount } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import Breadcrumb from '@/components/Breadcrumb.vue'
 import OfferCard from '@/components/OfferCard.vue'
+import { drop } from 'lodash'
 
 // ----------------------------------------------
 // 📄 PROPS / ROUTER / BASE VARIABLES
@@ -52,6 +53,34 @@ const showDropdown = ref({
   material: false,
   sort: false,
 })
+
+const toggleDropdown = (key) => {
+  for (const dropdown in showDropdown.value) {
+    if (dropdown === key) {
+      showDropdown.value[dropdown] = true
+    } else {
+      showDropdown.value[dropdown] = false
+    }
+  }
+}
+
+const dropdownRef = {
+  size: null,
+  brand: null,
+  condition: null,
+  color: null,
+  price: null,
+  material: null,
+  sortBy: null,
+}
+
+const handleClickOutside = (event) => {
+  for (const key in dropdownRef) {
+    if (dropdownRef[key] && !dropdownRef[key].contains(event.target)) {
+      showDropdown.value[key] = false
+    }
+  }
+}
 
 // 3. Sizes
 const availableSizes = ref([])
@@ -288,6 +317,15 @@ onMounted(async () => {
   }
 })
 
+// DROPDOWN EVENT CLICK LISTENER
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
+
 // ----------------------------------------------
 // 📜 PAGINATION HANDLER
 // ----------------------------------------------
@@ -317,8 +355,8 @@ const changePage = (order, actualNum) => {
         <!-- FILTERS & SORT -->
         <div class="filters">
           <!-- size -->
-          <div class="filters__size">
-            <button @click="showDropdown.size = !showDropdown.size" class="filters__button">
+          <div class="filters__size" :ref="(element) => (dropdownRef.size = element)">
+            <button @click="toggleDropdown('size')" class="filters__button">
               Taille <font-awesome-icon :icon="['fas', 'chevron-down']" v-if="!showDropdown.size" />
               <font-awesome-icon :icon="['fas', 'chevron-up']" v-else />
             </button>
@@ -342,8 +380,8 @@ const changePage = (order, actualNum) => {
             </div>
 
             <!-- brand -->
-            <div class="filters__brand">
-              <button @click="showDropdown.brand = !showDropdown.brand" class="filters__button">
+            <div class="filters__brand" :ref="(element) => (dropdownRef.brand = element)">
+              <button @click="toggleDropdown('brand')" class="filters__button">
                 Marque
                 <font-awesome-icon :icon="['fas', 'chevron-down']" v-if="!showDropdown.brand" />
                 <font-awesome-icon :icon="['fas', 'chevron-up']" v-else />
@@ -375,8 +413,8 @@ const changePage = (order, actualNum) => {
             </div>
 
             <!-- condition -->
-            <div class="filters__condition">
-              <button @click="showDropdown.condition = !showDropdown.condition">
+            <div class="filters__condition" :ref="(element) => (dropdownRef.condition = element)">
+              <button @click="toggleDropdown('condition')">
                 État
                 <font-awesome-icon :icon="['fas', 'chevron-down']" v-if="!showDropdown.condition" />
                 <font-awesome-icon :icon="['fas', 'chevron-up']" v-else />
@@ -405,24 +443,73 @@ const changePage = (order, actualNum) => {
             </div>
 
             <!-- color -->
-            <div class="filters__color">
-              <button @click="showDropdown.color = !showDropdown.color">
+            <div class="filters__color" :ref="(element) => (dropdownRef.color = element)">
+              <button @click="toggleDropdown('color')">
                 Couleur
                 <font-awesome-icon :icon="['fas', 'chevron-down']" v-if="!showDropdown.color" />
                 <font-awesome-icon :icon="['fas', 'chevron-up']" v-else />
               </button>
+
+              <div v-if="showDropdown.color" class="filter__dropdown">
+                <ul class="filter__list">
+                  <li v-for="color in availableColors" :key="color.id" class="filter__item">
+                    <label>
+                      <div
+                        class="filter__color-circle"
+                        :style="
+                          color.hex ? { backgroundColor: color.hex } : { background: color.style }
+                        "
+                        :class="{
+                          isWhite:
+                            color.name === 'blanc' ||
+                            color.name === 'creme' ||
+                            color.name === 'beige',
+                        }"
+                      ></div>
+                      <p>{{ color.displayName }}</p>
+                      <input
+                        type="checkbox"
+                        name="color"
+                        v-model="filters.color"
+                        :value="color.id"
+                      />
+                    </label>
+                  </li>
+                </ul>
+              </div>
             </div>
 
-            <div v-if="showDropdown.color" class="filter__dropdown">
-              <ul class="filter__list">
-                <li v-for="color in availableColors" :key="color.id" class="filter__item">
-                  <label>
-                    <p>ROND COULEUR</p>
-                    <p>{{ color.displayName }}</p>
-                    <input type="checkbox" name="color" v-model="filters.color" :value="color.id" />
-                  </label>
-                </li>
-              </ul>
+            <!-- pricemin & pricemax -->
+            <div class="filters__price" :ref="(element) => (dropdownRef.price = element)">
+              <button @click="toggleDropdown('price')" class="filter__button">
+                Prix
+                <font-awesome-icon :icon="['fas', 'chevron-down']" v-if="!showDropdown.price" />
+                <font-awesome-icon :icon="['fas', 'chevron-up']" v-else />
+              </button>
+
+              <div v-if="showDropdown.price" class="filter__dropdown">
+                <label>
+                  De
+                  <input
+                    type="number"
+                    name="priceMin"
+                    id="priceMin"
+                    placeholder="0,00€"
+                    v-model="filters.priceMin"
+                  />
+                </label>
+
+                <label
+                  >À
+                  <input
+                    type="number"
+                    name="priceMax"
+                    id="priceMax"
+                    placeholder="€"
+                    v-model="filters.priceMax"
+                  />
+                </label>
+              </div>
             </div>
           </div>
         </div>
@@ -437,6 +524,15 @@ const changePage = (order, actualNum) => {
             </li>
           </ul>
         </div>
+      </div>
+
+      <!-- NUMBER OF RESULTS -->
+      <div class="catalog__number-results" v-if="offersList.data">
+        <p>
+          {{
+            offersList.data.length > 0 ? offersList.data.length + ' résultats' : 'Pas de résultats'
+          }}
+        </p>
       </div>
 
       <!-- CATLOG OFFERS ----------------------->
@@ -477,6 +573,18 @@ const changePage = (order, actualNum) => {
   align-items: center;
   gap: 10px;
   margin: 10px 0;
+}
+
+/* COLORS */
+.filter__color-circle {
+  width: 20px;
+  height: 20px;
+  /* border: 1px solid black; */
+  border-radius: 50px;
+}
+
+.isWhite {
+  border: 1px solid lightgray;
 }
 
 /* OFFERS */
