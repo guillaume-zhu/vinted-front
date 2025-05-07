@@ -129,6 +129,9 @@ const availableConditions = ref([
 // 6. Colors
 const availableColors = ref([])
 
+// 7. Material
+const availableMaterials = ref([])
+
 // ----------------------------------------------
 // ⚙️ INIT FILTERS FROM URL
 // ----------------------------------------------
@@ -148,7 +151,11 @@ const initFiltersFromQuery = () => {
       : []
   filters.value.priceMin = route.query.priceMin || null
   filters.value.priceMax = route.query.priceMax || null
-  filters.value.material = route.query.material || null
+  filters.value.material = Array.isArray(route.query.material)
+    ? route.query.material
+    : route.query.material
+      ? [route.query.material]
+      : []
   filters.value.sortBy = route.query.sortBy || null
 }
 
@@ -186,6 +193,17 @@ const fetchColorsByCategory = async (categorySlug) => {
     console.log('availableColors ---->', availableColors.value)
   } catch (error) {
     console.log('Erreur lors du chargement des couleurs en fonction des offres de la catégorie')
+  }
+}
+
+const fetchMaterialsByCategory = async (categorySlug) => {
+  try {
+    const response = await axios.get(`http://localhost:1337/api/materials/category/${categorySlug}`)
+    availableMaterials.value = response.data
+
+    console.log('availableMaterials ---->', availableMaterials.value)
+  } catch (error) {
+    console.log('Erreur lors du chargement des matières en fonction des offres de la catégorie')
   }
 }
 
@@ -262,6 +280,8 @@ onMounted(async () => {
 
     fetchColorsByCategory(categoryData.value.attributes.name)
 
+    fetchMaterialsByCategory(categoryData.value.attributes.name)
+
     collectCategoryNames(categoryData.value)
     console.log('categoryChildren ---->', categoryChildren)
 
@@ -319,6 +339,11 @@ onMounted(async () => {
       } else if (filters.value.priceMin < filters.value.priceMax) {
         params['filters[price][$gte]'] = filters.value.priceMin
         params['filters[price][$lte]'] = filters.value.priceMax
+      }
+
+      //  materials
+      if (filters.value.material?.length > 0) {
+        params['filters[materials][id][$in]'] = filters.value.material
       }
 
       console.log('params envoyé à axios ---->', params)
@@ -529,6 +554,38 @@ const changePage = (order, actualNum) => {
                     v-model="filters.priceMax"
                   />
                 </label>
+              </div>
+            </div>
+
+            <!-- material -->
+            <div class="filters__material" :ref="(element) => (dropdownRef.material = element)">
+              <button @click="toggleDropdown('material')">
+                Matière<font-awesome-icon
+                  :icon="['fas', 'chevron-down']"
+                  v-if="!showDropdown.material"
+                />
+                <font-awesome-icon :icon="['fas', 'chevron-up']" v-else />
+              </button>
+
+              <div v-if="showDropdown.material" class="filter__dropdown">
+                <ul class="filter__list">
+                  <li
+                    v-for="material in availableMaterials"
+                    :key="material.id"
+                    class="filter__item"
+                  >
+                    <label>
+                      {{ material.displayName }}
+                      <input
+                        type="checkbox"
+                        name="material"
+                        id="material"
+                        v-model="filters.material"
+                        :value="material.id"
+                      />
+                    </label>
+                  </li>
+                </ul>
               </div>
             </div>
           </div>
