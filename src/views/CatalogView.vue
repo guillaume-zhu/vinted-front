@@ -56,11 +56,10 @@ const showDropdown = ref({
 
 const toggleDropdown = (key) => {
   for (const dropdown in showDropdown.value) {
-    if (dropdown === key) {
-      showDropdown.value[dropdown] = true
-    } else {
-      showDropdown.value[dropdown] = false
-    }
+    showDropdown.value[dropdown] =
+      dropdown === key
+        ? !showDropdown.value[dropdown] // toggle le bouton cliqué
+        : false // ferme les autres
   }
 }
 
@@ -75,8 +74,12 @@ const dropdownRef = {
 }
 
 const handleClickOutside = (event) => {
-  for (const key in dropdownRef) {
-    if (dropdownRef[key] && !dropdownRef[key].contains(event.target)) {
+  const clickedInsideAny = Object.values(dropdownRef).some(
+    (ref) => ref && ref.contains(event.target),
+  )
+
+  if (!clickedInsideAny) {
+    for (const key in showDropdown.value) {
       showDropdown.value[key] = false
     }
   }
@@ -412,13 +415,7 @@ const changePage = (order, actualNum) => {
                 <li v-for="size in availableSizes" :key="size.id" class="filter__item">
                   <label>
                     {{ size.displayName }}
-                    <input
-                      type="radio"
-                      name="size"
-                      :value="size.name"
-                      v-model="filters.size"
-                      @change="showDropdown.size = false"
-                    />
+                    <input type="radio" name="size" :value="size.name" v-model="filters.size" />
                   </label>
                 </li>
               </ul>
@@ -449,7 +446,6 @@ const changePage = (order, actualNum) => {
                         name="brand"
                         :value="brand.name"
                         v-model="filters.brand"
-                        @change="showDropdown.brand = false"
                       />
                     </label>
                   </li>
