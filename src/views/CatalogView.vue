@@ -301,6 +301,26 @@ onMounted(async () => {
         params['filters[colors][id][$in]'] = filters.value.color
       }
 
+      // price
+      // priceMin only
+      if (filters.value.priceMin && !filters.value.priceMax) {
+        params['filters[price][$gte]'] = filters.value.priceMin
+
+        // priceMax only
+      } else if (filters.value.priceMax && !filters.value.priceMin) {
+        params['filters[price][$lte]'] = filters.value.priceMax
+
+        // priceMin > priceMax
+      } else if (filters.value.priceMin > filters.value.priceMax) {
+        params['filters[price][$gte]'] = filters.value.priceMax
+        params['filters[price][$lte]'] = filters.value.priceMin
+
+        // piceMin + priceMax normal
+      } else if (filters.value.priceMin < filters.value.priceMax) {
+        params['filters[price][$gte]'] = filters.value.priceMin
+        params['filters[price][$lte]'] = filters.value.priceMax
+      }
+
       console.log('params envoyé à axios ---->', params)
 
       const responseOffers = await axios.get(`http://localhost:1337/api/offers?populate=*&`, {
