@@ -135,13 +135,27 @@ const availableColors = ref([])
 // 7. Material
 const availableMaterials = ref([])
 
+// 8. Sort
+const availableSorts = ref([
+  { name: 'price:asc', displayName: 'Prix croissant' },
+  { name: 'price:desc', displayName: 'Prix décroissant' },
+])
+
 // ----------------------------------------------
 // ⚙️ INIT FILTERS FROM URL
 // ----------------------------------------------
 
 const initFiltersFromQuery = () => {
-  filters.value.size = route.query.size || null
-  filters.value.brand = route.query.brand || null
+  filters.value.size = Array.isArray(route.query.size)
+    ? route.query.size
+    : route.query.size
+      ? [route.query.size]
+      : []
+  filters.value.brand = Array.isArray(route.query.brand)
+    ? route.query.brand
+    : route.query.brand
+      ? [route.query.brand]
+      : []
   filters.value.condition = Array.isArray(route.query.condition)
     ? route.query.condition
     : route.query.condition
@@ -159,7 +173,7 @@ const initFiltersFromQuery = () => {
     : route.query.material
       ? [route.query.material]
       : []
-  filters.value.sortBy = route.query.sortBy || null
+  filters.value.sort = route.query.sort || null
 }
 
 // ----------------------------------------------
@@ -306,12 +320,12 @@ onMounted(async () => {
 
       // size
       if (filters.value.size) {
-        params['filters[size][name][$eq]'] = filters.value.size
+        params['filters[size][name][$in]'] = filters.value.size
       }
 
       // brand
       if (filters.value.brand) {
-        params['filters[brand][name][$eq]'] = filters.value.brand
+        params['filters[brand][name][$in]'] = filters.value.brand
       }
 
       // condition
@@ -347,6 +361,11 @@ onMounted(async () => {
       //  materials
       if (filters.value.material?.length > 0) {
         params['filters[materials][id][$in]'] = filters.value.material
+      }
+
+      // sort
+      if (filters.value.sort) {
+        params['sort'] = filters.value.sort
       }
 
       console.log('params envoyé à axios ---->', params)
@@ -415,7 +434,7 @@ const changePage = (order, actualNum) => {
                 <li v-for="size in availableSizes" :key="size.id" class="filter__item">
                   <label>
                     {{ size.displayName }}
-                    <input type="radio" name="size" :value="size.name" v-model="filters.size" />
+                    <input type="checkbox" name="size" :value="size.name" v-model="filters.size" />
                   </label>
                 </li>
               </ul>
@@ -442,7 +461,7 @@ const changePage = (order, actualNum) => {
                     <label>
                       {{ brand.displayName }}
                       <input
-                        type="radio"
+                        type="checkbox"
                         name="brand"
                         :value="brand.name"
                         v-model="filters.brand"
@@ -578,6 +597,36 @@ const changePage = (order, actualNum) => {
                         id="material"
                         v-model="filters.material"
                         :value="material.id"
+                      />
+                    </label>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- sort by price -->
+            <div class="filters__sort" :ref="(element) => (dropdownRef.sort = element)">
+              <button @click="toggleDropdown('sort')" class="filters__button">
+                Tri
+                <font-awesome-icon :icon="['fas', 'chevron-down']" v-if="!showDropdown.sort" />
+                <font-awesome-icon :icon="['fas', 'chevron-up']" v-else />
+              </button>
+
+              <div class="filter__dropdown" v-if="showDropdown.sort">
+                <ul class="filter__list">
+                  <li
+                    class="filter__item"
+                    v-for="(sort, index) in availableSorts"
+                    :key="sort.index"
+                  >
+                    <label>
+                      {{ sort.displayName }}
+                      <input
+                        type="radio"
+                        name="sort"
+                        id="sort"
+                        v-model="filters.sort"
+                        :value="sort.name"
                       />
                     </label>
                   </li>
