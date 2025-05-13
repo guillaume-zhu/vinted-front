@@ -40,7 +40,7 @@ const filters = ref({
   priceMin: null,
   priceMax: null,
   material: null,
-  sortBy: null,
+  sort: null,
 })
 
 // 2. Main dropdown open/close state
@@ -101,10 +101,6 @@ const filteredBrands = computed(() => {
   }
 })
 
-watch(filteredBrands, (val) => {
-  console.log('🧠 filteredBrands :', val)
-})
-
 // 5. Condition
 const availableConditions = ref([
   {
@@ -140,6 +136,12 @@ const availableSorts = ref([
   { name: 'price:asc', displayName: 'Prix croissant' },
   { name: 'price:desc', displayName: 'Prix décroissant' },
 ])
+
+// 9. Added filters buttons
+const addedFilters = ref({})
+const availableRefs = ref({})
+availableRefs.value.condition = availableConditions.value
+availableRefs.value.sort = availableSorts.value
 
 // ----------------------------------------------
 // ⚙️ INIT FILTERS FROM URL
@@ -185,6 +187,8 @@ const fetchSizesByCategory = async (categorySlug) => {
     const response = await axios.get(`http://localhost:1337/api/sizes/category/${categorySlug}`)
 
     availableSizes.value = response.data
+    availableRefs.value.size = response.data
+
     console.log('availableSizes ---->', availableSizes.value)
   } catch (error) {
     console.log('Erreur lors du chargement des tailles en fonction de la catégorie', error)
@@ -195,6 +199,7 @@ const fetchBrandsByCategory = async (categorySlug) => {
     const response = await axios.get(`http://localhost:1337/api/brands/category/${categorySlug}`)
 
     availableBrands.value = response.data
+    availableRefs.value.brand = response.data
     console.log('availableBrands ---->', availableBrands.value)
   } catch (error) {
     console.log(
@@ -206,6 +211,7 @@ const fetchColorsByCategory = async (categorySlug) => {
   try {
     const response = await axios.get(`http://localhost:1337/api/colors/category/${categorySlug}`)
     availableColors.value = response.data
+    availableRefs.value.color = response.data
 
     console.log('availableColors ---->', availableColors.value)
   } catch (error) {
@@ -217,6 +223,7 @@ const fetchMaterialsByCategory = async (categorySlug) => {
   try {
     const response = await axios.get(`http://localhost:1337/api/materials/category/${categorySlug}`)
     availableMaterials.value = response.data
+    availableRefs.value.material = response.data
 
     console.log('availableMaterials ---->', availableMaterials.value)
   } catch (error) {
@@ -236,6 +243,46 @@ const collectCategoryNames = (category) => {
       categoryChildren.push({ displayName: child.attributes.displayName, id: child.id })
     }
   }
+}
+
+const removeFilter = (key, index) => {
+  const current = {}
+
+  // copie de filters
+  for (const k in filters.value) {
+    const v = filters.value[k]
+    if (Array.isArray(v)) {
+      current[k] = [...v]
+    } else {
+      current[k] = v
+    }
+  }
+
+  // suppression
+  if (Array.isArray(current[key])) {
+    current[key].splice(index, 1)
+  } else {
+    current[key] = null
+  }
+
+  // assignation pour enclencher le watch
+  filters.value = current
+}
+
+const removeAllFilters = () => {
+  const empty = {}
+
+  for (const key in filters.value) {
+    const value = filters.value[key]
+    if (Array.isArray(value)) {
+      empty[key] = []
+    } else {
+      empty[key] = null
+    }
+  }
+
+  filters.value = empty
+  page.value = 1
 }
 
 // Fonction récursive pour trouver les id en arborescence
@@ -275,6 +322,38 @@ watch(
   },
   { deep: true },
 )
+
+// Update addedFilters
+watchEffect(() => {
+  const updated = {}
+
+  for (const key in filters.value) {
+    const sourceList = availableRefs.value[key]
+    const value = filters.value[key]
+
+    console.log('key boucle + value ---->', key, value)
+
+    if (key === 'priceMin' || key === 'priceMax') {
+      updated[key] = value
+    }
+
+    if (!value || !sourceList) continue
+
+    if (Array.isArray(value)) {
+      // console.log('SourceList ---->' + [key], sourceList)
+
+      updated[key] = value.map(
+        (val) =>
+          sourceList.find((item) => item.name === val || item.id === val)?.displayName || val,
+      )
+    } else {
+      updated[key] =
+        sourceList.find((item) => item.name === value || item.id === value)?.displayName || value
+    }
+  }
+  // console.log('type of test ---->', filters.value)
+  addedFilters.value = updated
+})
 
 // ----------------------------------------------
 // 🚀 onMounted - Initial Data Loading - Request
@@ -335,7 +414,7 @@ onMounted(async () => {
 
       // colors
       if (filters.value.color?.length > 0) {
-        params['filters[colors][id][$in]'] = filters.value.color
+        params['filters[colors][name][$in]'] = filters.value.color
       }
 
       // price
@@ -531,7 +610,7 @@ const changePage = (order, actualNum) => {
                         type="checkbox"
                         name="color"
                         v-model="filters.color"
-                        :value="color.id"
+                        :value="color.name"
                       />
                     </label>
                   </li>
@@ -555,7 +634,7 @@ const changePage = (order, actualNum) => {
                     name="priceMin"
                     id="priceMin"
                     placeholder="0,00€"
-                    v-model="filters.priceMin"
+                    v-model.number="filters.priceMin"
                   />
                 </label>
 
@@ -566,7 +645,7 @@ const changePage = (order, actualNum) => {
                     name="priceMax"
                     id="priceMax"
                     placeholder="€"
-                    v-model="filters.priceMax"
+                    v-model.number="filters.priceMax"
                   />
                 </label>
               </div>
@@ -634,6 +713,50 @@ const changePage = (order, actualNum) => {
               </div>
             </div>
           </div>
+        </div>
+
+        <!-- <p>{{ addedFilters }}</p> -->
+        <!-- Buttons addedFilters -->
+        <div class="filters__button" v-if="addedFilters && filters">
+          <div v-for="(value, key) in addedFilters" :key="key" v-if="addedFilters && filters">
+            <button
+              v-if="Array.isArray(value)"
+              v-for="(val, index) in value"
+              @click="removeFilter(key, index)"
+            >
+              {{ val }}
+              <font-awesome-icon :icon="['fas', 'times']" />
+            </button>
+
+            <button v-else-if="key === 'sort'" @click="removeFilter(key)">
+              {{ value }}
+              <font-awesome-icon :icon="['fas', 'times']" />
+            </button>
+
+            <button
+              v-else-if="
+                (key === 'priceMin' && addedFilters.priceMin) ||
+                (key === 'priceMax' && addedFilters.priceMax)
+              "
+              @click="removeFilter(key)"
+            >
+              {{
+                key === 'priceMin'
+                  ? 'De ' + Number(value).toFixed(2) + ' €'
+                  : 'À ' + Number(value).toFixed(2) + ' €'
+              }}
+              <font-awesome-icon :icon="['fas', 'times']" />
+            </button>
+          </div>
+
+          <p
+            v-if="
+              Object.values(filters).some((v) => v !== null && (!Array.isArray(v) || v.length > 0))
+            "
+            @click="removeAllFilters()"
+          >
+            Effacer les filtres
+          </p>
         </div>
 
         <!-- CHILD LINKS -->
