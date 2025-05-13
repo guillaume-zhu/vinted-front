@@ -6,7 +6,9 @@ import { RouterLink } from 'vue-router'
 import Breadcrumb from '@/components/Breadcrumb.vue'
 import OfferGallery from '@/components/OfferGallery.vue'
 import OfferCard from '@/components/OfferCard.vue'
+import PricePopup from '@/components/PricePopup.vue'
 
+// Main variables
 const GlobalStore = inject('GlobalStore')
 console.log('Global store userInfoCookie.id ---->', GlobalStore.userInfoCookie.value.id)
 
@@ -24,6 +26,20 @@ const ownerInfo = ref(null)
 const ownerOffers = ref([])
 const ownerOffersFiltered = ref([])
 const sliceOffers = ref(100)
+
+// Variable pour le popup price details
+const showPricePopup = ref(false)
+const selectedOfferForPopup = ref(null)
+
+const handlePriceClick = (offer) => {
+  selectedOfferForPopup.value = offer
+  showPricePopup.value = true
+}
+
+const closePricePopup = () => {
+  showPricePopup.value = false
+  selectedOfferForPopup.value = null
+}
 
 ////// REQUETE POUR RÉCUPÉRER offerInfo + category BREADCRUMB + dressing
 onMounted(async () => {
@@ -113,6 +129,7 @@ const SeeMore = () => {
               v-for="offer in ownerOffersFiltered.slice(0, sliceOffers)"
               :key="offer.id"
               :offer="offer"
+              @price-clicked="handlePriceClick"
             />
           </div>
           <p @click="SeeMore()" v-if="sliceOffers < ownerOffers.length">
@@ -252,6 +269,16 @@ const SeeMore = () => {
       </div>
     </div>
   </div>
+
+  <!-- POPUP GLOBAL PRICE DETAIL -->
+  <PricePopup
+    v-if="selectedOfferForPopup"
+    :selectedOfferForPopup="selectedOfferForPopup"
+    :showPricePopup="showPricePopup"
+    @closePricePopup="closePricePopup"
+  />
+
+  <p v-if="selectedOfferForPopup">{{ selectedOfferForPopup.price }}</p>
 </template>
 
 <style scoped>

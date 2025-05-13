@@ -96,6 +96,7 @@ onMounted(async () => {
           :key="offer.id"
           :offer="offer"
           :fromProfile="true"
+          :disablePricePopup="true"
         />
       </div>
     </div>

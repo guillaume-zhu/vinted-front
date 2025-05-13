@@ -2,14 +2,16 @@
 import { ref, onMounted, watchEffect, watch, computed, onBeforeUnmount } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
+
 import Breadcrumb from '@/components/Breadcrumb.vue'
 import OfferCard from '@/components/OfferCard.vue'
-import { drop } from 'lodash'
+import PricePopup from '@/components/PricePopup.vue'
 
 // ----------------------------------------------
 // 📄 PROPS / ROUTER / BASE VARIABLES
 // ----------------------------------------------
 
+// 1. Main
 const props = defineProps({
   id: {
     type: String,
@@ -26,6 +28,20 @@ const isLoading = ref(false)
 const offersList = ref([])
 const totalPage = ref(null)
 const page = ref(1)
+
+// 2. Price Pop-up
+const selectedOfferForPopup = ref(null)
+const showPricePopup = ref(false)
+
+const handlePriceClick = (offer) => {
+  selectedOfferForPopup.value = offer
+  showPricePopup.value = true
+}
+
+const closePricePopup = () => {
+  showPricePopup.value = false
+  selectedOfferForPopup.value = null
+}
 
 // ----------------------------------------------
 // 🎯 FILTER SYSTEM
@@ -715,7 +731,6 @@ const changePage = (order, actualNum) => {
           </div>
         </div>
 
-        <!-- <p>{{ addedFilters }}</p> -->
         <!-- Buttons addedFilters -->
         <div class="filters__button" v-if="addedFilters && filters">
           <div v-for="(value, key) in addedFilters" :key="key" v-if="addedFilters && filters">
@@ -787,6 +802,7 @@ const changePage = (order, actualNum) => {
           :key="offer.id"
           :offer="offer"
           :fromCatalog="true"
+          @price-clicked="handlePriceClick"
         />
       </div>
 
@@ -803,6 +819,12 @@ const changePage = (order, actualNum) => {
       </div>
     </div>
   </div>
+
+  <PricePopup
+    :selectedOfferForPopup="selectedOfferForPopup"
+    :showPricePopup="showPricePopup"
+    @closePricePopup="closePricePopup"
+  />
 </template>
 
 <style scoped>

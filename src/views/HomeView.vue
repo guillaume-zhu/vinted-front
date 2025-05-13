@@ -5,6 +5,7 @@ import _ from 'lodash'
 
 import OfferCard from '@/components/OfferCard.vue'
 import Dressing from '@/components/Dressing.vue'
+import PricePopup from '@/components/PricePopup.vue'
 
 const isLoading = ref(false)
 const errorMessage = ref('')
@@ -30,7 +31,21 @@ let page = 1
 const offersListPlus = ref([])
 let pageSize = 0
 
-/////////// Fonction pour découper le tableau d'id en 80-80-80
+// Variable pour le popup price details
+const showPricePopup = ref(false)
+const selectedOfferForPopup = ref(null)
+
+const handlePriceClick = (offer) => {
+  selectedOfferForPopup.value = offer
+  showPricePopup.value = true
+}
+
+const closePricePopup = () => {
+  showPricePopup.value = false
+  selectedOfferForPopup.value = null
+}
+
+// Fonction pour découper le tableau d'id en 80-80-80
 const cutArray = (array, size) => {
   let result = []
   for (let i = 0; i < array.length; i += size) {
@@ -126,26 +141,6 @@ onMounted(async () => {
     randomizedAllOwnersId.value = _.shuffle(allOwnersId.value)
     console.log('randomizedAllOwnersId ---->', randomizedAllOwnersId.value)
 
-    // // Afficher un dressing pour le premier id du tableau
-    // const responseOwner = await axios.get(
-    //   `http://localhost:1337/api/users/${randomizedAllOwnersId.value[0].id}?populate[0]=avatar&populate[1]=offers.images&populate[2]=offers.category&populate[3]=offers.brand&populate[4]=offers.size&populate[5]=offers.materials&populate[6]=offers.colors`,
-    // )
-    // firstDressingLine.value = responseOwner.data
-    // console.log('firstDressingLine ---->', firstDressingLine.value)
-
-    // // Afficher un dressing pour le deuxieme id du tableau
-    // const responseOwner2 = await axios.get(
-    //   `http://localhost:1337/api/users/${randomizedAllOwnersId.value[1].id}?populate[0]=avatar&populate[1]=offers.images&populate[2]=offers.category&populate[3]=offers.brand&populate[4]=offers.size&populate[5]=offers.materials&populate[6]=offers.colors`,
-    // )
-    // secondDressingLine.value = responseOwner2.data
-    // console.log('secondDressingLine ---->', secondDressingLine.value)
-
-    // // Afficher un dressing pour le troisième id du tableau
-    // const responseOwner3 = await axios.get(
-    //   `http://localhost:1337/api/users/${randomizedAllOwnersId.value[2].id}?populate[0]=avatar&populate[1]=offers.images&populate[2]=offers.category&populate[3]=offers.brand&populate[4]=offers.size&populate[5]=offers.materials&populate[6]=offers.colors`,
-    // )
-    // thirdDressingLine.value = responseOwner3.data
-
     // Copie de la liste des tableaux d'id utilisateurs pour la transformer en file d'attente mutable
     const ownersQueue = [...randomizedAllOwnersId.value]
 
@@ -165,8 +160,6 @@ onMounted(async () => {
 })
 
 /////////// LOGIQUE POUR AJOUTER UN BOUTON VOIR PLUS ET AFFICHER LA SUITE DES REQUÊTES
-// - ajouter un bouton voir plus, lors du clic lancer nouvelle requête de 80 offres de la div présente derrière avec un v-if
-// - lancer une requete a partir du 2e tableau de 80 id, puis faire une incrémentation de {pageSize + 80} lors du clic de voir plus
 const loadMoreOffer = async () => {
   pageSize += 80
 
@@ -238,7 +231,12 @@ const loadMoreOffer = async () => {
 
         <!-- FIRST 2 OFFERS LINE -->
         <div class="offers-list">
-          <OfferCard v-for="offer in firstOffersLine" :key="offer.id" :offer="offer" />
+          <OfferCard
+            v-for="offer in firstOffersLine"
+            :key="offer.id"
+            :offer="offer"
+            @price-clicked="handlePriceClick"
+          />
         </div>
 
         <!-- FIRST DRESSING LINE -->
@@ -246,7 +244,12 @@ const loadMoreOffer = async () => {
 
         <!-- SECOND 5 OFFERS LINE -->
         <div class="offers-list">
-          <OfferCard v-for="offer in secondOffersLine" :key="offer.id" :offer="offer" />
+          <OfferCard
+            v-for="offer in secondOffersLine"
+            :key="offer.id"
+            :offer="offer"
+            @price-clicked="handlePriceClick"
+          />
         </div>
 
         <!-- SECOND DRESSING LINE -->
@@ -254,7 +257,12 @@ const loadMoreOffer = async () => {
 
         <!-- THIRD 5 OFFERS LINE -->
         <div class="offers-list">
-          <OfferCard v-for="offer in thirdOffersLine" :key="offer.id" :offer="offer" />
+          <OfferCard
+            v-for="offer in thirdOffersLine"
+            :key="offer.id"
+            :offer="offer"
+            @price-clicked="handlePriceClick"
+          />
         </div>
 
         <!-- THIRD DRESSING LINE -->
@@ -262,18 +270,36 @@ const loadMoreOffer = async () => {
 
         <!-- FOURTH 4 OFFERS LINE -->
         <div class="offers-list">
-          <OfferCard v-for="offer in fourthOffersLine" :key="offer.id" :offer="offer" />
+          <OfferCard
+            v-for="offer in fourthOffersLine"
+            :key="offer.id"
+            :offer="offer"
+            @price-clicked="handlePriceClick"
+          />
         </div>
 
         <!-- VOIR PLUS OFFRES  -->
         <div class="offers-list" v-if="offersListPlus">
-          <OfferCard v-for="offer in offersListPlus" :key="offer.id" :offer="offer" />
+          <OfferCard
+            v-for="offer in offersListPlus"
+            :key="offer.id"
+            :offer="offer"
+            @price-clicked="handlePriceClick"
+          />
         </div>
 
         <button @click="loadMoreOffer">Voir plus</button>
       </div>
     </section>
   </div>
+
+  <!-- POPUP GLOBAL PRICE DETAIL -->
+  <PricePopup
+    v-if="selectedOfferForPopup"
+    :selectedOfferForPopup="selectedOfferForPopup.attributes"
+    :showPricePopup="showPricePopup"
+    @closePricePopup="closePricePopup"
+  />
 </template>
 
 <style scoped>

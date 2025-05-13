@@ -1,5 +1,8 @@
 <script setup>
 import { RouterLink } from 'vue-router'
+import { ref } from 'vue'
+
+const emit = defineEmits(['price-clicked'])
 
 const props = defineProps({
   offer: {
@@ -10,6 +13,9 @@ const props = defineProps({
     type: Boolean,
   },
   fromCatalog: {
+    type: Boolean,
+  },
+  disablePricePopup: {
     type: Boolean,
   },
 })
@@ -28,16 +34,19 @@ const props = defineProps({
         v-if="offer.attributes.images"
         :src="offer.attributes.images.data[0].attributes.url"
       />
-      <p v-if="offer.attributes.brand.data?.attributes.displayName">
-        {{ offer.attributes.brand.data.attributes.displayName }}
-      </p>
-      <p v-if="offer.attributes.size.data?.attributes.displayName">
-        {{ offer.attributes.size.data.attributes.displayName }}
-      </p>
-      <p v-else>{{ offer.attributes.condition }}</p>
-      <p>{{ offer.attributes.price.toFixed(2) }} €</p>
-      <p>{{ (offer.attributes.price + offer.attributes.price * (9.38 / 100)).toFixed(2) }} €</p>
     </RouterLink>
+    <p v-if="offer.attributes.brand.data?.attributes.displayName">
+      {{ offer.attributes.brand.data.attributes.displayName }}
+    </p>
+    <p v-if="offer.attributes.size.data?.attributes.displayName">
+      {{ offer.attributes.size.data.attributes.displayName }}
+    </p>
+    <p v-else>{{ offer.attributes.condition }}</p>
+    <p>{{ offer.attributes.price.toFixed(2) }} €</p>
+    <p @click="emit('price-clicked', offer)">
+      {{ (offer.attributes.price + offer.attributes.price * (9.38 / 100)).toFixed(2) }} €
+      <span>incl. <font-awesome-icon :icon="['fas', 'shield-alt']" /></span>
+    </p>
   </div>
 
   <!-- FROM PRODUCT & PROFILE -->
@@ -49,19 +58,20 @@ const props = defineProps({
         v-if="offer.images"
         :src="offer.images[0].url"
       />
-      <p v-if="offer.brand?.displayName">
-        {{ offer.brand.displayName }}
-      </p>
-      <p v-if="offer.size?.displayName">
-        {{ offer.size.displayName }}
-      </p>
-      <p v-else>{{ offer.condition }}</p>
-      <p>{{ offer.price.toFixed(2) }} €</p>
-      <p>{{ (offer.price + offer.price * (9.38 / 100)).toFixed(2) }} €</p>
     </RouterLink>
+    <p v-if="offer.brand?.displayName">
+      {{ offer.brand.displayName }}
+    </p>
+    <p v-if="offer.size?.displayName">
+      {{ offer.size.displayName }}
+    </p>
+    <p v-else>{{ offer.condition }}</p>
+    <p>{{ offer.price.toFixed(2) }} €</p>
+    <p @click="emit('price-clicked', offer)" v-if="!disablePricePopup">
+      {{ (offer.price + offer.price * (9.38 / 100)).toFixed(2) }} €
+      <span>incl. <font-awesome-icon :icon="['fas', 'shield-alt']" /></span>
+    </p>
   </div>
-
-  <!-- FROM PROFILE -->
 </template>
 
 <style scoped>
