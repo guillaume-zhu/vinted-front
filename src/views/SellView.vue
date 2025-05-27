@@ -13,11 +13,11 @@
 // router.push a l'offre créée
 
 //// A faire next
-// getBreadCrumb réalisé, il faut maintenant l'adapter dans une boucle qui va l'utiliser dans noChildrenCategories pour que la finalité -> avoir un tableau qui contient [ 'grand-parent > parent > categorie[index 0]', 'grand-parent > parent > categorie[index 1]', etc]
-// ensuite mapper noChildrenCategories avec ce tableau de breadCrumb en tableau enrichi qu'on va pouvoir utiliser pour afficher les résultats de la recherche avec leur breadCrumb respectifs
+// ajouter un debounce
 
 import { ref, computed, onMounted, watch } from 'vue'
 import axios from 'axios'
+import { debounce } from 'lodash'
 
 // -----------------------------------------
 // BASE VARIABLES
@@ -156,40 +156,39 @@ const fetchLevel1 = async () => {
 }
 
 const filterCategories = async (textInput) => {
-  if (textInput.length >= 3) {
-    console.log('textInput ---->', textInput)
+  try {
+    const response = await axios.get(
+      `http://localhost:1337/api/categories/?filters[displayName][$containsi]=${textInput}&[populate[0]=parent&populate[1]=parent.parent&populate[2]=parent.parent.parent&populate[3]=parent.parent.parent.parent&populate[4]=parent.parent.parent.parent.parent&populate[5]=children&pagination[pageSize]=200`,
+    )
+    filteredCategories.value = response.data.data
+    console.log('Categories filtrées ---->', filteredCategories.value)
 
-    try {
-      const response = await axios.get(
-        `http://localhost:1337/api/categories/?filters[displayName][$containsi]=${textInput}&[populate[0]=parent&populate[1]=parent.parent&populate[2]=parent.parent.parent&populate[3]=parent.parent.parent.parent&populate[4]=parent.parent.parent.parent.parent&populate[5]=children&pagination[pageSize]=200`,
-      )
-      filteredCategories.value = response.data.data
-      console.log('Categories filtrées ---->', filteredCategories.value)
+    noChildrenCategories.value = filteredCategories.value.filter(
+      (cat) => cat.attributes.children.data.length === 0,
+    )
+    console.log('No child categories ---->', noChildrenCategories.value)
 
-      noChildrenCategories.value = filteredCategories.value.filter(
-        (cat) => cat.attributes.children.data.length === 0,
-      )
-      console.log('No child categories ---->', noChildrenCategories.value)
+    getAllBreadCrumb(noChildrenCategories.value)
+    console.log('getBreadCrumb --->', getBreadCrumb(noChildrenCategories.value[0]))
 
-      getAllBreadCrumb(noChildrenCategories.value)
-      console.log('getBreadCrumb --->', getBreadCrumb(noChildrenCategories.value[0]))
-
-      currentCategories.value = categoriesWithBreadCrumb.value
-    } catch (error) {
-      console.log('Erreur lors de la requete pour afficher les categories par search', error)
-    }
-  } else if (textInput.length === 0) {
+    currentCategories.value = categoriesWithBreadCrumb.value
+  } catch (error) {
+    console.log('Erreur lors de la requete pour afficher les categories par search', error)
+  }
+  if (textInput.length === 0) {
     currentCategories.value = firstCategories.value
-  } else {
-    return
   }
 }
+
+const debouncedFilterCategories = debounce((value) => {
+  filterCategories(value)
+}, 400)
 
 // -----------------------------------------
 // WATCHERS
 // -----------------------------------------
 watch(searchTerm, (newValue) => {
-  filterCategories(newValue)
+  debouncedFilterCategories(newValue)
 })
 
 // -----------------------------------------
