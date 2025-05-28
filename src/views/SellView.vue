@@ -13,7 +13,6 @@
 // router.push a l'offre créée
 
 //// A faire next
-// input brand initialisé, maintenant il reste a améliorer l'ux quand on selectionne la bonne valeur et gérer l'affichage suite a cette selection
 
 import { ref, computed, onMounted, watch } from 'vue'
 import axios from 'axios'
@@ -30,6 +29,7 @@ const title = ref(null)
 const description = ref(null)
 const category = ref(null)
 const brand = ref(null)
+const customBrand = ref(null)
 const size = ref(null)
 const condition = ref(null)
 const color = ref([])
@@ -375,7 +375,9 @@ onMounted(() => {
 
           <!-- Toggle dropdown -->
           <div @click="showBrandDropdown = !showBrandDropdown">
-            <p>{{ brand ? brand.attributes.displayName : 'Sélectionne une marque' }}</p>
+            <p v-if="!brand && !customBrand">Sélectionne une marque</p>
+            <p v-else-if="brand && !customBrand">{{ brand.attributes.displayName }}</p>
+            <p v-else-if="!brand && customBrand">{{ customBrand }}</p>
 
             <font-awesome-icon :icon="['fas', 'chevron-down']" v-if="!showBrandDropdown" />
             <font-awesome-icon :icon="['fas', 'chevron-up']" v-if="showBrandDropdown" />
@@ -424,9 +426,30 @@ onMounted(() => {
                       id="searchBrand"
                       v-model="brand"
                       :value="b"
-                      @change="showBrandDropdown = false"
+                      @change="
+                        () => {
+                          ;(showBrandDropdown = false), (customBrand = null)
+                        }
+                      "
                     />
                   </li>
+                  <!-- custom brand -->
+                  <div class="form__brand-search-custom">
+                    <p>Marque non disponible</p>
+                    <p>Utiliser "{{ searchBrand }}" comme marque</p>
+                    <input
+                      type="radio"
+                      name="customBrand"
+                      id="customBrand"
+                      v-model="customBrand"
+                      :value="searchBrand"
+                      @change="
+                        () => {
+                          ;(showBrandDropdown = false), (brand = null)
+                        }
+                      "
+                    />
+                  </div>
                 </div>
               </ul>
             </div>
