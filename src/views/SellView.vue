@@ -13,7 +13,7 @@
 // router.push a l'offre créée
 
 //// A faire next
-// ajouter un debounce
+// input brand initialisé, maintenant il reste a améliorer l'ux quand on selectionne la bonne valeur et gérer l'affichage suite a cette selection
 
 import { ref, computed, onMounted, watch } from 'vue'
 import axios from 'axios'
@@ -44,15 +44,17 @@ const firstCategories = ref([])
 const currentCategories = ref([])
 const selectedPath = ref([])
 const showCatDropdown = ref(false)
-const searchTerm = ref('')
+const searchCategory = ref('')
 const filteredCategories = ref([])
 const noChildrenCategories = ref([])
 const breadCrumbArray = ref([])
 const categoriesWithBreadCrumb = ref([])
 
-// 4. Brand Input
+// 4. Brand Input dropdown
 const availableBrand = ref([])
 const showBrandDropdown = ref(false)
+const searchBrand = ref('')
+const filteredBrand = ref([])
 
 // -----------------------------------------
 // BASE FUNCTIONS
@@ -203,17 +205,32 @@ const fetchPopularBrand = async () => {
     console.log('Erreur lors de la requete pour afficher des marques populaires')
   }
 }
-// créer un input marque avec un texte pour chercher les marques disponibles, si la marque n'existe pas la créer
-// sinon afficher de base les marques populaires au clic
-// créer availableBrand
-// lancer requete pour afficher les marques les plus connues et stocker dans availableBrand
-// template = v for de li sur availableBrand
+
+const filterBrands = async (textInput) => {
+  try {
+    const response = await axios.get(
+      `http://localhost:1337/api/brands?filters[displayName][$containsi]=${textInput}&pagination[pageSize]=100`,
+    )
+    filteredBrand.value = response.data.data
+    console.log('FilteredBrand ---->', filteredBrand.value)
+  } catch (error) {
+    console.log('Erreur lors de la requete pour afficher des marques par search', error)
+  }
+}
+
+const debouncedFilterBrands = debounce((value) => {
+  filterBrands(value)
+}, 400)
 
 // -----------------------------------------
 // WATCHERS
 // -----------------------------------------
-watch(searchTerm, (newValue) => {
+watch(searchCategory, (newValue) => {
   debouncedFilterCategories(newValue)
+})
+
+watch(searchBrand, (newValue) => {
+  debouncedFilterBrands(newValue)
 })
 
 // -----------------------------------------
@@ -291,17 +308,18 @@ onMounted(() => {
           </div>
 
           <!-- Categorie dropdown -->
-          <div class="container" v-if="showCatDropdown">
-            <!-- categorie search -->
+          <div class="container" v-if="showCatDropdown && currentCategories.length">
+            <!-- search -->
             <input
               type="text"
-              name="search"
-              id="search"
+              name="searchCategory"
+              id="searchCategory"
               placeholder="Trouver une catégorie"
-              v-model="searchTerm"
+              v-model="searchCategory"
             />
 
-            <div v-if="currentCategories.length">
+            <!-- results ------->
+            <div>
               <ul class="form__category-list">
                 <!-- by click -->
                 <div class="form__category-click" v-if="!currentCategories[0].breadCrumb">
@@ -310,6 +328,7 @@ onMounted(() => {
                     <font-awesome-icon :icon="['fas', 'arrow-left']" @click="backCategory()" />
                     <span>{{ currentLabel.attributes.displayName }}</span>
                   </div>
+
                   <!-- click list -->
                   <li
                     class="form__category-click-item"
@@ -354,22 +373,63 @@ onMounted(() => {
         <div class="form__brand form-flex">
           <h2>Marque</h2>
 
+          <!-- Toggle dropdown -->
           <div @click="showBrandDropdown = !showBrandDropdown">
-            <p>Sélectionne une catégorie</p>
+            <p>{{ brand ? brand.attributes.displayName : 'Sélectionne une marque' }}</p>
 
             <font-awesome-icon :icon="['fas', 'chevron-down']" v-if="!showBrandDropdown" />
             <font-awesome-icon :icon="['fas', 'chevron-up']" v-if="showBrandDropdown" />
           </div>
 
-          <div v-if="availableBrand">
-            <ul class="form__brand-list">
-              <div class="form__brand-click">
-                <li v-for="b in availableBrand" :key="b.id">
-                  <label>{{ b.attributes.displayName }}</label>
-                  <input type="radio" name="brand" id="brand" v-model="brand" :value="brand" />
-                </li>
-              </div>
-            </ul>
+          <!-- Brand dropdown -->
+          <div v-if="availableBrand && showBrandDropdown">
+            <!-- search -->
+            <input
+              type="text"
+              name="searchBrand"
+              id="searchBrand"
+              placeholder="Trouver une marque"
+              v-model="searchBrand"
+            />
+
+            <!-- results ------->
+            <div>
+              <ul class="form__brand-list">
+                <!-- by click -->
+                <div class="form__brand-click" v-if="!searchBrand">
+                  <!-- click label -->
+                  <span>Marques populaires</span>
+                  <!-- click list -->
+                  <li v-for="b in availableBrand" :key="b.id">
+                    <label>{{ b.attributes.displayName }}</label>
+                    <input
+                      type="radio"
+                      name="brand"
+                      id="brand"
+                      v-model="brand"
+                      :value="b"
+                      @change="showBrandDropdown = false"
+                    />
+                  </li>
+                </div>
+
+                <!-- by search -->
+                <div class="form__brand-search" v-if="filteredBrand">
+                  <!-- search list -->
+                  <li v-for="b in filteredBrand" :key="b.id">
+                    <label>{{ b.attributes.displayName }}</label>
+                    <input
+                      type="radio"
+                      name="searchBrand"
+                      id="searchBrand"
+                      v-model="brand"
+                      :value="b"
+                      @change="showBrandDropdown = false"
+                    />
+                  </li>
+                </div>
+              </ul>
+            </div>
           </div>
         </div>
 
