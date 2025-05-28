@@ -44,26 +44,61 @@ const material = ref([])
 const isSubmitting = ref(false)
 const errorMessage = ref('')
 
-// 3. Category Input dropdown
+// 3. Dropdown state
+const dropdowns = ref({
+  category: false,
+  brand: false,
+  size: false,
+  condition: false,
+  color: false,
+  material: false,
+})
+
+// 4. Category Input
 const firstCategories = ref([])
 const currentCategories = ref([])
 const selectedPath = ref([])
-const showCatDropdown = ref(false)
 const searchCategory = ref('')
 const filteredCategories = ref([])
 const noChildrenCategories = ref([])
 const breadCrumbArray = ref([])
 const categoriesWithBreadCrumb = ref([])
 
-// 4. Brand Input dropdown
+// 5. Brand Input
 const availableBrand = ref([])
-const showBrandDropdown = ref(false)
 const searchBrand = ref('')
 const filteredBrand = ref([])
 
-// 5. Size Input dropdown
+// 6. Size Input
 const availableSizes = ref([])
-const showSizesDropdown = ref(false)
+
+// 7. Condition Input to v-select
+const availableConditions = [
+  {
+    name: 'Neuf avec étiquette',
+    description:
+      'Article neuf, jamais porté/utilisé avec étiquettes ou dans son emballage d’origine.',
+  },
+  {
+    name: 'Neuf sans étiquette',
+    description: 'Article neuf, jamais porté/utilisé, sans étiquettes ni emballage d’origine.',
+  },
+  {
+    name: 'Très bon état',
+    description:
+      'Article très peu porté/utilisé qui peut présenter de légères imperfections, mais qui reste en très bon état. Précise avec des photos et une description détaillée, les défauts de ton article.',
+  },
+  {
+    name: 'Bon état',
+    description:
+      'Article porté/utilisé quelques fois, présentant des imperfections et des signes d’usure. Précise avec des photos et une description détaillée, les défauts de ton article.',
+  },
+  {
+    name: 'Satisfaisant',
+    description:
+      'Article porté/utilisé plusieurs fois, présentant des imperfections et des signes d’usure. Précise avec des photos et une description détaillée, les défauts de ton article.',
+  },
+]
 
 // -----------------------------------------
 // BASE FUNCTIONS
@@ -106,7 +141,7 @@ const selectedCategory = (cat) => {
   if (currentCategories.value.length === 0) {
     category.value = cat
     currentCategories.value = firstCategories.value
-    showCatDropdown.value = false
+    dropdowns.value.category = false
 
     // console.log('Category value end ---->', category.value)
     fetchSizes(category.value.attributes.name)
@@ -119,7 +154,7 @@ const selectedCategory = (cat) => {
 
 const selectedCategoryBysearch = (cat) => {
   fetchSizes(cat.attributes.name)
-  showCatDropdown.value = false
+  dropdowns.value.category = false
 
   if (size.value) {
     size.value = null
@@ -337,15 +372,15 @@ onMounted(() => {
           <h2>Catégorie</h2>
 
           <!-- Toggle dropdown -->
-          <div @click="showCatDropdown = !showCatDropdown">
+          <div @click="dropdowns.category = !dropdowns.category">
             <p>{{ category ? category.attributes.displayName : 'Sélectionne une catégorie' }}</p>
 
-            <font-awesome-icon :icon="['fas', 'chevron-down']" v-if="!showCatDropdown" />
-            <font-awesome-icon :icon="['fas', 'chevron-up']" v-if="showCatDropdown" />
+            <font-awesome-icon :icon="['fas', 'chevron-down']" v-if="!dropdowns.category" />
+            <font-awesome-icon :icon="['fas', 'chevron-up']" v-if="dropdowns.category" />
           </div>
 
           <!-- Categorie dropdown -->
-          <div class="container" v-if="showCatDropdown && currentCategories.length">
+          <div class="container" v-if="dropdowns.category && currentCategories.length">
             <!-- search -->
             <input
               type="text"
@@ -411,17 +446,17 @@ onMounted(() => {
           <h2>Marque</h2>
 
           <!-- Toggle dropdown -->
-          <div @click="showBrandDropdown = !showBrandDropdown">
+          <div @click="dropdowns.brand = !dropdowns.brand">
             <p v-if="!brand && !customBrand">Sélectionne une marque</p>
             <p v-else-if="brand && !customBrand">{{ brand.attributes.displayName }}</p>
             <p v-else-if="!brand && customBrand">{{ customBrand }}</p>
 
-            <font-awesome-icon :icon="['fas', 'chevron-down']" v-if="!showBrandDropdown" />
-            <font-awesome-icon :icon="['fas', 'chevron-up']" v-if="showBrandDropdown" />
+            <font-awesome-icon :icon="['fas', 'chevron-down']" v-if="!dropdowns.brand" />
+            <font-awesome-icon :icon="['fas', 'chevron-up']" v-if="dropdowns.brand" />
           </div>
 
           <!-- Brand dropdown -->
-          <div v-if="availableBrand && showBrandDropdown">
+          <div v-if="availableBrand && dropdowns.brand">
             <!-- search -->
             <input
               type="text"
@@ -448,7 +483,7 @@ onMounted(() => {
                         id="brand"
                         v-model="brand"
                         :value="b"
-                        @change="showBrandDropdown = false"
+                        @change="dropdowns.brand = false"
                     /></label>
                   </li>
                 </div>
@@ -466,7 +501,7 @@ onMounted(() => {
                       :value="b"
                       @change="
                         () => {
-                          ;(showBrandDropdown = false), (customBrand = null)
+                          ;(dropdowns.brand = false), (customBrand = null)
                         }
                       "
                     />
@@ -483,7 +518,7 @@ onMounted(() => {
                       :value="searchBrand"
                       @change="
                         () => {
-                          ;(showBrandDropdown = false), (brand = null)
+                          ;(dropdowns.brand = false), (brand = null)
                         }
                       "
                     />
@@ -499,30 +534,30 @@ onMounted(() => {
           <h2>Taille</h2>
 
           <!-- Toggle dropdown -->
-          <div @click="showSizesDropdown = !showSizesDropdown">
+          <div @click="dropdowns.size = !dropdowns.size">
             <p>{{ size?.displayName || 'Sélectionne une taille' }}</p>
 
-            <font-awesome-icon :icon="['fas', 'chevron-down']" v-if="!showSizesDropdown" />
-            <font-awesome-icon :icon="['fas', 'chevron-up']" v-if="showSizesDropdown" />
+            <font-awesome-icon :icon="['fas', 'chevron-down']" v-if="!dropdowns.size" />
+            <font-awesome-icon :icon="['fas', 'chevron-up']" v-if="dropdowns.size" />
           </div>
 
           <!-- Size dropdown -->
           <!-- results -->
-          <div v-if="showSizesDropdown && availableSizes">
+          <div v-if="dropdowns.size && availableSizes">
             <ul class="form__size_list">
               <span>Choisis la taille qui correspond à l'étiquette de l'article</span>
               <p>{{ availableSizes[0].displayCategoryName }}</p>
 
-              <li v-for="s in availableSizes">
+              <li v-for="s in availableSizes" :key="s.id">
                 <label>
-                  {{ s.displayName }}
+                  <p>{{ s.displayName }}</p>
                   <input
                     type="radio"
                     name="size"
                     id="size"
                     v-model="size"
                     :value="s"
-                    @change="showSizesDropdown = false"
+                    @change="dropdowns.size = false"
                   />
                 </label>
               </li>
@@ -530,26 +565,54 @@ onMounted(() => {
           </div>
         </div>
 
-        <!-- condition -->
+        <!-- CONDITION -->
         <div class="form__condition form-flex">
           <h2>État</h2>
-          <input type="text" name="condition" id="condition" v-model="condition" placeholder="" />
+
+          <!-- Toggle dropdown -->
+          <div @click="dropdowns.condition = !dropdowns.condition">
+            <p>{{ condition?.name || 'Sélectionne un état' }}</p>
+
+            <font-awesome-icon :icon="['fas', 'chevron-down']" v-if="!dropdowns.condition" />
+            <font-awesome-icon :icon="['fas', 'chevron-up']" v-if="dropdowns.condition" />
+          </div>
+
+          <!-- Condtion dropdown -->
+          <!-- results -->
+          <div v-if="dropdowns.condition && availableConditions">
+            <ul class="form__condition-list">
+              <li v-for="(c, index) in availableConditions" :key="index">
+                <label>
+                  <p>{{ c.name }}</p>
+                  <p>{{ c.description }}</p>
+                  <input
+                    type="radio"
+                    name="condition"
+                    id="condition"
+                    v-model="condition"
+                    :value="c"
+                    @change="dropdowns.condition = false"
+                  />
+                </label>
+              </li>
+            </ul>
+          </div>
         </div>
 
-        <!-- color -->
+        <!-- COLOR -->
         <div class="form__color form-flex">
           <h2>Couleur</h2>
           <input type="text" name="price" id="price" v-model="color" placeholder="" />
         </div>
 
-        <!-- material -->
+        <!-- MATERIAL -->
         <div class="form__material form-flex">
           <h2>Matière (recommandé)</h2>
           <input type="text" name="price" id="price" v-model="material" placeholder="" />
         </div>
       </div>
 
-      <!-- price -->
+      <!-- PRICE -->
       <div class="form-price form-flex">
         <h2>Prix</h2>
         <input type="number" name="price" id="price" />
