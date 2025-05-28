@@ -13,6 +13,11 @@
 // router.push a l'offre créée
 
 //// A faire next
+// Etat || condition input
+
+//// A ne pas oublier
+// Ajouter display en fonction details si category a été choisi
+// Verification lors de la soumission du formulaire que certains inputs sont bien remplis
 
 import { ref, computed, onMounted, watch } from 'vue'
 import axios from 'axios'
@@ -55,6 +60,10 @@ const availableBrand = ref([])
 const showBrandDropdown = ref(false)
 const searchBrand = ref('')
 const filteredBrand = ref([])
+
+// 5. Size Input dropdown
+const availableSizes = ref([])
+const showSizesDropdown = ref(false)
 
 // -----------------------------------------
 // BASE FUNCTIONS
@@ -100,6 +109,20 @@ const selectedCategory = (cat) => {
     showCatDropdown.value = false
 
     // console.log('Category value end ---->', category.value)
+    fetchSizes(category.value.attributes.name)
+  }
+
+  if (size.value) {
+    size.value = null
+  }
+}
+
+const selectedCategoryBysearch = (cat) => {
+  fetchSizes(cat.attributes.name)
+  showCatDropdown.value = false
+
+  if (size.value) {
+    size.value = null
   }
 }
 
@@ -192,8 +215,8 @@ const debouncedFilterCategories = debounce((value) => {
   filterCategories(value)
 }, 400)
 
-// 3. Brand input
-const fetchPopularBrand = async () => {
+// 2. Brand Input
+const fetchPopularBrands = async () => {
   try {
     const response = await axios.get(
       `http://localhost:1337/api/brands?filters[isPopular]=true&pagination[pageSize]=50`,
@@ -222,6 +245,20 @@ const debouncedFilterBrands = debounce((value) => {
   filterBrands(value)
 }, 400)
 
+// 3. Size Input
+const fetchSizes = async (categoryName) => {
+  try {
+    const response = await axios.get(
+      `http://localhost:1337/api/sizes/category/${categoryName}?onlySizes=true`,
+    )
+
+    availableSizes.value = response.data
+    console.log('availableSizes ---->', availableSizes.value)
+  } catch (error) {
+    console.log('Erreur lors de la requete pour afficher les sizes')
+  }
+}
+
 // -----------------------------------------
 // WATCHERS
 // -----------------------------------------
@@ -238,7 +275,7 @@ watch(searchBrand, (newValue) => {
 // -----------------------------------------
 onMounted(() => {
   fetchLevel1()
-  fetchPopularBrand()
+  fetchPopularBrands()
 })
 </script>
 
@@ -358,7 +395,7 @@ onMounted(() => {
                         id="category"
                         v-model="category"
                         :value="cat"
-                        @change="showCatDropdown = !showCatDropdown"
+                        @change="selectedCategoryBysearch(cat)"
                       />
                     </label>
                   </li>
@@ -369,7 +406,7 @@ onMounted(() => {
         </div>
 
         <!-- if category selected -->
-        <!-- brand -->
+        <!-- BRAND -->
         <div class="form__brand form-flex">
           <h2>Marque</h2>
 
@@ -403,15 +440,16 @@ onMounted(() => {
                   <span>Marques populaires</span>
                   <!-- click list -->
                   <li v-for="b in availableBrand" :key="b.id">
-                    <label>{{ b.attributes.displayName }}</label>
-                    <input
-                      type="radio"
-                      name="brand"
-                      id="brand"
-                      v-model="brand"
-                      :value="b"
-                      @change="showBrandDropdown = false"
-                    />
+                    <label
+                      >{{ b.attributes.displayName }}
+                      <input
+                        type="radio"
+                        name="brand"
+                        id="brand"
+                        v-model="brand"
+                        :value="b"
+                        @change="showBrandDropdown = false"
+                    /></label>
                   </li>
                 </div>
 
@@ -456,10 +494,40 @@ onMounted(() => {
           </div>
         </div>
 
-        <!-- size -->
+        <!-- SIZE -->
         <div class="form__size form-flex">
           <h2>Taille</h2>
-          <input type="text" name="size" id="size" v-model="size" placeholder="" />
+
+          <!-- Toggle dropdown -->
+          <div @click="showSizesDropdown = !showSizesDropdown">
+            <p>{{ size?.displayName || 'Sélectionne une taille' }}</p>
+
+            <font-awesome-icon :icon="['fas', 'chevron-down']" v-if="!showSizesDropdown" />
+            <font-awesome-icon :icon="['fas', 'chevron-up']" v-if="showSizesDropdown" />
+          </div>
+
+          <!-- Size dropdown -->
+          <!-- results -->
+          <div v-if="showSizesDropdown && availableSizes">
+            <ul class="form__size_list">
+              <span>Choisis la taille qui correspond à l'étiquette de l'article</span>
+              <p>{{ availableSizes[0].displayCategoryName }}</p>
+
+              <li v-for="s in availableSizes">
+                <label>
+                  {{ s.displayName }}
+                  <input
+                    type="radio"
+                    name="size"
+                    id="size"
+                    v-model="size"
+                    :value="s"
+                    @change="showSizesDropdown = false"
+                  />
+                </label>
+              </li>
+            </ul>
+          </div>
         </div>
 
         <!-- condition -->
