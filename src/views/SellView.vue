@@ -19,7 +19,7 @@
 // Ajouter display en fonction details si category a été choisi
 // Verification lors de la soumission du formulaire que certains inputs sont bien remplis
 
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, onBeforeUnmount } from 'vue'
 import axios from 'axios'
 import { debounce } from 'lodash'
 
@@ -50,8 +50,8 @@ const dropdowns = ref({
   brand: false,
   size: false,
   condition: false,
-  color: false,
-  material: false,
+  colors: false,
+  materials: false,
 })
 
 // 4. Category Input
@@ -72,7 +72,7 @@ const filteredBrand = ref([])
 // 6. Size Input
 const availableSizes = ref([])
 
-// 7. Condition Input to v-select
+// 7. Condition Input
 const availableConditions = [
   {
     name: 'Neuf avec étiquette',
@@ -99,6 +99,10 @@ const availableConditions = [
       'Article porté/utilisé plusieurs fois, présentant des imperfections et des signes d’usure. Précise avec des photos et une description détaillée, les défauts de ton article.',
   },
 ]
+
+// 8. Color Input
+const availableColors = ref([])
+const colorDropdownRef = ref(null)
 
 // -----------------------------------------
 // BASE FUNCTIONS
@@ -202,6 +206,22 @@ const getAllBreadCrumb = (array) => {
   // console.log('categoriesWithBreadCrumb ---->', categoriesWithBreadCrumb.value)
 }
 
+// 3. Color Input dropdown
+const isDisabled = (c) => {
+  return color.value.length >= 2 && !color.value.includes(c)
+}
+
+// 4. Handle click outdside
+const handleClickOutside = (event) => {
+  if (
+    dropdowns.value.colors &&
+    colorDropdownRef.value &&
+    !colorDropdownRef.value.contains(event.target)
+  ) {
+    dropdowns.value.colors = false
+  }
+}
+
 // -----------------------------------------
 // API REQUEST
 // -----------------------------------------
@@ -294,6 +314,18 @@ const fetchSizes = async (categoryName) => {
   }
 }
 
+// 4. Colors Input
+const fetchColors = async () => {
+  try {
+    const response = await axios.get('http://localhost:1337/api/colors?pagination[pageSize]=50')
+
+    availableColors.value = response.data.data
+    console.log('availableColors ---->', availableColors.value)
+  } catch (error) {
+    console.log(('Erreur lors du chargement des couleurs', error))
+  }
+}
+
 // -----------------------------------------
 // WATCHERS
 // -----------------------------------------
@@ -311,6 +343,12 @@ watch(searchBrand, (newValue) => {
 onMounted(() => {
   fetchLevel1()
   fetchPopularBrands()
+  document.addEventListener('click', handleClickOutside)
+  fetchColors()
+})
+
+onBeforeUnmount(() => {
+  document.addEventListener('click', handleClickOutside)
 })
 </script>
 
@@ -600,9 +638,47 @@ onMounted(() => {
         </div>
 
         <!-- COLOR -->
-        <div class="form__color form-flex">
+        <div class="form__color form-flex" ref="colorDropdownRef">
           <h2>Couleur</h2>
-          <input type="text" name="price" id="price" v-model="color" placeholder="" />
+
+          <!-- Toggle dropdown -->
+          <div @click="dropdowns.colors = !dropdowns.colors">
+            <p>
+              {{ 'Sélectionne 2 couleurs maximum' }}
+            </p>
+
+            <font-awesome-icon :icon="['fas', 'chevron-down']" v-if="!dropdowns.colors" />
+            <font-awesome-icon :icon="['fas', 'chevron-up']" v-if="dropdowns.colors" />
+          </div>
+
+          <!-- Color dropdown -->
+          <div v-if="availableColors && dropdowns.colors">
+            <!-- results -->
+            <div>
+              <ul class="form__colors-list">
+                <li v-for="c in availableColors" :key="c.id">
+                  <label>
+                    <div
+                      class="form__colors-circle"
+                      :style="
+                        c.attributes.hex
+                          ? { backgroundColor: c.attributes.hex }
+                          : { backgroundColor: c.attributes.style }
+                      "
+                    ></div>
+                    <p>{{ c.attributes.displayName }}</p>
+                    <input
+                      type="checkbox"
+                      name="color"
+                      id="color"
+                      v-model="color"
+                      :value="c"
+                      :disabled="isDisabled(c)"
+                  /></label>
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
 
         <!-- MATERIAL -->
@@ -629,5 +705,12 @@ input[type='file'] {
 .form-flex {
   display: flex;
   padding: 10px;
+}
+
+.form__colors-circle {
+  width: 20px;
+  height: 20px;
+  border: 1px solid black;
+  border-radius: 50px;
 }
 </style>
