@@ -13,7 +13,7 @@
 // router.push a l'offre créée
 
 //// A faire next
-// Etat || condition input
+// Prix input + soumission formulaire formdata
 
 //// A ne pas oublier
 // Ajouter display en fonction details si category a été choisi
@@ -102,7 +102,11 @@ const availableConditions = [
 
 // 8. Color Input
 const availableColors = ref([])
-const colorDropdownRef = ref(null)
+const colorsDropdownRef = ref(null)
+
+// 9. Material Input
+const availableMaterials = ref([])
+const materialsDropdownRef = ref(null)
 
 // -----------------------------------------
 // BASE FUNCTIONS
@@ -207,7 +211,7 @@ const getAllBreadCrumb = (array) => {
 }
 
 // 3. Color Input dropdown
-const isDisabled = (c) => {
+const isDisabledColor = (c) => {
   return color.value.length >= 2 && !color.value.includes(c)
 }
 
@@ -215,11 +219,24 @@ const isDisabled = (c) => {
 const handleClickOutside = (event) => {
   if (
     dropdowns.value.colors &&
-    colorDropdownRef.value &&
-    !colorDropdownRef.value.contains(event.target)
+    colorsDropdownRef.value &&
+    !colorsDropdownRef.value.contains(event.target)
   ) {
     dropdowns.value.colors = false
   }
+
+  if (
+    dropdowns.value.materials &&
+    materialsDropdownRef.value &&
+    !materialsDropdownRef.value.contains(event.target)
+  ) {
+    dropdowns.value.materials = false
+  }
+}
+
+// 4. Material Input dropdown
+const isDisabledMaterial = (m) => {
+  return material.value.length >= 3 && !material.value.includes(m)
 }
 
 // -----------------------------------------
@@ -326,6 +343,19 @@ const fetchColors = async () => {
   }
 }
 
+// 5. Materials Input
+const fetchMaterials = async () => {
+  try {
+    const response = await axios.get('http://localhost:1337/api/materials?pagination[pageSize]=100')
+
+    availableMaterials.value = response.data.data.sort((a, b) =>
+      a.attributes.displayName.localeCompare(b.attributes.displayName),
+    )
+  } catch (error) {
+    console.log('Erreur lors du chargements des materials', error)
+  }
+}
+
 // -----------------------------------------
 // WATCHERS
 // -----------------------------------------
@@ -345,6 +375,7 @@ onMounted(() => {
   fetchPopularBrands()
   document.addEventListener('click', handleClickOutside)
   fetchColors()
+  fetchMaterials()
 })
 
 onBeforeUnmount(() => {
@@ -479,219 +510,258 @@ onBeforeUnmount(() => {
         </div>
 
         <!-- if category selected -->
-        <!-- BRAND -->
-        <div class="form__brand form-flex">
-          <h2>Marque</h2>
+        <div class="form__details-ifcategory" v-if="category">
+          <!-- BRAND -->
+          <div class="form__brand form-flex">
+            <h2>Marque</h2>
 
-          <!-- Toggle dropdown -->
-          <div @click="dropdowns.brand = !dropdowns.brand">
-            <p v-if="!brand && !customBrand">Sélectionne une marque</p>
-            <p v-else-if="brand && !customBrand">{{ brand.attributes.displayName }}</p>
-            <p v-else-if="!brand && customBrand">{{ customBrand }}</p>
+            <!-- Toggle dropdown -->
+            <div @click="dropdowns.brand = !dropdowns.brand">
+              <p v-if="!brand && !customBrand">Sélectionne une marque</p>
+              <p v-else-if="brand && !customBrand">{{ brand.attributes.displayName }}</p>
+              <p v-else-if="!brand && customBrand">{{ customBrand }}</p>
 
-            <font-awesome-icon :icon="['fas', 'chevron-down']" v-if="!dropdowns.brand" />
-            <font-awesome-icon :icon="['fas', 'chevron-up']" v-if="dropdowns.brand" />
-          </div>
+              <font-awesome-icon :icon="['fas', 'chevron-down']" v-if="!dropdowns.brand" />
+              <font-awesome-icon :icon="['fas', 'chevron-up']" v-if="dropdowns.brand" />
+            </div>
 
-          <!-- Brand dropdown -->
-          <div v-if="availableBrand && dropdowns.brand">
-            <!-- search -->
-            <input
-              type="text"
-              name="searchBrand"
-              id="searchBrand"
-              placeholder="Trouver une marque"
-              v-model="searchBrand"
-            />
+            <!-- Brand dropdown -->
+            <div v-if="availableBrand && dropdowns.brand">
+              <!-- search -->
+              <input
+                type="text"
+                name="searchBrand"
+                id="searchBrand"
+                placeholder="Trouver une marque"
+                v-model="searchBrand"
+              />
 
-            <!-- results ------->
-            <div>
-              <ul class="form__brand-list">
-                <!-- by click -->
-                <div class="form__brand-click" v-if="!searchBrand">
-                  <!-- click label -->
-                  <span>Marques populaires</span>
-                  <!-- click list -->
-                  <li v-for="b in availableBrand" :key="b.id">
-                    <label
-                      >{{ b.attributes.displayName }}
+              <!-- results ------->
+              <div>
+                <ul class="form__brand-list">
+                  <!-- by click -->
+                  <div class="form__brand-click" v-if="!searchBrand">
+                    <!-- click label -->
+                    <span>Marques populaires</span>
+                    <!-- click list -->
+                    <li v-for="b in availableBrand" :key="b.id">
+                      <label
+                        >{{ b.attributes.displayName }}
+                        <input
+                          type="radio"
+                          name="brand"
+                          id="brand"
+                          v-model="brand"
+                          :value="b"
+                          @change="dropdowns.brand = false"
+                      /></label>
+                    </li>
+                  </div>
+
+                  <!-- by search -->
+                  <div class="form__brand-search" v-if="filteredBrand">
+                    <!-- search list -->
+                    <li v-for="b in filteredBrand" :key="b.id">
+                      <label>{{ b.attributes.displayName }}</label>
                       <input
                         type="radio"
-                        name="brand"
-                        id="brand"
+                        name="searchBrand"
+                        id="searchBrand"
                         v-model="brand"
                         :value="b"
-                        @change="dropdowns.brand = false"
-                    /></label>
-                  </li>
-                </div>
-
-                <!-- by search -->
-                <div class="form__brand-search" v-if="filteredBrand">
-                  <!-- search list -->
-                  <li v-for="b in filteredBrand" :key="b.id">
-                    <label>{{ b.attributes.displayName }}</label>
-                    <input
-                      type="radio"
-                      name="searchBrand"
-                      id="searchBrand"
-                      v-model="brand"
-                      :value="b"
-                      @change="
-                        () => {
-                          ;(dropdowns.brand = false), (customBrand = null)
-                        }
-                      "
-                    />
-                  </li>
-                  <!-- custom brand -->
-                  <div class="form__brand-search-custom">
-                    <p>Marque non disponible</p>
-                    <p>Utiliser "{{ searchBrand }}" comme marque</p>
-                    <input
-                      type="radio"
-                      name="customBrand"
-                      id="customBrand"
-                      v-model="customBrand"
-                      :value="searchBrand"
-                      @change="
-                        () => {
-                          ;(dropdowns.brand = false), (brand = null)
-                        }
-                      "
-                    />
+                        @change="
+                          () => {
+                            ;(dropdowns.brand = false), (customBrand = null)
+                          }
+                        "
+                      />
+                    </li>
+                    <!-- custom brand -->
+                    <div class="form__brand-search-custom">
+                      <p>Marque non disponible</p>
+                      <p>Utiliser "{{ searchBrand }}" comme marque</p>
+                      <input
+                        type="radio"
+                        name="customBrand"
+                        id="customBrand"
+                        v-model="customBrand"
+                        :value="searchBrand"
+                        @change="
+                          () => {
+                            ;(dropdowns.brand = false), (brand = null)
+                          }
+                        "
+                      />
+                    </div>
                   </div>
-                </div>
-              </ul>
+                </ul>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- SIZE -->
-        <div class="form__size form-flex">
-          <h2>Taille</h2>
+          <!-- SIZE -->
+          <div class="form__size form-flex">
+            <h2>Taille</h2>
 
-          <!-- Toggle dropdown -->
-          <div @click="dropdowns.size = !dropdowns.size">
-            <p>{{ size?.displayName || 'Sélectionne une taille' }}</p>
+            <!-- Toggle dropdown -->
+            <div @click="dropdowns.size = !dropdowns.size">
+              <p>{{ size?.displayName || 'Sélectionne une taille' }}</p>
 
-            <font-awesome-icon :icon="['fas', 'chevron-down']" v-if="!dropdowns.size" />
-            <font-awesome-icon :icon="['fas', 'chevron-up']" v-if="dropdowns.size" />
-          </div>
+              <font-awesome-icon :icon="['fas', 'chevron-down']" v-if="!dropdowns.size" />
+              <font-awesome-icon :icon="['fas', 'chevron-up']" v-if="dropdowns.size" />
+            </div>
 
-          <!-- Size dropdown -->
-          <!-- results -->
-          <div v-if="dropdowns.size && availableSizes">
-            <ul class="form__size_list">
-              <span>Choisis la taille qui correspond à l'étiquette de l'article</span>
-              <p>{{ availableSizes[0].displayCategoryName }}</p>
-
-              <li v-for="s in availableSizes" :key="s.id">
-                <label>
-                  <p>{{ s.displayName }}</p>
-                  <input
-                    type="radio"
-                    name="size"
-                    id="size"
-                    v-model="size"
-                    :value="s"
-                    @change="dropdowns.size = false"
-                  />
-                </label>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- CONDITION -->
-        <div class="form__condition form-flex">
-          <h2>État</h2>
-
-          <!-- Toggle dropdown -->
-          <div @click="dropdowns.condition = !dropdowns.condition">
-            <p>{{ condition?.name || 'Sélectionne un état' }}</p>
-
-            <font-awesome-icon :icon="['fas', 'chevron-down']" v-if="!dropdowns.condition" />
-            <font-awesome-icon :icon="['fas', 'chevron-up']" v-if="dropdowns.condition" />
-          </div>
-
-          <!-- Condtion dropdown -->
-          <!-- results -->
-          <div v-if="dropdowns.condition && availableConditions">
-            <ul class="form__condition-list">
-              <li v-for="(c, index) in availableConditions" :key="index">
-                <label>
-                  <p>{{ c.name }}</p>
-                  <p>{{ c.description }}</p>
-                  <input
-                    type="radio"
-                    name="condition"
-                    id="condition"
-                    v-model="condition"
-                    :value="c"
-                    @change="dropdowns.condition = false"
-                  />
-                </label>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- COLOR -->
-        <div class="form__color form-flex" ref="colorDropdownRef">
-          <h2>Couleur</h2>
-
-          <!-- Toggle dropdown -->
-          <div @click="dropdowns.colors = !dropdowns.colors">
-            <p>
-              {{ 'Sélectionne 2 couleurs maximum' }}
-            </p>
-
-            <font-awesome-icon :icon="['fas', 'chevron-down']" v-if="!dropdowns.colors" />
-            <font-awesome-icon :icon="['fas', 'chevron-up']" v-if="dropdowns.colors" />
-          </div>
-
-          <!-- Color dropdown -->
-          <div v-if="availableColors && dropdowns.colors">
+            <!-- Size dropdown -->
             <!-- results -->
-            <div>
-              <ul class="form__colors-list">
-                <li v-for="c in availableColors" :key="c.id">
+            <div v-if="dropdowns.size && availableSizes">
+              <ul class="form__size_list">
+                <span>Choisis la taille qui correspond à l'étiquette de l'article</span>
+                <p>{{ availableSizes[0].displayCategoryName }}</p>
+
+                <li v-for="s in availableSizes" :key="s.id">
                   <label>
-                    <div
-                      class="form__colors-circle"
-                      :style="
-                        c.attributes.hex
-                          ? { backgroundColor: c.attributes.hex }
-                          : { backgroundColor: c.attributes.style }
-                      "
-                    ></div>
-                    <p>{{ c.attributes.displayName }}</p>
+                    <p>{{ s.displayName }}</p>
                     <input
-                      type="checkbox"
-                      name="color"
-                      id="color"
-                      v-model="color"
-                      :value="c"
-                      :disabled="isDisabled(c)"
-                  /></label>
+                      type="radio"
+                      name="size"
+                      id="size"
+                      v-model="size"
+                      :value="s"
+                      @change="dropdowns.size = false"
+                    />
+                  </label>
                 </li>
               </ul>
             </div>
           </div>
-        </div>
 
-        <!-- MATERIAL -->
-        <div class="form__material form-flex">
-          <h2>Matière (recommandé)</h2>
-          <input type="text" name="price" id="price" v-model="material" placeholder="" />
+          <!-- CONDITION -->
+          <div class="form__condition form-flex">
+            <h2>État</h2>
+
+            <!-- Toggle dropdown -->
+            <div @click="dropdowns.condition = !dropdowns.condition">
+              <p>{{ condition?.name || 'Sélectionne un état' }}</p>
+
+              <font-awesome-icon :icon="['fas', 'chevron-down']" v-if="!dropdowns.condition" />
+              <font-awesome-icon :icon="['fas', 'chevron-up']" v-if="dropdowns.condition" />
+            </div>
+
+            <!-- Condtion dropdown -->
+            <!-- results -->
+            <div v-if="dropdowns.condition && availableConditions">
+              <ul class="form__condition-list">
+                <li v-for="(c, index) in availableConditions" :key="index">
+                  <label>
+                    <p>{{ c.name }}</p>
+                    <p>{{ c.description }}</p>
+                    <input
+                      type="radio"
+                      name="condition"
+                      id="condition"
+                      v-model="condition"
+                      :value="c"
+                      @change="dropdowns.condition = false"
+                    />
+                  </label>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- COLOR -->
+          <div class="form__color form-flex" ref="colorsDropdownRef">
+            <h2>Couleur</h2>
+
+            <!-- Toggle dropdown -->
+            <div @click="dropdowns.colors = !dropdowns.colors">
+              <p v-if="color.length === 0">
+                {{ 'Sélectionne 2 couleurs maximum' }}
+              </p>
+              <p v-if="color" v-for="c in color" :key="c.id">
+                {{ c.attributes.displayName }}
+              </p>
+
+              <font-awesome-icon :icon="['fas', 'chevron-down']" v-if="!dropdowns.colors" />
+              <font-awesome-icon :icon="['fas', 'chevron-up']" v-if="dropdowns.colors" />
+            </div>
+
+            <!-- Color dropdown -->
+            <div v-if="availableColors && dropdowns.colors">
+              <!-- results -->
+              <div>
+                <ul class="form__colors-list">
+                  <li v-for="c in availableColors" :key="c.id">
+                    <label>
+                      <div
+                        class="form__colors-circle"
+                        :style="
+                          c.attributes.hex
+                            ? { backgroundColor: c.attributes.hex }
+                            : { backgroundColor: c.attributes.style }
+                        "
+                      ></div>
+                      <p>{{ c.attributes.displayName }}</p>
+                      <input
+                        type="checkbox"
+                        name="color"
+                        id="color"
+                        v-model="color"
+                        :value="c"
+                        :disabled="isDisabledColor(c)"
+                    /></label>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- MATERIAL -->
+          <div class="form__material form-flex" ref="materialsDropdownRef">
+            <h2>Matière (recommandé)</h2>
+
+            <!-- Toggle dropdown -->
+            <div @click="dropdowns.materials = !dropdowns.materials">
+              <p v-for="m in material" :key="m.id" v-if="material">
+                {{ m.attributes.displayName }}
+              </p>
+              <p v-if="material.length === 0">
+                {{ `Séléctionne jusqu'à 3 options` }}
+              </p>
+
+              <font-awesome-icon :icon="['fas', 'chevron-down']" v-if="!dropdowns.materials" />
+              <font-awesome-icon :icon="['fas', 'chevron-up']" v-if="dropdowns.materials" />
+            </div>
+
+            <!-- Material dropdown -->
+            <div v-if="availableMaterials && dropdowns.materials">
+              <!-- results -->
+              <div>
+                <ul class="form__materials-list">
+                  <li v-for="m in availableMaterials" :key="m.id">
+                    <label>
+                      <p>{{ m.attributes.displayName }}</p>
+                      <input
+                        type="checkbox"
+                        name="material"
+                        id="material"
+                        v-model="material"
+                        :value="m"
+                        :disabled="isDisabledMaterial(m)"
+                      />
+                    </label>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
       <!-- PRICE -->
       <div class="form-price form-flex">
         <h2>Prix</h2>
-        <input type="number" name="price" id="price" />
+        <input type="number" name="price" id="price" v-model="price" placeholder="0,00€" />
       </div>
     </form>
   </div>
