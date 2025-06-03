@@ -47,7 +47,17 @@ const price = ref([])
 
 // 2. Message and Error
 const isSubmitting = ref(false)
-const errorMessage = ref('')
+const errorMessage = ref({
+  pictures: null,
+  title: null,
+  description: null,
+  category: null,
+  brand: null,
+  size: null,
+  condition: null,
+  colors: null,
+  price: null,
+})
 
 // 3. Dropdown state
 const dropdowns = ref({
@@ -123,18 +133,27 @@ const triggerSelectFile = () => {
 }
 
 const selectFile = (event) => {
-  errorMessage.value = ''
+  errorMessage.value.pictures = ''
 
   if (event.target.files.length <= 20) {
     pictures.value = event.target.files
     // console.log('pictures ---->', pictures.value)
   } else if (event.target.files.length > 20) {
-    errorMessage.value = '20 photos maximum'
+    errorMessage.value.pictures = '20 photos maximum'
     pictures.value = null
   } else {
-    errorMessage.value = 'Un problème est survenu'
+    errorMessage.value.pictures = 'Un problème est survenu'
   }
 }
+
+const urlsListPreview = computed(() => {
+  const tab = []
+
+  for (const picture of pictures.value) {
+    tab.push(URL.createObjectURL(picture))
+  }
+  return tab
+})
 
 // 2. Category Input dropdown
 const selectedCategory = (cat) => {
@@ -364,8 +383,46 @@ const fetchMaterials = async () => {
 // 6. Submission formData
 const handleSubmit = async () => {
   isSubmitting.value = true
-  errorMessage.value = ''
+  Object.keys(errorMessage.value).forEach((key) => {
+    errorMessage.value[key] = ''
+  })
 
+  if (!pictures.value || pictures.value?.length === 0) {
+    errorMessage.value.pictures = 'Ajoute au moins une photo'
+  }
+  if (!title.value) {
+    errorMessage.value.title = 'Titre : doit être renseigné'
+  }
+  if (!category.value) {
+    errorMessage.value.category = 'Catégorie : doit être renseigné'
+  }
+  if (!brand.value) {
+    errorMessage.value.brand = 'Marque : doit être renseigné'
+  }
+  if (!size.value) {
+    errorMessage.value.size = 'Taille : doit être renseigné'
+  }
+  if (!condition.value) {
+    errorMessage.value.condition = 'État : doit être renseigné'
+  }
+  if (color.value.length === 0 || !color.value) {
+    errorMessage.value.colors = 'Couleur : doit être renseigné'
+  }
+  if (!price.value || price.value < 1) {
+    errorMessage.value.price = 'Prix : doit être supérieur ou égal à 1.0'
+  }
+
+  if (
+    !pictures.value ||
+    !title.value ||
+    !category.value ||
+    !size.value ||
+    !condition.value ||
+    !color.value ||
+    !price.value
+  ) {
+    return
+  }
   const formData = new FormData()
 
   for (const picture of pictures.value) {
@@ -409,6 +466,7 @@ const handleSubmit = async () => {
 
   isSubmitting.value = false
 }
+
 // -----------------------------------------
 // WATCHERS
 // -----------------------------------------
@@ -441,7 +499,7 @@ onBeforeUnmount(() => {
     <h1>Vends ton article</h1>
 
     <!-- FORMULAIRE -------------------->
-    <form class="form" @submit.prevent="handleSubmit">
+    <form class="form" @submit.prevent="handleSubmit" v-if="!isSubmitting">
       <!-- PHOTO ------------->
       <div class="form__photo">
         <label>
@@ -461,7 +519,12 @@ onBeforeUnmount(() => {
         </label>
 
         <p v-if="pictures">{{ pictures }}</p>
-        <p v-if="errorMessage">{{ errorMessage }}</p>
+
+        <div v-if="pictures">
+          <img :src="url" v-for="url in urlsListPreview" />
+        </div>
+
+        <p v-if="errorMessage.pictures" class="form__error-message">{{ errorMessage.pictures }}</p>
       </div>
 
       <!-- TITLE ------------->
@@ -474,6 +537,7 @@ onBeforeUnmount(() => {
           v-model="title"
           placeholder="ex : Chemise Sézanne verte"
         />
+        <p v-if="errorMessage.title" class="form__error-message">{{ errorMessage.title }}</p>
       </div>
 
       <!-- DESCRIPTION ------------->
@@ -485,6 +549,9 @@ onBeforeUnmount(() => {
           v-model="description"
           placeholder="ex : porté quelques fois, taille correctement"
         ></textarea>
+        <p v-if="errorMessage.description" class="form__error-message">
+          {{ errorMessage.description }}
+        </p>
       </div>
 
       <!-- DETAILS ------------->
@@ -560,6 +627,10 @@ onBeforeUnmount(() => {
               </ul>
             </div>
           </div>
+
+          <p v-if="errorMessage.category" class="form__error-message">
+            {{ errorMessage.category }}
+          </p>
         </div>
 
         <!-- if category selected -->
@@ -650,6 +721,7 @@ onBeforeUnmount(() => {
                 </ul>
               </div>
             </div>
+            <p v-if="errorMessage.brand" class="form__error-message">{{ errorMessage.brand }}</p>
           </div>
 
           <!-- SIZE -->
@@ -686,6 +758,7 @@ onBeforeUnmount(() => {
                 </li>
               </ul>
             </div>
+            <p v-if="errorMessage.size" class="form__error-message">{{ errorMessage.size }}</p>
           </div>
 
           <!-- CONDITION -->
@@ -720,6 +793,9 @@ onBeforeUnmount(() => {
                 </li>
               </ul>
             </div>
+            <p v-if="errorMessage.condition" class="form__error-message">
+              {{ errorMessage.condition }}
+            </p>
           </div>
 
           <!-- COLOR -->
@@ -767,6 +843,7 @@ onBeforeUnmount(() => {
                 </ul>
               </div>
             </div>
+            <p v-if="errorMessage.colors" class="form__error-message">{{ errorMessage.colors }}</p>
           </div>
 
           <!-- MATERIAL -->
@@ -815,11 +892,16 @@ onBeforeUnmount(() => {
       <div class="form-price form-flex">
         <h2>Prix</h2>
         <input type="number" name="price" id="price" v-model="price" placeholder="0,00€" />
+        <p v-if="errorMessage.price" class="form__error-message">{{ errorMessage.price }}</p>
       </div>
 
       <!-- BUTTON SUBMIT FORM -->
       <button>Ajouter</button>
     </form>
+
+    <div v-else-if="isSubmitting">
+      <p>En cours de chargement</p>
+    </div>
   </div>
 </template>
 
@@ -838,5 +920,9 @@ input[type='file'] {
   height: 20px;
   border: 1px solid black;
   border-radius: 50px;
+}
+
+.form__error-message {
+  color: red;
 }
 </style>
