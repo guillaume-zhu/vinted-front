@@ -1,8 +1,4 @@
 <script setup>
-// Créer tout les inputs de la page
-// Créer les refs et les attribuer aux input en v-model
-// Ajouter submit form fonction pour envoyer la requête du formulaire
-
 //// FORMDATA
 // isSubmitting + error
 // créer formdata vide
@@ -13,19 +9,27 @@
 // router.push a l'offre créée
 
 //// A faire next
-// Prix input + soumission formulaire formdata
+// soumission formulaire formdata + boutons
 
 //// A ne pas oublier
 // Ajouter display en fonction details si category a été choisi
 // Verification lors de la soumission du formulaire que certains inputs sont bien remplis
+// Gestion errorMessage
 
-import { ref, computed, onMounted, watch, onBeforeUnmount } from 'vue'
+// Problemes
+// no owner + no material + no colors
+// fix no search category
+
+import { ref, computed, onMounted, watch, onBeforeUnmount, inject } from 'vue'
 import axios from 'axios'
 import { debounce } from 'lodash'
 
 // -----------------------------------------
 // BASE VARIABLES
 // -----------------------------------------
+
+// 1. Import variables
+const GlobalStore = inject('GlobalStore')
 
 // 1. Form refs
 const pictures = ref(null)
@@ -39,6 +43,7 @@ const size = ref(null)
 const condition = ref(null)
 const color = ref([])
 const material = ref([])
+const price = ref([])
 
 // 2. Message and Error
 const isSubmitting = ref(false)
@@ -356,6 +361,54 @@ const fetchMaterials = async () => {
   }
 }
 
+// 6. Submission formData
+const handleSubmit = async () => {
+  isSubmitting.value = true
+  errorMessage.value = ''
+
+  const formData = new FormData()
+
+  for (const picture of pictures.value) {
+    formData.append('files.images', picture)
+  }
+
+  const offerData = {
+    name: title.value,
+    description: description.value,
+    category: category.value.id,
+    brand: brand.value.id,
+    customBrand: customBrand.value || null,
+    size: size.value.id,
+    condition: condition.value.name,
+    colors: {
+      connect: color.value.map((c) => ({ id: c.id })),
+    },
+    materials: {
+      connect: material.value.map((m) => ({ id: m.id })),
+    },
+    price: price.value,
+    owner: GlobalStore.userInfoCookie.value.id,
+  }
+
+  formData.append('data', JSON.stringify(offerData))
+
+  for (const [key, value] of formData.entries()) {
+    console.log(`${key}:`, value)
+  }
+
+  try {
+    const response = await axios.post('http://localhost:1337/api/offers?populate=*', formData, {
+      headers: { Authorization: 'Bearer ' + GlobalStore.userInfoCookie.value.token },
+      // 'Content-Type': 'multipart/form-data',
+    })
+
+    console.log('response --->', response.data)
+  } catch (error) {
+    console.log('Erreur lors de la soumission du formulaire', error)
+  }
+
+  isSubmitting.value = false
+}
 // -----------------------------------------
 // WATCHERS
 // -----------------------------------------
@@ -388,7 +441,7 @@ onBeforeUnmount(() => {
     <h1>Vends ton article</h1>
 
     <!-- FORMULAIRE -------------------->
-    <form class="form">
+    <form class="form" @submit.prevent="handleSubmit">
       <!-- PHOTO ------------->
       <div class="form__photo">
         <label>
@@ -763,6 +816,9 @@ onBeforeUnmount(() => {
         <h2>Prix</h2>
         <input type="number" name="price" id="price" v-model="price" placeholder="0,00€" />
       </div>
+
+      <!-- BUTTON SUBMIT FORM -->
+      <button>Ajouter</button>
     </form>
   </div>
 </template>
