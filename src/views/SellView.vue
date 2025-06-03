@@ -23,6 +23,7 @@
 import { ref, computed, onMounted, watch, onBeforeUnmount, inject } from 'vue'
 import axios from 'axios'
 import { debounce } from 'lodash'
+import { useRouter } from 'vue-router'
 
 // -----------------------------------------
 // BASE VARIABLES
@@ -30,6 +31,7 @@ import { debounce } from 'lodash'
 
 // 1. Import variables
 const GlobalStore = inject('GlobalStore')
+const router = useRouter()
 
 // 1. Form refs
 const pictures = ref(null)
@@ -457,9 +459,9 @@ const handleSubmit = async () => {
 
   formData.append('data', JSON.stringify(offerData))
 
-  for (const [key, value] of formData.entries()) {
-    console.log(`${key}:`, value)
-  }
+  // for (const [key, value] of formData.entries()) {
+  //   console.log(`${key}:`, value)
+  // }
 
   try {
     const response = await axios.post('http://localhost:1337/api/offers?populate=*', formData, {
@@ -467,7 +469,10 @@ const handleSubmit = async () => {
       // 'Content-Type': 'multipart/form-data',
     })
 
-    console.log('response --->', response.data)
+    const newOffer = response.data.data
+    console.log('response newOffer--->', newOffer)
+
+    router.push({ name: 'product', params: { id: newOffer.id } })
   } catch (error) {
     console.log('Erreur lors de la soumission du formulaire', error)
   }
