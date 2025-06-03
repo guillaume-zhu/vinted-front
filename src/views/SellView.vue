@@ -349,7 +349,11 @@ const fetchSizes = async (categoryName) => {
     )
 
     availableSizes.value = response.data
-    console.log('availableSizes ---->', availableSizes.value)
+    // console.log('availableSizes ---->', availableSizes.value)
+
+    if (availableSizes.value.length === 0) {
+      size.value = null
+    }
   } catch (error) {
     console.log('Erreur lors de la requete pour afficher les sizes')
   }
@@ -399,7 +403,7 @@ const handleSubmit = async () => {
   if (!brand.value) {
     errorMessage.value.brand = 'Marque : doit être renseigné'
   }
-  if (!size.value) {
+  if (!size.value && availableSizes.value.length > 0) {
     errorMessage.value.size = 'Taille : doit être renseigné'
   }
   if (!condition.value) {
@@ -416,11 +420,12 @@ const handleSubmit = async () => {
     !pictures.value ||
     !title.value ||
     !category.value ||
-    !size.value ||
+    (!size.value && availableSizes.value.length > 0) ||
     !condition.value ||
     !color.value ||
     !price.value
   ) {
+    isSubmitting.value = false
     return
   }
   const formData = new FormData()
@@ -435,7 +440,7 @@ const handleSubmit = async () => {
     category: category.value.id,
     brand: brand.value.id,
     customBrand: customBrand.value || null,
-    size: size.value.id,
+    size: size.value?.id || null,
     condition: condition.value.name,
     colors: {
       connect: color.value.map((c) => ({ id: c.id })),
@@ -725,7 +730,7 @@ onBeforeUnmount(() => {
           </div>
 
           <!-- SIZE -->
-          <div class="form__size form-flex">
+          <div class="form__size form-flex" v-if="availableSizes.length > 0">
             <h2>Taille</h2>
 
             <!-- Toggle dropdown -->
