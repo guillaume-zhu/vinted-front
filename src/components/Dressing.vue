@@ -36,7 +36,7 @@ const scrollRight = () => {
 </script>
 
 <template>
-  <div class="container offers__dressing">
+  <div class="container offers__dressing" v-if="dressingInfo">
     <div class="offers__dressing-header">
       <RouterLink :to="{ name: 'profile', params: { id: dressingInfo.id } }">
         <div class="offers__dressing-user-info">
