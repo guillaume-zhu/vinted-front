@@ -19,6 +19,7 @@ import {
   faMapMarkerAlt,
   faPen,
   faPlus,
+  faSearch,
   faShieldAlt,
   faTimes,
 } from '@fortawesome/free-solid-svg-icons'
@@ -45,6 +46,7 @@ library.add(
   faChevronUp,
   faPlus,
   faArrowLeft,
+  faSearch,
 )
 
 const app = createApp(App).component('font-awesome-icon', FontAwesomeIcon)

@@ -298,12 +298,15 @@ const filterCategories = async (textInput) => {
     getAllBreadCrumb(noChildrenCategories.value)
     // console.log('getBreadCrumb --->', getBreadCrumb(noChildrenCategories.value[0]))
 
-    currentCategories.value = categoriesWithBreadCrumb.value
+    if (textInput.length === 0) {
+      currentCategories.value = firstCategories.value
+    } else if (noChildrenCategories.value.length === 0) {
+      currentCategories.value = []
+    } else {
+      currentCategories.value = categoriesWithBreadCrumb.value
+    }
   } catch (error) {
     console.log('Erreur lors de la requete pour afficher les categories par search', error)
-  }
-  if (textInput.length === 0) {
-    currentCategories.value = firstCategories.value
   }
 }
 
@@ -574,7 +577,7 @@ onBeforeUnmount(() => {
           </div>
 
           <!-- Categorie dropdown -->
-          <div class="container" v-if="dropdowns.category && currentCategories.length">
+          <div class="container" v-if="dropdowns.category">
             <!-- search -->
             <input
               type="text"
@@ -583,12 +586,17 @@ onBeforeUnmount(() => {
               placeholder="Trouver une catégorie"
               v-model="searchCategory"
             />
+            <font-awesome-icon
+              :icon="['fas', 'times']"
+              v-if="searchCategory"
+              @click="searchCategory = ''"
+            />
 
             <!-- results ------->
             <div>
               <ul class="form__category-list">
                 <!-- by click -->
-                <div class="form__category-click" v-if="!currentCategories[0].breadCrumb">
+                <div class="form__category-click" v-if="!searchCategory">
                   <!-- click label -->
                   <div class="form__category-click-header" v-if="selectedPath.length > 0">
                     <font-awesome-icon :icon="['fas', 'arrow-left']" @click="backCategory()" />
@@ -608,7 +616,10 @@ onBeforeUnmount(() => {
                 </div>
 
                 <!-- by search -->
-                <div class="form__category-search" v-else-if="currentCategories[0].breadCrumb">
+                <div
+                  class="form__category-search"
+                  v-else-if="currentCategories[0]?.breadCrumb && currentCategories.length"
+                >
                   <!-- search list -->
                   <li
                     class="form__category-search-item"
@@ -628,6 +639,13 @@ onBeforeUnmount(() => {
                       />
                     </label>
                   </li>
+                </div>
+
+                <!-- if not found -->
+                <div v-else class="form__category-no-result">
+                  <font-awesome-icon :icon="['fas', 'search']" />
+                  <h1>Aucune catégorie trouvée</h1>
+                  <p>Aucun article ne correspond à ta recherche. Essaie avec un autre mot-clé.</p>
                 </div>
               </ul>
             </div>
