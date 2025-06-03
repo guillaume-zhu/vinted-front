@@ -54,7 +54,7 @@ const scrollRight = () => {
       <div class="offers__dressing-card" v-for="offer in dressingInfo.offers" :key="offer.id">
         <RouterLink :to="{ name: 'product', params: { id: offer.id } }">
           <img class="offers__dressing-card-image" :src="offer.images[0].url" alt="" />
-          <p>{{ offer.brand.displayName }}</p>
+          <p v-if="offer.brand">{{ offer.brand.displayName }}</p>
           <p v-if="offer.size">{{ offer.size.displayName }}</p>
           <p>{{ offer.price.toFixed(2) }} €</p>
           <p>{{ (offer.price + offer.price * (9.38 / 100)).toFixed(2) }} €</p>
