@@ -79,8 +79,6 @@ const logOut = () => {
 import userProfileImg from '@/assets/img/user-profile.webp'
 
 const avatarUrl = computed(() => {
-  console.log('Mise à jour avatarUrl détectée') // Vérifie si ça s'affiche dans la console
-
   // Si cookie existe et contient avatarUrl
   if (userInfoCookie.value && userInfoCookie.value.avatarUrl) {
     return userInfoCookie.value.avatarUrl

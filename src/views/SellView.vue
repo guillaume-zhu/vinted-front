@@ -1,25 +1,4 @@
 <script setup>
-//// FORMDATA
-// isSubmitting + error
-// créer formdata vide
-// append les images au formdata en bouclant + if hasOwnProperty
-// stringifier les autres infos
-// lancer la requete avec clé image + clé data avec stringified infos + authorization
-// ajouter prévisualisation avec un computed et URL générer + boucler + if hasOwnProperty
-// router.push a l'offre créée
-
-//// A faire next
-// soumission formulaire formdata + boutons
-
-//// A ne pas oublier
-// Ajouter display en fonction details si category a été choisi
-// Verification lors de la soumission du formulaire que certains inputs sont bien remplis
-// Gestion errorMessage
-
-// Problemes
-// no owner + no material + no colors
-// fix no search category
-
 import { ref, computed, onMounted, watch, onBeforeUnmount, inject } from 'vue'
 import axios from 'axios'
 import { debounce } from 'lodash'
@@ -139,7 +118,6 @@ const selectFile = (event) => {
 
   if (event.target.files.length <= 20) {
     pictures.value = event.target.files
-    // console.log('pictures ---->', pictures.value)
   } else if (event.target.files.length > 20) {
     errorMessage.value.pictures = '20 photos maximum'
     pictures.value = null
@@ -165,19 +143,11 @@ const selectedCategory = (cat) => {
 
   currentCategories.value = Array.isArray(enfants) ? enfants : []
 
-  // console.log(
-  //   'Chemin actuel : selectedPath ---->',
-  //   selectedPath.value,
-  //   ' | Prochain niveau : currentCategories ---->',
-  //   currentCategories.value,
-  // )
-
   if (currentCategories.value.length === 0) {
     category.value = cat
     currentCategories.value = firstCategories.value
     dropdowns.value.category = false
 
-    // console.log('Category value end ---->', category.value)
     fetchSizes(category.value.attributes.name)
   }
 
@@ -228,12 +198,9 @@ const getAllBreadCrumb = (array) => {
   for (const categorie of array) {
     breadCrumbArray.value.push(getBreadCrumb(categorie))
   }
-  // console.log('breadCrumbArray ---->', breadCrumbArray.value)
   categoriesWithBreadCrumb.value = noChildrenCategories.value.map((cat, index) => {
     return { id: cat.id, attributes: cat.attributes, breadCrumb: breadCrumbArray.value[index] }
   })
-
-  // console.log('categoriesWithBreadCrumb ---->', categoriesWithBreadCrumb.value)
 }
 
 // 3. Color Input dropdown
@@ -278,7 +245,6 @@ const fetchLevel1 = async () => {
 
     firstCategories.value = response.data.data
     currentCategories.value = firstCategories.value
-    // console.log('Catégories lvl1 chargée ---->', currentCategories.value)
   } catch (error) {
     console.log('Erreur fetchLevel1', error)
   }
@@ -290,15 +256,12 @@ const filterCategories = async (textInput) => {
       `http://localhost:1337/api/categories/?filters[displayName][$containsi]=${textInput}&[populate[0]=parent&populate[1]=parent.parent&populate[2]=parent.parent.parent&populate[3]=parent.parent.parent.parent&populate[4]=parent.parent.parent.parent.parent&populate[5]=children&pagination[pageSize]=200`,
     )
     filteredCategories.value = response.data.data
-    // console.log('Categories filtrées ---->', filteredCategories.value)
 
     noChildrenCategories.value = filteredCategories.value.filter(
       (cat) => cat.attributes.children.data.length === 0,
     )
-    // console.log('No child categories ---->', noChildrenCategories.value)
 
     getAllBreadCrumb(noChildrenCategories.value)
-    // console.log('getBreadCrumb --->', getBreadCrumb(noChildrenCategories.value[0]))
 
     if (textInput.length === 0) {
       currentCategories.value = firstCategories.value
@@ -324,7 +287,6 @@ const fetchPopularBrands = async () => {
     )
 
     availableBrand.value = response.data.data
-    console.log('availableBrand ---->', availableBrand.value)
   } catch (error) {
     console.log('Erreur lors de la requete pour afficher des marques populaires')
   }
@@ -336,7 +298,6 @@ const filterBrands = async (textInput) => {
       `http://localhost:1337/api/brands?filters[displayName][$containsi]=${textInput}&pagination[pageSize]=100`,
     )
     filteredBrand.value = response.data.data
-    console.log('FilteredBrand ---->', filteredBrand.value)
   } catch (error) {
     console.log('Erreur lors de la requete pour afficher des marques par search', error)
   }
@@ -354,7 +315,6 @@ const fetchSizes = async (categoryName) => {
     )
 
     availableSizes.value = response.data
-    // console.log('availableSizes ---->', availableSizes.value)
 
     if (availableSizes.value.length === 0) {
       size.value = null
@@ -370,7 +330,6 @@ const fetchColors = async () => {
     const response = await axios.get('http://localhost:1337/api/colors?pagination[pageSize]=50')
 
     availableColors.value = response.data.data
-    console.log('availableColors ---->', availableColors.value)
   } catch (error) {
     console.log(('Erreur lors du chargement des couleurs', error))
   }
@@ -459,6 +418,7 @@ const handleSubmit = async () => {
 
   formData.append('data', JSON.stringify(offerData))
 
+  // log for forData entries
   // for (const [key, value] of formData.entries()) {
   //   console.log(`${key}:`, value)
   // }

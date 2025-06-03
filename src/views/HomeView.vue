@@ -84,7 +84,6 @@ onMounted(async () => {
       `http://localhost:1337/api/offers?pagination[pageSize]=1`,
     )
     totalOffer = responseTotalOffer.data.meta.pagination.total
-    console.log('totalOffer --->', totalOffer)
 
     /////// récupérer tout les id avec une requete pour pageSize = total offres
     const responseAllOffersId = await axios.get(
@@ -96,16 +95,11 @@ onMounted(async () => {
 
     ///// Mélanger le tableau d'id aléatoirement
     randomizedAllOffersId.value = _.shuffle(allOffersId.value)
-    console.log(`randomizedAllOffersId ---->`, randomizedAllOffersId.value)
 
     /////// Charger 80 premières offres grace au tableau d'id
     //// Couper le tableau en partie de 80
-    console.log(
-      ` randomizedAllOffersId cuted in 80 ---->`,
-      cutArray(randomizedAllOffersId.value, 80),
-    )
+
     const first80OffersId = cutArray(randomizedAllOffersId.value, 80)[0]
-    console.log('first80OffersId ---->', first80OffersId)
 
     //// requête pour afficher les 80 premières offres en aléatoire
     const { data } = await axios.get(
@@ -116,30 +110,23 @@ onMounted(async () => {
         },
       },
     )
-    console.log('data offers ---->', data)
 
     // Attribution des lines d'offres découpées
     firstOffersLine.value = data.data.slice(0, 10)
-    console.log('firstOffersLine ---->', firstOffersLine.value)
 
     secondOffersLine.value = data.data.slice(10, 35)
-    console.log('secondOffersLine ---->', secondOffersLine.value)
 
     thirdOffersLine.value = data.data.slice(35, 60)
-    console.log('thirdOffersLine ---->', thirdOffersLine.value)
 
     fourthOffersLine.value = data.data.slice(60)
-    console.log('fourthOffersLine ---->', fourthOffersLine.value)
 
     ///////// RÉCUPÉRER UN DRESSING ALÉATOIRE
     // Récupérer tout les id des utilisateurs dans un tableau
     const responseAllOwnersId = await axios.get('http://localhost:1337/api/users?[fields][0]=id')
     allOwnersId.value = responseAllOwnersId.data
-    console.log('allOwnersId ---->', allOwnersId.value)
 
     // Mélanger ce tableau d'id
     randomizedAllOwnersId.value = _.shuffle(allOwnersId.value)
-    console.log('randomizedAllOwnersId ---->', randomizedAllOwnersId.value)
 
     // Copie de la liste des tableaux d'id utilisateurs pour la transformer en file d'attente mutable
     const ownersQueue = [...randomizedAllOwnersId.value]
@@ -148,10 +135,6 @@ onMounted(async () => {
     firstDressingLine.value = await searchDressingWithOffers(ownersQueue)
     secondDressingLine.value = await searchDressingWithOffers(ownersQueue)
     thirdDressingLine.value = await searchDressingWithOffers(ownersQueue)
-
-    console.log('firstDressingLine ---->', firstDressingLine.value)
-    console.log('secondDressingLine ---->', secondDressingLine.value)
-    console.log('thirdDressingLine ---->', thirdDressingLine.value)
   } catch (error) {
     errorMessage.value = error
   } finally {
@@ -173,7 +156,6 @@ const loadMoreOffer = async () => {
   )
 
   offersListPlus.value = responseOfferPlus.data.data
-  console.log('offersListPlus ---->', offersListPlus.value)
 }
 </script>
 
