@@ -115,10 +115,11 @@ const triggerSelectFile = () => {
 
 const selectFile = (event) => {
   errorMessage.value.pictures = ''
+  const files = Array.from(event.target.files)
 
-  if (event.target.files.length <= 20) {
-    pictures.value = event.target.files
-  } else if (event.target.files.length > 20) {
+  if (files.length <= 20) {
+    pictures.value = files
+  } else if (files.length > 20) {
     errorMessage.value.pictures = '20 photos maximum'
     pictures.value = null
   } else {
@@ -134,6 +135,10 @@ const urlsListPreview = computed(() => {
   }
   return tab
 })
+
+const removeAddedImg = (index) => {
+  pictures.value.splice(index, 1)
+}
 
 // 2. Category Input dropdown
 const selectedCategory = (cat) => {
@@ -463,7 +468,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  document.addEventListener('click', handleClickOutside)
+  document.removeEventListener('click', handleClickOutside)
 })
 </script>
 
@@ -491,10 +496,9 @@ onBeforeUnmount(() => {
           </button>
         </label>
 
-        <p v-if="pictures">{{ pictures }}</p>
-
-        <div v-if="pictures">
-          <img :src="url" v-for="url in urlsListPreview" />
+        <div v-if="pictures?.length > 0" v-for="(url, index) in urlsListPreview">
+          <img :src="url" />
+          <font-awesome-icon :icon="['fas', 'times']" @click="removeAddedImg(index)" />
         </div>
 
         <p v-if="errorMessage.pictures" class="form__error-message">{{ errorMessage.pictures }}</p>
@@ -843,7 +847,7 @@ onBeforeUnmount(() => {
               <p v-for="m in material" :key="m.id" v-if="material">
                 {{ m.attributes.displayName }}
               </p>
-              <p v-if="material.length === 0">
+              <p v-if="material?.length === 0">
                 {{ `Séléctionne jusqu'à 3 options` }}
               </p>
 
