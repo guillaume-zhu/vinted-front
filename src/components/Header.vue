@@ -108,9 +108,7 @@ onUnmounted(() => {
           </div>
         </transition>
 
-        <button>
-          <a href="">Vends tes articles</a>
-        </button>
+        <RouterLink :to="{ name: 'sell' }"> <button>Vends tes articles</button></RouterLink>
 
         <div class="header-main__help"><span>?</span></div>
       </div>
