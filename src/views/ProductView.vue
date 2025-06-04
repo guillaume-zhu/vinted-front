@@ -1,21 +1,27 @@
 <script setup>
 import { ref, onMounted, computed, inject } from 'vue'
 import axios from 'axios'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 
 import Breadcrumb from '@/components/Breadcrumb.vue'
 import OfferGallery from '@/components/OfferGallery.vue'
 import OfferCard from '@/components/OfferCard.vue'
 import PricePopup from '@/components/PricePopup.vue'
 
-// Main variables
-const GlobalStore = inject('GlobalStore')
-console.log('Global store userInfoCookie.id ---->', GlobalStore.userInfoCookie.value.id)
+import fallbackAvatar from '@/assets/img/user-profile.webp'
 
+// -----------------------------------------
+// BASE VARIABLES
+// -----------------------------------------
+
+// 1. Import variables
+const GlobalStore = inject('GlobalStore')
 const props = defineProps({
   id: { type: String },
 })
+const router = useRouter()
 
+// 2. Offer and category
 const offerInfo = ref(null)
 const isLoading = ref(false)
 const category = ref(null)
@@ -27,7 +33,7 @@ const ownerOffers = ref([])
 const ownerOffersFiltered = ref([])
 const sliceOffers = ref(100)
 
-// Variable pour le popup price details
+// 3. Popup price detail
 const showPricePopup = ref(false)
 const selectedOfferForPopup = ref(null)
 
@@ -41,49 +47,14 @@ const closePricePopup = () => {
   selectedOfferForPopup.value = null
 }
 
-////// REQUETE POUR RÉCUPÉRER offerInfo + category BREADCRUMB + dressing
-onMounted(async () => {
-  isLoading.value = true
+// 4. Popup delete
+const showDeletePopup = ref(false)
 
-  try {
-    // Récupérer offerInfo
-    const { data } = await axios.get(`http://localhost:1337/api/offers/${props.id}?populate=*`)
-    console.log('offerInfo ---->', data.data)
+// -----------------------------------------
+// BASE FUNCTIONS
+// -----------------------------------------
 
-    offerInfo.value = data.data
-    category.value = offerInfo.value.attributes.category.data
-
-    offerPictures.value = offerInfo.value.attributes.images.data
-    ownerId.value = offerInfo.value.attributes.owner.data.id
-    // console.log('offerPictures', offerPictures.value)
-
-    // Récupérer category breadcrumb
-    const responseCategory = await axios.get(
-      `http://localhost:1337/api/categories/${category.value.id}?populate[0]=parent&populate[1]=parent.parent&populate[2]=parent.parent.parent&populate[3]=parent.parent.parent.parent&populate[4]=parent.parent.parent.parent.parent`,
-    )
-
-    breadCrumb.value = responseCategory.data.data
-    console.log('breadCrumb ---->', breadCrumb.value)
-
-    // Récupérer ownerInfo
-    const responseOwnerInfo = await axios.get(
-      `http://localhost:1337/api/users/${ownerId.value}?populate[0]=avatar&populate[1]=offers.images&populate[2]=offers.category&populate[3]=offers.brand&populate[4]=offers.size&populate[5]=offers.materials&populate[6]=offers.colors&populate[7]=country`,
-    )
-
-    ownerInfo.value = responseOwnerInfo.data
-    console.log('ownerInfo ---->', ownerInfo.value)
-
-    ownerOffers.value = ownerInfo.value.offers
-    console.log('ownerOffers ---->', ownerOffers.value)
-
-    ownerOffersFiltered.value = ownerOffers.value.filter((offer) => offer.id.toString() != props.id)
-  } catch (error) {
-    console.log('Erreur lors du chargement des informations produit', error)
-  }
-  isLoading.value = false
-})
-
-// Calculer 'ajouté il y a X jours'
+// 1. Offer detail
 const addedAgo = computed(() => {
   // vérification erreur
   if (!offerInfo.value?.attributes?.publishedAt) return ''
@@ -101,12 +72,66 @@ const addedAgo = computed(() => {
   const days = Math.floor(diffMs / (1000 * 60 * 60 * 24))
 
   // retourner 'il y a X jours'
-  return `il y a ${days} ${days > 1 ? 'jours' : 'jour'}`
+  return days === 0 ? 'aujourd’hui' : `il y a ${days} ${days > 1 ? 'jours' : 'jour'}`
 })
 
-// Voir plus dressing
+// 2. Dressing see more
 const SeeMore = () => {
   sliceOffers.value += 100
+}
+
+// -----------------------------------------
+// API REQUEST
+// -----------------------------------------
+
+// 1. Offer, category and dressing info
+onMounted(async () => {
+  isLoading.value = true
+
+  try {
+    // Récupérer offerInfo
+    const { data } = await axios.get(`http://localhost:1337/api/offers/${props.id}?populate=*`)
+
+    offerInfo.value = data.data
+    category.value = offerInfo.value.attributes.category.data
+
+    offerPictures.value = offerInfo.value.attributes.images.data
+    ownerId.value = offerInfo.value.attributes.owner.data.id
+
+    // Récupérer category breadcrumb
+    const responseCategory = await axios.get(
+      `http://localhost:1337/api/categories/${category.value.id}?populate[0]=parent&populate[1]=parent.parent&populate[2]=parent.parent.parent&populate[3]=parent.parent.parent.parent&populate[4]=parent.parent.parent.parent.parent`,
+    )
+
+    breadCrumb.value = responseCategory.data.data
+
+    // Récupérer ownerInfo
+    const responseOwnerInfo = await axios.get(
+      `http://localhost:1337/api/users/${ownerId.value}?populate[0]=avatar&populate[1]=offers.images&populate[2]=offers.category&populate[3]=offers.brand&populate[4]=offers.size&populate[5]=offers.materials&populate[6]=offers.colors&populate[7]=country`,
+    )
+
+    ownerInfo.value = responseOwnerInfo.data
+
+    ownerOffers.value = ownerInfo.value.offers
+
+    ownerOffersFiltered.value = ownerOffers.value.filter((offer) => offer.id.toString() != props.id)
+  } catch (error) {
+    console.log('Erreur lors du chargement des informations produit', error)
+  }
+  isLoading.value = false
+})
+
+// 2. Delete offer
+const deleteOffer = async () => {
+  try {
+    const response = await axios.delete(`http://localhost:1337/api/offers/${props.id}`, {
+      headers: { Authorization: 'Bearer ' + GlobalStore.userInfoCookie.value.token },
+    })
+
+    router.push({ name: 'profile', params: { id: GlobalStore.userInfoCookie.value.id } })
+  } catch (error) {
+    console.log(`Erreur lors de la suppression de l'offre`)
+  }
 }
 </script>
 
@@ -148,10 +173,12 @@ const SeeMore = () => {
             <span v-if="offerInfo.attributes.condition"
               >{{ offerInfo.attributes.condition }} ·
             </span>
-            <span>{{ offerInfo.attributes.brand.data.attributes.displayName }}</span>
+            <span v-if="offerInfo.attributes.brand?.data">{{
+              offerInfo.attributes.brand.data.attributes.displayName
+            }}</span>
 
             <p>{{ offerInfo.attributes.price.toFixed(2) }} €</p>
-            <p>
+            <p @click="handlePriceClick(offerInfo.attributes)">
               {{
                 (offerInfo.attributes.price + offerInfo.attributes.price * (9.38 / 100)).toFixed(2)
               }}
@@ -165,7 +192,7 @@ const SeeMore = () => {
           <!-- MID PART -->
           <div class="details__mid">
             <!-- condition -->
-            <div class="details__mid-info" v-if="offerInfo.attributes.condition.data">
+            <div class="details__mid-info" v-if="offerInfo.attributes.condition">
               <p>État</p>
               <p>{{ offerInfo.attributes.condition }}</p>
             </div>
@@ -220,7 +247,7 @@ const SeeMore = () => {
               <RouterLink :to="{ name: 'edit', params: { id: offerInfo.id } }">
                 <button>Modifier l'annonce</button>
               </RouterLink>
-              <button>Supprimer</button>
+              <button @click="showDeletePopup = true">Supprimer</button>
             </div>
             <button v-else>Acheter</button>
           </div>
@@ -246,7 +273,8 @@ const SeeMore = () => {
           <div>
             <RouterLink :to="{ name: 'profile', params: { id: ownerInfo.id } }">
               <div class="details__owner-avatar">
-                <img :src="ownerInfo.avatar.url" alt="" />
+                <img :src="ownerInfo.avatar?.url || fallbackAvatar" alt="avatar utilisateur" />
+
                 <p>{{ ownerInfo.username }}</p>
               </div>
             </RouterLink>
@@ -280,7 +308,25 @@ const SeeMore = () => {
     @closePricePopup="closePricePopup"
   />
 
-  <p v-if="selectedOfferForPopup">{{ selectedOfferForPopup.price }}</p>
+  <!-- POPUP DELETE -->
+  <div class="product__popup-delete" v-if="showDeletePopup">
+    <div class="product__popup-content">
+      <div>
+        <h2>Supprimer l'article</h2>
+      </div>
+
+      <div>
+        <p>
+          Supprimer un article vendu via Vinted est contraire aux <span>Termes et Conditions</span>
+        </p>
+      </div>
+
+      <div>
+        <button @click="showDeletePopup = false">Annuler</button>
+        <button @click="deleteOffer()">Confirmer et supprimer</button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <style scoped>
@@ -358,5 +404,26 @@ const SeeMore = () => {
   width: 48px;
   height: 48px;
   border-radius: 50px;
+}
+
+/* POPUP DELETE OFFER ------------------------*/
+.product__popup-delete {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100vw;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.product__popup-content {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 10px;
+  max-width: 90%;
 }
 </style>
