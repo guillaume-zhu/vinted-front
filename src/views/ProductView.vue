@@ -217,7 +217,9 @@ const SeeMore = () => {
           <!-- BOT PART -->
           <div class="details__bot">
             <div v-if="GlobalStore.userInfoCookie.value.id === offerInfo.attributes.owner.data.id">
-              <button>Modifier l'annonce</button>
+              <RouterLink :to="{ name: 'edit', params: { id: offerInfo.id } }">
+                <button>Modifier l'annonce</button>
+              </RouterLink>
               <button>Supprimer</button>
             </div>
             <button v-else>Acheter</button>

@@ -9,6 +9,7 @@ import PasswordView from '@/views/PasswordView.vue'
 import ProductView from '@/views/ProductView.vue'
 import CatalogView from '@/views/CatalogView.vue'
 import SellView from '@/views/SellView.vue'
+import EditView from '@/views/EditView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -65,6 +66,13 @@ const router = createRouter({
       name: 'sell',
       component: SellView,
       meta: { requireAuth: true },
+    },
+    {
+      path: '/edit/:id',
+      name: 'edit',
+      component: EditView,
+      meta: { requireAuth: true },
+      props: true,
     },
   ],
   scrollBehavior(to, from, savedPosition) {
