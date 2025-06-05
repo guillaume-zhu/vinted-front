@@ -1,8 +1,12 @@
-<script setup></script>
+<script setup>
+const props = defineProps({
+  hide: Boolean,
+})
+</script>
 
 <template>
   <footer class="container">
-    <div class="footer__top">
+    <div class="footer__top" v-if="!hide">
       <ul>
         <p>Vinted</p>
         <li>À propos de Vinted</li>

@@ -1,8 +1,10 @@
 <script setup>
-import { RouterView } from 'vue-router'
+import { RouterView, useRoute } from 'vue-router'
 
 import Header from './components/Header.vue'
 import Footer from './components/Footer.vue'
+
+const route = useRoute()
 </script>
 
 <template>
@@ -13,7 +15,7 @@ import Footer from './components/Footer.vue'
       <RouterView :key="$route.params.id" />
     </main>
 
-    <Footer />
+    <Footer :hide="route.path.includes('/checkkout')" />
   </div>
 </template>
 
