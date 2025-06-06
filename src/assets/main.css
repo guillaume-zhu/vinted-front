@@ -1,29 +1,91 @@
 @import './base.css';
 
 :root {
-  /* dimensions */
+  /* COLORS --------------------- */
+  --color-primary: #017580;
+  --color-secondary: #e6f9fa;
+  --color-light: #edf2f2;
+  --color-danger: #d04555;
+  --color-black: #15191a;
+  --color-gray: #5a6566;
+
+  /* DIMENSIONS ----------------- */
   --header-height: 98px;
   --header-main-height: 52px;
   --header-nav-height: 44px;
+
+  /* FONT ----------------------- */
+  --font-main: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+
+  /* Sizes */
+  --font-h1: 22px;
+  --font-h2: 16px;
+  --font-h3: 14px;
+  --font-span-lg: 16px;
+  --font-span-md: 14px;
+  --font-p: 12px;
+
+  /* Weight */
+  --font-weight-bold: 580;
+  --font-weight-medium: 500;
+  --font-weight-light: 375;
+
+  /* Line height */
+  --line-height-heading: 28px;
+  --line-height-mid: 22px;
+  --line-height-body: 18px;
+  --line-height-small: 16px;
+
+  /* OTHER ---------------------- */
+  --radius: 6px;
 }
 
+/* FONT ---------------------------------- */
+
 body {
-  font-family: 'Inter', Arial, sans-serif;
+  font-family: var(--font-main);
 }
 
 h1 {
-  font-size: 24px;
-  font-weight: 500;
+  font-size: var(--font-h1);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-heading);
+  color: var(--color-black);
 }
 
 h2 {
-  /* font-size: 22px; */
-  font-weight: 580;
+  font-size: var(--font-h2);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-mid);
+  color: var(--color-black);
+}
+
+h3 {
+  font-size: var(--font-h3);
+  font-weight: var(--font-weight-light);
+  line-height: var(--line-height-mid);
+  color: var(--color-gray);
 }
 
 p {
-  font-size: 12px;
-  font-weight: 375;
+  font-size: var(--font-p);
+  font-weight: var(--font-weight-light);
+  line-height: var(--line-height-small);
+  color: var(--color-gray);
+}
+
+.text-lg {
+  font-size: var(--font-span-lg);
+  line-height: var(--line-height-mid);
+}
+
+.text-md {
+  font-size: var(--font-span-md);
+  line-height: var(--line-height-body);
+}
+
+.text-primary {
+  color: var(--color-primary);
 }
 
 .container {
@@ -33,4 +95,8 @@ p {
 
 .container__catalog {
   max-width: 925px;
+}
+
+.rounded {
+  border-radius: var(--radius);
 }
