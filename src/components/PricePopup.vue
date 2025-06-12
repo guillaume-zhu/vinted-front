@@ -2,6 +2,7 @@
 const props = defineProps({
   selectedOfferForPopup: Object,
   showPricePopup: Boolean,
+  fromCatalog: Boolean,
 })
 
 const emit = defineEmits(['closePricePopup'])
@@ -18,12 +19,16 @@ const emit = defineEmits(['closePricePopup'])
       <div>
         <div>
           <h3>Article</h3>
-          <p>{{ selectedOfferForPopup.price.toFixed(2) + ' €' }}</p>
+          <p v-if="fromCatalog">{{ selectedOfferForPopup.attributes.price.toFixed(2) + ' €' }}</p>
+          <p v-else>{{ selectedOfferForPopup.price.toFixed(2) + ' €' }}</p>
         </div>
 
         <div>
           <h3>Frais de Protection acheteurs</h3>
-          <p>{{ (selectedOfferForPopup.price * (9.38 / 100)).toFixed(2) + ' €' }}</p>
+          <p v-if="fromCatalog">
+            {{ (selectedOfferForPopup.attributes.price * (9.38 / 100)).toFixed(2) + ' €' }}
+          </p>
+          <p v-else>{{ (selectedOfferForPopup.price * (9.38 / 100)).toFixed(2) + ' €' }}</p>
         </div>
         <p>Les frais de port sont calculés lors de la commande.</p>
       </div>

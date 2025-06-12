@@ -17,6 +17,15 @@ const isOpen = ref(false)
 const avatarRef = ref(null)
 const menuRef = ref(null)
 
+// SaerchInput
+const searchTerm = ref(null)
+const OnSearch = () => {
+  if (!searchTerm.value.trim()) {
+    return
+  }
+  router.push({ name: 'search', query: { q: searchTerm.value.trim(), page: 1 } })
+}
+
 // Fonction pour ouvrir / fermer le menu
 const toggleMenu = () => {
   isOpen.value = !isOpen.value
@@ -66,7 +75,14 @@ onUnmounted(() => {
       <!-- SEARCHBAR ----------------------------->
       <div class="header-main__search-group">
         <label for="searchbar">Articles</label>
-        <input type="text" name="searchbar" id="searchbar" />
+        <input
+          type="text"
+          name="searchbar"
+          id="searchbar"
+          @keydown.enter="OnSearch"
+          placeholder="Rechercher un article"
+          v-model="searchTerm"
+        />
       </div>
 
       <!-- BOUTONS ------------------------------->
