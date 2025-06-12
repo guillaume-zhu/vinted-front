@@ -21,8 +21,6 @@ const route = useRoute()
 const router = useRouter()
 
 const offersList = ref([])
-const totalPage = ref(null)
-const page = ref(1)
 
 // 2. Price Pop-up
 const selectedOfferForPopup = ref(null)
@@ -42,20 +40,29 @@ const closePricePopup = () => {
 const q = computed(() => route.query.q?.trim() || '')
 console.log('q ---->', q.value)
 
+// 4. pagination
+const totalPage = ref(null)
+const page = ref(Number(route.query.page) || 1)
+
 // ----------------------------------------------
 // 🎯 FILTER SYSTEM
 // ----------------------------------------------
 
 // 1. Main filters
+
+function toArray(param) {
+  return Array.isArray(param) ? param : [param]
+}
+
 const filters = ref({
-  size: [],
-  brand: [],
-  condition: [],
-  color: [],
-  priceMin: null,
-  priceMax: null,
-  material: [],
-  sort: null,
+  size: route.query.size ? toArray(route.query.size) : [],
+  brand: route.query.brand ? toArray(route.query.brand) : [],
+  condition: route.query.condition ? toArray(route.query.condition) : [],
+  color: route.query.color ? toArray(route.query.color) : [],
+  material: route.query.material ? toArray(route.query.material) : [],
+  priceMin: route.query.priceMin ? Number(route.query.priceMin) : null,
+  priceMax: route.query.priceMax ? Number(route.query.priceMax) : null,
+  sort: route.query.sort || null,
 })
 
 // 2. Main dropdown open/close state
@@ -443,6 +450,41 @@ watch(
   },
   { deep: true },
 )
+
+// 4. Watch filters pour sync l'url
+watch(
+  filters,
+  (newFilters) => {
+    const query = { q: q.value || undefined, page: page.value }
+
+    for (const key in newFilters) {
+      const val = newFilters[key]
+      if (Array.isArray(val) && val.length) {
+        query[key] = val
+      } else if (!Array.isArray(val) && val != null) {
+        query[key] = val
+      }
+      // sinon on ne met pas le paramètre vide dans l'URL
+    }
+
+    router.replace({ name: 'search', query })
+  },
+  { deep: true },
+)
+
+// watch(
+//   [filters, page],
+//   () => {
+//     const query = { q: q.value || undefined, page: page.value }
+//     // ne pas injecter les clés vides
+//     Object.entries(filters.value).forEach(([key, val]) => {
+//       if (Array.isArray(val) && val.length) query[key] = val
+//       else if (!Array.isArray(val) && val != null) query[key] = val
+//     })
+//     router.replace({ name: 'search', query })
+//   },
+//   { deep: true },
+// )
 
 // 3. Watch added filters
 watchEffect(() => {
