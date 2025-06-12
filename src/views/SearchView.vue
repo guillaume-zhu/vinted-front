@@ -6,9 +6,10 @@ import axios from 'axios'
 import OfferCard from '@/components/OfferCard.vue'
 import PricePopup from '@/components/PricePopup.vue'
 
+import { debounce } from 'lodash'
+
 // NE PAS OUBLIER
-// Ajouter ce qu'il manque sur la page
-// Modifier catalog view pour sortir les div de
+// Modifier catalog view pour sortir les div de + ajouter props fromCatalog a pricePopup
 // Gérer la pagination
 
 // ----------------------------------------------
@@ -207,9 +208,38 @@ const fetchOffers = async () => {
 
   const params = {
     'filters[name][$containsi]': q.value,
-    'pagination[pageSize]': 100,
+    'pagination[pageSize]': 96,
     'pagination[page]': page.value,
     populate: '*',
+  }
+
+  // Filtres dynamiques
+  if (filters.value.brand.length) {
+    params['filters[brand][name][$in]'] = filters.value.brand
+  }
+  if (filters.value.size.length) {
+    params['filters[size][name][$in]'] = filters.value.size
+  }
+  if (filters.value.condition.length) {
+    params['filters[condition][$in]'] = filters.value.condition
+  }
+  if (filters.value.color.length) {
+    params['filters[colors][name][$in]'] = filters.value.color
+  }
+  if (filters.value.material.length) {
+    params['filters[materials][id][$in]'] = filters.value.material
+  }
+  if (filters.value.priceMin !== null) {
+    params['filters[price][$gte]'] = filters.value.priceMin
+  }
+  if (filters.value.priceMax !== null) {
+    params['filters[price][$lte]'] = filters.value.priceMax
+  }
+  if (filters.value.sort === 'priceAsc') {
+    params['sort'] = 'price:asc'
+  }
+  if (filters.value.sort === 'priceDesc') {
+    params['sort'] = 'price:desc'
   }
 
   try {
@@ -229,75 +259,80 @@ const fetchOffers = async () => {
   }
 }
 
+const debouncedFetchOffers = debounce(() => {
+  page.value = 1
+  fetchOffers()
+}, 2000) //
+
 // ----------------------------------------------
 // 🛟 FILTRAGE & EXTRACT FUNCTIONS
 // ----------------------------------------------
 
 // 1. Filtered Offers
-const filteredOffers = computed(() => {
-  let results = offersList.value.data || []
+// const filteredOffers = computed(() => {
+//   let results = offersList.value.data || []
 
-  // 1. Filtre taille
-  if (filters.value.size?.length > 0) {
-    results = results.filter((offer) => {
-      const offerSize = offer.attributes.size?.data?.attributes?.name
-      return filters.value.size.includes(offerSize)
-    })
-  }
+//   // 1. Filtre taille
+//   if (filters.value.size?.length > 0) {
+//     results = results.filter((offer) => {
+//       const offerSize = offer.attributes.size?.data?.attributes?.name
+//       return filters.value.size.includes(offerSize)
+//     })
+//   }
 
-  // 2. Filtre marque
-  if (filters.value.brand?.length > 0) {
-    results = results.filter((offer) => {
-      const offerBrand = offer.attributes.brand?.data?.attributes?.name
-      return filters.value.brand.includes(offerBrand)
-    })
-  }
+//   // 2. Filtre marque
+//   if (filters.value.brand?.length > 0) {
+//     results = results.filter((offer) => {
+//       const offerBrand = offer.attributes.brand?.data?.attributes?.name
+//       return filters.value.brand.includes(offerBrand)
+//     })
+//   }
 
-  // 3. Filtre condition
-  if (filters.value.condition?.length > 0) {
-    results = results.filter((offer) => {
-      const offerCondition = offer.attributes.condition
-      return filters.value.condition.includes(offerCondition)
-    })
-  }
+//   // 3. Filtre condition
+//   if (filters.value.condition?.length > 0) {
+//     results = results.filter((offer) => {
+//       const offerCondition = offer.attributes.condition
+//       return filters.value.condition.includes(offerCondition)
+//     })
+//   }
 
-  // 4. Filtre color
-  if (filters.value.color.length > 0) {
-    results = results.filter((offer) => {
-      const offerColors = offer.attributes.colors?.data?.map((c) => c.attributes.name) || []
-      return offerColors.some((color) => filters.value.color.includes(color))
-    })
-  }
+//   // 4. Filtre color
+//   if (filters.value.color.length > 0) {
+//     results = results.filter((offer) => {
+//       const offerColors = offer.attributes.colors?.data?.map((c) => c.attributes.name) || []
+//       return offerColors.some((color) => filters.value.color.includes(color))
+//     })
+//   }
 
-  // 5. Filtre material
-  if (filters.value.material.length > 0) {
-    results = results.filter((offer) => {
-      const offerMaterials = offer.attributes.materials?.data || []
-      const offerMaterialIds = offerMaterials.map((m) => m.id)
-      return filters.value.material.some((id) => offerMaterialIds.includes(id))
-    })
-  }
+//   // 5. Filtre material
+//   if (filters.value.material.length > 0) {
+//     results = results.filter((offer) => {
+//       const offerMaterials = offer.attributes.materials?.data || []
+//       const offerMaterialIds = offerMaterials.map((m) => m.id)
+//       return filters.value.material.some((id) => offerMaterialIds.includes(id))
+//     })
+//   }
 
-  // 6. Filtre prix
-  const min = filters.value.priceMin
-  const max = filters.value.priceMax
+//   // 6. Filtre prix
+//   const min = filters.value.priceMin
+//   const max = filters.value.priceMax
 
-  if (min !== null) {
-    results = results.filter((offer) => offer.attributes.price >= min)
-  }
-  if (max !== null) {
-    results = results.filter((offer) => offer.attributes.price <= max)
-  }
+//   if (min !== null) {
+//     results = results.filter((offer) => offer.attributes.price >= min)
+//   }
+//   if (max !== null) {
+//     results = results.filter((offer) => offer.attributes.price <= max)
+//   }
 
-  // 7. Filtre sort
-  if (filters.value.sort === 'priceAsc') {
-    results.sort((a, b) => a.attributes.price - b.attributes.price)
-  } else if (filters.value.sort === 'priceDesc') {
-    results.sort((a, b) => b.attributes.price - a.attributes.price)
-  }
+//   // 7. Filtre sort
+//   if (filters.value.sort === 'priceAsc') {
+//     results.sort((a, b) => a.attributes.price - b.attributes.price)
+//   } else if (filters.value.sort === 'priceDesc') {
+//     results.sort((a, b) => b.attributes.price - a.attributes.price)
+//   }
 
-  return results
-})
+//   return results
+// })
 
 // 2. Size
 const extractSizesFromOffers = (offers) => {
@@ -400,6 +435,15 @@ watch(page, () => {
   fetchOffers()
 })
 
+// 3. Watch filters
+watch(
+  filters,
+  () => {
+    debouncedFetchOffers()
+  },
+  { deep: true },
+)
+
 // 3. Watch added filters
 watchEffect(() => {
   const updated = {}
@@ -461,7 +505,8 @@ const changePage = (order, actualNum) => {
     <div class="container__catalog">
       <!-- CATALOG HEADER --------------------->
       <div class="catalog__header">
-        <h1>Articles</h1>
+        <h1 v-if="q">Recherche pour "{{ q }}"</h1>
+        <h1 v-else>Articles</h1>
 
         <!-- FILTERS & SORT -->
         <div class="filters">
@@ -728,7 +773,7 @@ const changePage = (order, actualNum) => {
       <!-- OFFERS ----------------------------->
       <div class="catalog__offers" v-if="offersList">
         <OfferCard
-          v-for="offer in filteredOffers"
+          v-for="offer in offersList.data"
           :key="offer.id"
           :offer="offer"
           :fromCatalog="true"
