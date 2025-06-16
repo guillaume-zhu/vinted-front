@@ -38,6 +38,11 @@
 
   /* OTHER ---------------------- */
   --radius: 6px;
+
+  /* BREAKPOINT */
+  --breakpoint-sm: 720px;
+  --breakpoint-md: 960px;
+  --breakpoint-lg: 1200px;
 }
 
 /* FONT ---------------------------------- */
@@ -71,7 +76,11 @@ p {
   font-size: var(--font-p);
   font-weight: var(--font-weight-light);
   line-height: var(--line-height-small);
-  color: var(--color-gray);
+  /* color: var(--color-gray); */
+}
+
+button {
+  font-family: var(--font-main);
 }
 
 .text-lg {
@@ -82,10 +91,15 @@ p {
 .text-md {
   font-size: var(--font-span-md);
   line-height: var(--line-height-body);
+  font-weight: var(--font-weight-light);
 }
 
 .text-primary {
   color: var(--color-primary);
+}
+
+.text-gray {
+  color: var(--color-gray);
 }
 
 .container {

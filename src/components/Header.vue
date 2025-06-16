@@ -74,22 +74,30 @@ onUnmounted(() => {
 
       <!-- SEARCHBAR ----------------------------->
       <div class="header-main__search-group">
-        <label for="searchbar">Articles</label>
-        <input
-          type="text"
-          name="searchbar"
-          id="searchbar"
-          @keydown.enter="OnSearch"
-          placeholder="Rechercher un article"
-          v-model="searchTerm"
-        />
+        <div class="header-main__search-label">
+          <label for="searchbar">Articles</label>
+        </div>
+
+        <div class="header-main__search-input">
+          <font-awesome-icon :icon="['fas', 'search']" />
+          <input
+            type="text"
+            name="searchbar"
+            id="searchbar"
+            @keydown.enter="OnSearch"
+            placeholder="Rechercher des articles"
+            v-model="searchTerm"
+            class="text-lg"
+          />
+          <font-awesome-icon :icon="['fas', 'times']" v-if="searchTerm" @click="searchTerm = ''" />
+        </div>
       </div>
 
       <!-- BOUTONS ------------------------------->
       <div class="header-main__buttons">
         <!-- SI NON CONNECTÉ -->
         <RouterLink :to="{ name: 'login' }" v-if="!GlobalStore.userInfoCookie.value">
-          <button>S'inscrire | Se connecter</button>
+          <button class="btn--primary">S'inscrire | Se connecter</button>
         </RouterLink>
 
         <!-- SI CONNECTÉ --------------->
@@ -124,14 +132,18 @@ onUnmounted(() => {
           </div>
         </transition>
 
-        <RouterLink :to="{ name: 'sell' }"> <button>Vends tes articles</button></RouterLink>
+        <RouterLink :to="{ name: 'sell' }">
+          <button class="btn--secondary">Vends tes articles</button></RouterLink
+        >
 
-        <div class="header-main__help"><span>?</span></div>
+        <div class="header-main__help"><span class="text-md">?</span></div>
       </div>
     </div>
 
     <!-- NAV LINKS -->
-    <CategoryDropdown />
+    <div class="header-bot">
+      <CategoryDropdown />
+    </div>
   </header>
 </template>
 
@@ -139,23 +151,119 @@ onUnmounted(() => {
 /* HEADER BASE ------------------------------------------------*/
 header {
   height: var(--header-height);
-  max-width: 100vw;
-  /* border: 1px solid black;  */
-  /* margin-bottom: 1000px; */
+  width: 100vw;
+  position: fixed;
+  top: 0;
+  z-index: 1000;
+  background-color: white;
 }
 
 /* HEADER MAIN --------------------------*/
 .header-main {
-  border: 1px solid blue;
+  /* border: 1px solid blue; */
   height: var(--header-main-height);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 50px;
+  padding: 7px 0px 7px 0px;
 }
 
-/* HEADER BUTTONS & LOG --------*/
+.header-main > a > img {
+  width: 73px;
+  object-fit: contain;
+}
+
+/* HEADER SEARCHBAR -------*/
+.header-main__search-group {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.header-main__search-group svg {
+  color: var(--color-gray);
+}
+
+/* LABEL */
+.header-main__search-label {
+  background-color: var(--color-light);
+  height: 100%;
+  width: 100px;
+  border-radius: var(--radius) 0px 0px var(--radius);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-right: 0.5px solid var(--color-gray);
+}
+
+.header-main__search-label > label {
+  font-size: var(--font-span-md);
+  color: var(--color-gray);
+}
+
+/* INPUT */
+.header-main__search-input {
+  width: 100%;
+  height: 100%;
+  border-radius: 0px var(--radius) var(--radius) 0px;
+  background-color: var(--color-light);
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0px 12px 0px 12px;
+}
+
+.header-main__search-input > input {
+  border: none;
+  background: none;
+  font: inherit;
+  outline: none;
+  color: var(--color-black);
+  font-weight: 375;
+  width: 100%;
+}
+
+/* HEADER BUTTONS & LOG */
 .header-main__buttons {
   display: flex;
+  align-items: center;
+  /* border: 1px solid red; */
+  gap: 10px;
+  height: 100%;
+}
+
+.header-main__buttons a {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.header-main__buttons button {
+  border-radius: var(--radius);
+  white-space: nowrap;
+  width: fit-content;
+  padding: 6px 12px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.btn--primary {
+  background-color: white;
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
+}
+
+.btn--secondary {
+  background-color: var(--color-primary);
+  border: none;
+  color: white;
 }
 
 .header-main__buttons img {
@@ -172,18 +280,30 @@ header {
   align-items: center;
 }
 
+.header-main__help {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--color-gray);
+  width: 20px;
+  height: 20px;
+  border-radius: 50px;
+  padding: 5px;
+  color: var(--color-gray);
+}
+
 /* HEADER PROFILE DROPDOWN */
 
 .header-main__profile-container {
   position: relative;
-  background-color: red;
+  /* background-color: red; */
   display: flex;
 }
 
 .header-main__dropdown {
   position: absolute;
   top: 50px;
-  border: 1px solid red;
+  /* border: 1px solid red; */
   background-color: white;
   z-index: 1000;
 }
@@ -193,9 +313,11 @@ header {
 }
 
 .header-main__dropdown li {
-  padding: 10px;
+  padding: 12px;
   cursor: pointer;
   transition: background-color 0.3s;
+  font-size: 15px;
+  color: var(--color-gray);
 }
 
 .header-main__dropdown li:hover {
@@ -212,12 +334,8 @@ header {
   opacity: 0;
 }
 
-/* HEADER NAV ----------------------------- */
-
-.header-nav {
-  border: 1px solid red;
-  height: var(--header-nav-height);
-  display: flex;
-  gap: 20px;
+/* HEADER BOT --------------------------*/
+.header-bot {
+  border: 2px solid var(--color-light);
 }
 </style>

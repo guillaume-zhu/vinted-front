@@ -9,6 +9,39 @@ const categoryRefs = ref({})
 const dropdownRefs = ref({})
 const categories = ref([])
 const activeSubCategoryByRoot = ref({})
+const categoryImages = {
+  // 🌸 Femmes
+  'femmes-vetements': '/images/categories/femmes-vetements.png',
+  'femmes-chaussures': '/images/categories/femmes-chaussures.png',
+  'femmes-sacs': '/images/categories/femmes-sacs.png',
+  'femmes-accessoires': '/images/categories/femmes-accessoires.png',
+  'femmes-beaute': '/images/categories/femmes-beaute.png',
+
+  // 🧔 Hommes
+  'hommes-vetements': '/images/categories/hommes-vetements.png',
+  'hommes-chaussures': '/images/categories/hommes-chaussures.png',
+  'hommes-accessoires': '/images/categories/hommes-accessoires.png',
+  'hommes-soins': '/images/categories/hommes-soins.png',
+
+  // 👶 Enfants
+  'enfants-filles': '/images/categories/enfants-filles.png',
+  'enfants-garcons': '/images/categories/enfants-garcons.png',
+  'enfants-jouets': '/images/categories/enfants-jouets.png',
+  'enfants-soinsBebe': '/images/categories/enfants-soins-bebe.png',
+  'enfants-poussettes': '/images/categories/enfants-poussettes.png',
+  'enfants-porteursTrotteursJouetsBascule':
+    '/images/categories/enfants-porteurs-trotteurs-et-jouets-a-bascule.png',
+  'enfants-chaisesHautesSiegeAuto': '/images/categories/enfants-chaises-hautes-et-sieges-auto.png',
+  'enfants-mobilier': '/images/categories/enfants-mobilier.png',
+  'enfants-scolarite': '/images/categories/enfants-scolarite.png',
+  'enfants-autres': '/images/categories/enfants-autres.png',
+
+  // 🏠 Maison
+  'maison-textiles': '/images/categories/maison-textiles.png',
+  'maison-decoration': '/images/categories/maison-decoration.png',
+  'maison-artsTable': '/images/categories/maison-arts-de-la-table.png',
+  'maison-celebrationFetes': '/images/categories/maison-celebrations-et-fetes.png',
+}
 
 const toggleCategory = (cat) => {
   // Fermer le menu "À propos"
@@ -167,7 +200,7 @@ const aboutLinks = [
       @click="toggleCategory(cat.attributes.name)"
       :ref="(el) => (categoryRefs[cat.attributes.name] = el)"
     >
-      {{ cat.attributes.displayName }}
+      <span class="text-md">{{ cat.attributes.displayName }}</span>
 
       <transition name="fade">
         <div
@@ -175,7 +208,7 @@ const aboutLinks = [
           class="dropdown-category"
           :ref="(el) => (dropdownRefs[cat.attributes.name] = el)"
         >
-          <div class="dropdown-category__container">
+          <div class="dropdown-category__container container">
             <!-- Colonne gauche -->
             <ul class="dropdown-category__left">
               <li class="voir-tout">
@@ -184,8 +217,14 @@ const aboutLinks = [
                   @click.stop
                   @click="closeAllMenus"
                 >
-                  <span class="voir-tout-icon">...</span>
-                  <strong>Voir tout</strong>
+                  <div class="dropdown-category__left-icon-sub">
+                    <img
+                      src="/images/categories/voir-tout.png"
+                      alt="Icônes de sous-catégorie voir tout"
+                      class="dropdown-category__left-icon"
+                    />
+                    <strong>Voir tout</strong>
+                  </div>
                 </RouterLink>
               </li>
 
@@ -195,7 +234,19 @@ const aboutLinks = [
                 @click.stop="selectSubCategory(cat.attributes.name, sub)"
                 :class="{ active: activeSubCategoryByRoot[cat.attributes.name]?.id === sub.id }"
               >
-                {{ sub.attributes.displayName }}
+                <div class="dropdown-category__left-icon-sub">
+                  <img
+                    :src="categoryImages[sub.attributes.name]"
+                    alt="Icône de sous-caégorie"
+                    v-if="categoryImages[sub.attributes.name]"
+                    class="dropdown-category__left-icon"
+                  />
+                  {{ sub.attributes.displayName }}
+                </div>
+                <font-awesome-icon
+                  :icon="['fas', 'chevron-right']"
+                  :class="{ active: activeSubCategoryByRoot[cat.attributes.name]?.id === sub.id }"
+                />
               </li>
             </ul>
 
@@ -238,12 +289,12 @@ const aboutLinks = [
     </div>
 
     <!-- À propos -->
-    <div class="nav-item about-trigger" @click="toggleAbout">
+    <div class="nav-item about-trigger text-md" @click="toggleAbout">
       À propos
 
       <transition name="fade">
-        <div v-if="aboutOpen" class="dropdown-category about-dropdown">
-          <div class="dropdown-category__container about">
+        <div v-if="aboutOpen" class="dropdown-category">
+          <div class="dropdown-category__container container dropdown-category__about">
             <div class="about-column" v-for="(group, index) in aboutLinks" :key="index">
               <strong>{{ group.title }}</strong>
               <ul>
@@ -258,17 +309,43 @@ const aboutLinks = [
 </template>
 
 <style scoped>
-/* DROPDOWN NAV */
+/* DESKTOP ----------------------------------------- */
+
+/* HEADER NAV ----------------------------- */
+.header-nav {
+  /* border: 1px solid green; */
+  height: var(--header-nav-height);
+  display: flex;
+  justify-content: flex-start;
+}
 
 .nav-item {
   position: relative;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0px 16px 0px 16px;
+  background-color: white;
+  transition: background-color 0.3s;
+  color: var(--color-gray);
 }
 
+.nav-item:hover {
+  background-color: var(--color-light);
+  border-bottom: 2px solid var(--color-primary);
+  color: var(--color-black);
+}
+
+/* DROPDOWN NAV */
 .dropdown-category {
-  position: absolute;
-  top: 100%;
+  position: fixed;
+  top: calc(var(--header-main-height) + var(--header-nav-height));
   left: 0;
   background-color: white;
+  width: 100vw;
   z-index: 1000;
 }
 
@@ -276,40 +353,105 @@ const aboutLinks = [
   display: flex;
   background: white;
   padding: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid red;
+}
+
+.dropdown-category li {
+  font-size: var(--font-h2);
+  color: var(--color-gray);
+  border: 1px solid red;
+  padding: 20px 10px;
+  border-radius: 3px;
+  background-color: white;
+  transition: background-color 0.3s;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  line-height: var(--line-height-body);
+  overflow: hidden;
+}
+
+.dropdown-category li:hover {
+  background-color: var(--color-light);
+}
+
+.dropdown-category li:hover a {
+  color: var(--color-black);
+  font-weight: var(--font-weight-medium);
+}
+
+/* .dropdown-category__right {
+  padding-left: 20px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(100px, 1fr));
+  gap: 0px 20px;
+} */
+
+.dropdown-category__right {
+  column-count: 2;
+  /* column-gap: 20px; */
+  border: 1px solid peru;
+  width: 700px;
+}
+
+.dropdown-category__right li {
+  max-width: 350px;
+  break-inside: avoid-column;
+}
+
+.dropdown-category a {
+  text-decoration: none;
+  color: var(--color-gray);
+  font-weight: var(--font-weight-light);
 }
 
 .dropdown-category__left {
-  width: 200px;
+  width: 350px;
   padding-right: 20px;
   list-style: none;
   border-right: 1px solid #eee;
 }
 
-.dropdown-category__right {
-  list-style: none;
-  padding-left: 20px;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(100px, 1fr));
-  gap: 10px 20px;
+.dropdown-category__left-icon-sub {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.dropdown-category__left-icon {
+  height: 23px;
+  margin-right: 10px;
 }
 
 .dropdown-category__left li {
-  padding: 8px 0;
   cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .dropdown-category__left li.active {
-  font-weight: bold;
-  background-color: #f5f5f5;
+  font-weight: var(--font-weight-medium);
+  background-color: var(--color-light);
+  color: var(--color-black);
+}
+
+.dropdown-category__left li svg {
+  display: none;
+  color: var(--color-gray);
+  font-size: 14px;
+  margin-left: 5px;
+}
+
+.dropdown-category__left li svg.active {
+  display: inline;
 }
 
 /* ABOUT */
-
-.dropdown-category__container.about {
+.dropdown-category__about {
   display: flex;
   gap: 40px;
-  padding: 20px 40px;
+  padding: 20px 20px;
+  width: 100vw;
 }
 
 .about-column {
@@ -318,9 +460,15 @@ const aboutLinks = [
   gap: 8px;
 }
 
+.about-column > ul > li {
+  width: 250px;
+}
+
 .about-column strong {
   margin-bottom: 6px;
   font-size: 0.9rem;
   font-weight: bold;
 }
+
+/* 1200px ----------------------------------------- */
 </style>
