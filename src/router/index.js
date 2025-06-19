@@ -12,6 +12,7 @@ import SellView from '@/views/SellView.vue'
 import EditView from '@/views/EditView.vue'
 import CheckoutView from '@/views/CheckoutView.vue'
 import SearchView from '@/views/SearchView.vue'
+import DesignSystemView from '@/views/DesignSystemView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -87,6 +88,11 @@ const router = createRouter({
       path: '/search',
       name: 'search',
       component: SearchView,
+    },
+    {
+      path: '/design',
+      name: 'design',
+      component: DesignSystemView,
     },
   ],
   scrollBehavior(to, from, savedPosition) {
