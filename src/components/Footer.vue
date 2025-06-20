@@ -8,7 +8,7 @@ const props = defineProps({
   <footer class="container">
     <div class="footer__top" v-if="!hide">
       <ul>
-        <p>Vinted</p>
+        <h2>Vinted</h2>
         <li>À propos de Vinted</li>
         <li>Carrière</li>
         <li>Le développement durable</li>
@@ -17,7 +17,7 @@ const props = defineProps({
       </ul>
 
       <ul>
-        <p>Découvrir</p>
+        <h2>Découvrir</h2>
         <li>Comment ça marche ?</li>
         <li>Vérification de l'article</li>
         <li>Applications mobiles</li>
@@ -27,7 +27,7 @@ const props = defineProps({
       </ul>
 
       <ul>
-        <p>Aide</p>
+        <h2>Aide</h2>
         <li>Centre d'aide</li>
         <li>Vendre</li>
         <li>Acheter</li>
@@ -38,15 +38,15 @@ const props = defineProps({
     </div>
 
     <div class="footer__mid">
+      <div class="footer__download">
+        <a href=""> <img src="./../assets/img/footer-download-apple.svg" alt="" /></a>
+        <a href=""> <img src="./../assets/img/footer-download-google.svg" alt="" /></a>
+      </div>
+
       <div class="footer__links">
         <a href=""><font-awesome-icon :icon="['fab', 'facebook-square']" /></a>
         <a href=""> <font-awesome-icon :icon="['fab', 'linkedin']" /></a>
         <a href=""><font-awesome-icon :icon="['fab', 'instagram']" /></a>
-      </div>
-
-      <div class="footer__donwload">
-        <a href=""> <img src="./../assets/img/footer-download-apple.svg" alt="" /></a>
-        <a href=""> <img src="./../assets/img/footer-download-google.svg" alt="" /></a>
       </div>
     </div>
 
@@ -62,22 +62,119 @@ const props = defineProps({
 </template>
 
 <style scoped>
+/* RESPONSIVE STYLES -------------------*/
 footer {
-  padding: 20px 0px;
+  padding: 0px 8px 0px 8px;
 }
 
+/* FOOTER TOP */
 .footer__top {
-  display: flex;
-  justify-content: space-between;
+  border-bottom: 1px solid var(--color-light-gray);
 }
 
+footer h2 {
+  color: var(--color-gray);
+  font-weight: var(--font-weight-light);
+  font-size: 18px;
+  margin-bottom: 5px;
+}
+
+footer li {
+  color: var(--color-gray);
+  font-weight: var(--font-weight-light);
+  font-size: 15px;
+  padding: 10px 0px 10px 0px;
+}
+
+footer ul {
+  padding: 12px;
+}
+
+/* FOOTER MID */
 .footer__mid {
+  padding: 20px;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-bottom: 1px solid var(--color-light-gray);
 }
 
-.footer__bot {
+.footer__download {
   display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.footer__download img {
+  width: 140px;
+  height: 40px;
+}
+
+.footer__links {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   gap: 15px;
+  margin-top: 20px;
+}
+
+.footer__links svg {
+  color: var(--color-light-gray);
+  font-size: 30px;
+}
+
+/* FOOTER BOT */
+.footer__bot {
+  padding: 20px 12px 20px 12px;
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  row-gap: 30px;
+}
+
+.footer__bot p {
+  color: var(--color-gray);
+  font-weight: var(--font-weight-light);
+  font-size: 15px;
+  width: fit-content;
+}
+
+/* SMALL / MOBILE (≤ 720px) */
+@media (max-width: 720px) {
+  footer {
+    /* background-color: pink; */
+  }
+}
+
+/* MEDIUM (721px à 960px) */
+@media (min-width: 721px) {
+  footer {
+    /* background-color: purple; */
+  }
+  .footer__top {
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 10px;
+  }
+  .footer__mid {
+    flex-direction: row-reverse;
+    justify-content: space-between;
+  }
+  .footer__links {
+    margin-top: 0px;
+  }
+}
+
+/* DESKTOP (>960px) */
+@media (min-width: 961px) {
+  footer {
+    /* background-color: red; */
+    padding: 20px 20px 20px 20px;
+  }
+  .footer__bot {
+    margin-top: 16px;
+  }
 }
 </style>
