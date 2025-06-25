@@ -4,8 +4,10 @@
   /* COLORS --------------------- */
   --color-light-primary: #e6fafa;
   --color-primary: #017580;
+  --color-dark-primary: #00636c;
   --color-secondary: #e6f9fa;
   --color-danger: #d04555;
+  --color-lightest: #f3f9f9;
   --color-light: #edf2f2;
   --color-light-gray: #b6bebf;
   --color-gray: #5a6566;
@@ -138,6 +140,39 @@ body {
 }
 .activeBtn {
   background-color: var(--color-light-primary);
+}
+
+/* Buttons */
+.ds-btn {
+  width: 100%;
+  height: 42px;
+  border-radius: var(--radius);
+  border: none;
+  padding: 10px 16px 10px 16px;
+}
+
+.ds-btn--primary {
+  background-color: var(--color-primary);
+}
+
+.ds-btn--primary > h2 {
+  color: white;
+}
+
+.ds-btn--primary:hover {
+  background-color: var(--color-dark-primary);
+}
+
+.ds-btn--secondary {
+  background-color: var(--color-lightest);
+}
+
+.ds-btn--secondary > h2 {
+  color: var(--color-primary);
+}
+
+.ds-btn--secondary:hover {
+  background-color: var(--color-light);
 }
 
 /* RESPONSIVE ----------*/

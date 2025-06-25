@@ -14,6 +14,7 @@ const props = defineProps({
         <li>Le développement durable</li>
         <li>Presse</li>
         <li>Publicités</li>
+        <li>Accessibilité</li>
       </ul>
 
       <ul>
@@ -143,16 +144,10 @@ footer ul {
 
 /* SMALL / MOBILE (≤ 720px) */
 @media (max-width: 720px) {
-  footer {
-    /* background-color: pink; */
-  }
 }
 
 /* MEDIUM (721px à 960px) */
 @media (min-width: 721px) {
-  footer {
-    /* background-color: purple; */
-  }
   .footer__top {
     display: flex;
     justify-content: space-between;
@@ -170,11 +165,34 @@ footer ul {
 /* DESKTOP (>960px) */
 @media (min-width: 961px) {
   footer {
-    /* background-color: red; */
     padding: 20px 20px 20px 20px;
+  }
+
+  .footer__mid {
+    padding: 20px 12px;
   }
   .footer__bot {
     margin-top: 16px;
+  }
+  footer ul {
+    padding: 12px;
+  }
+}
+
+/* DESKTOP (>1200px) */
+@media (min-width: 1200px) {
+  footer {
+    padding: 20px 0px 20px 0px;
+  }
+
+  .footer__mid {
+    padding: 20px 12px;
+  }
+  .footer__bot {
+    margin-top: 16px;
+  }
+  footer ul {
+    padding: 12px;
   }
 }
 </style>

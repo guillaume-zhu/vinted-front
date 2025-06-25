@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { RouterLink } from 'vue-router'
 import axios from 'axios'
 import _ from 'lodash'
 
@@ -160,7 +161,7 @@ const loadMoreOffer = async () => {
 </script>
 
 <template>
-  <div>
+  <main class="page-content">
     <!-- HERO ---------------------->
     <div class="hero">
       <div class="hero__background">
@@ -172,108 +173,114 @@ const loadMoreOffer = async () => {
       <div class="hero__card-container container">
         <div class="hero__card">
           <div class="hero__card-content">
-            <h1>Prêts à faire du tri dans vos placards ?</h1>
+            <h1>Prêt à faire du tri dans tes placards ?</h1>
           </div>
 
-          <button>
-            <a href="">Vends maintenant</a>
-          </button>
-          <button>
-            <a href="">Découvrir comment ça marche</a>
-          </button>
+          <div class="hero__card-buttons">
+            <RouterLink :to="{ name: 'sell' }">
+              <button class="ds-btn ds-btn--primary">
+                <h2>Commence à vendre</h2>
+              </button>
+            </RouterLink>
+            <button class="ds-btn ds-btn--secondary">
+              <h2>Découvrir comment ça marche</h2>
+            </button>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- BANNER -------------------->
-    <div class="banner container">
-      <div class="banner__content-text">
-        <h2>NOUVEAU</h2>
-        <p>Vends tes appareils électroniques sans frais de vente</p>
+    <div class="home__content">
+      <!-- BANNER -------------------->
+      <div class="banner container">
+        <div class="banner__content-text">
+          <span class="text-md">NOUVEAU</span>
+          <h2>Vends tes appareils électroniques sans frais de vente</h2>
+        </div>
+
+        <RouterLink :to="{ name: 'sell' }" class="banner__button"> Commencer à vendre</RouterLink>
       </div>
 
-      <button class="banner__button">
-        <a href="">Commencer à vendre</a>
-      </button>
+      <!-- OFFERS -------------------->
+      <section class="offers">
+        <div v-if="isLoading">
+          <p>En cours de chargement</p>
+        </div>
+        <div v-else-if="errorMessage">
+          <p>{{ errorMessage }}</p>
+        </div>
+
+        <!-- OFFERSLIST -->
+
+        <div class="container" v-else="offersList">
+          <h1>Fil d'actu</h1>
+
+          <!-- FIRST 2 OFFERS LINE -->
+          <div class="offers-list">
+            <OfferCard
+              v-for="offer in firstOffersLine"
+              :key="offer.id"
+              :offer="offer"
+              @price-clicked="handlePriceClick"
+            />
+          </div>
+
+          <!-- FIRST DRESSING LINE -->
+          <Dressing :dressingInfo="firstDressingLine" v-if="firstDressingLine" />
+
+          <!-- SECOND 5 OFFERS LINE -->
+          <div class="offers-list">
+            <OfferCard
+              v-for="offer in secondOffersLine"
+              :key="offer.id"
+              :offer="offer"
+              @price-clicked="handlePriceClick"
+            />
+          </div>
+
+          <!-- SECOND DRESSING LINE -->
+          <Dressing :dressingInfo="secondDressingLine" v-if="secondDressingLine" />
+
+          <!-- THIRD 5 OFFERS LINE -->
+          <div class="offers-list">
+            <OfferCard
+              v-for="offer in thirdOffersLine"
+              :key="offer.id"
+              :offer="offer"
+              @price-clicked="handlePriceClick"
+            />
+          </div>
+
+          <!-- THIRD DRESSING LINE -->
+          <Dressing :dressingInfo="thirdDressingLine" v-if="secondDressingLine" />
+
+          <!-- FOURTH 4 OFFERS LINE -->
+          <div class="offers-list">
+            <OfferCard
+              v-for="offer in fourthOffersLine"
+              :key="offer.id"
+              :offer="offer"
+              @price-clicked="handlePriceClick"
+            />
+          </div>
+
+          <!-- VOIR PLUS OFFRES  -->
+          <div class="offers-list" v-if="offersListPlus">
+            <OfferCard
+              v-for="offer in offersListPlus"
+              :key="offer.id"
+              :offer="offer"
+              @price-clicked="handlePriceClick"
+            />
+          </div>
+
+          <div class="offers-load-more">
+            <button class="ds-filter-btn" @click="loadMoreOffer">Voir plus</button>
+          </div>
+        </div>
+      </section>
     </div>
-
-    <!-- OFFERS -------------------->
-    <section class="offers">
-      <div v-if="isLoading">
-        <p>En cours de chargement</p>
-      </div>
-      <div v-else-if="errorMessage">
-        <p>{{ errorMessage }}</p>
-      </div>
-
-      <!-- OFFERSLIST -->
-
-      <div class="container" v-else="offersList">
-        <h2>Fil d'actu</h2>
-
-        <!-- FIRST 2 OFFERS LINE -->
-        <div class="offers-list">
-          <OfferCard
-            v-for="offer in firstOffersLine"
-            :key="offer.id"
-            :offer="offer"
-            @price-clicked="handlePriceClick"
-          />
-        </div>
-
-        <!-- FIRST DRESSING LINE -->
-        <Dressing :dressingInfo="firstDressingLine" v-if="firstDressingLine" />
-
-        <!-- SECOND 5 OFFERS LINE -->
-        <div class="offers-list">
-          <OfferCard
-            v-for="offer in secondOffersLine"
-            :key="offer.id"
-            :offer="offer"
-            @price-clicked="handlePriceClick"
-          />
-        </div>
-
-        <!-- SECOND DRESSING LINE -->
-        <Dressing :dressingInfo="secondDressingLine" v-if="secondDressingLine" />
-
-        <!-- THIRD 5 OFFERS LINE -->
-        <div class="offers-list">
-          <OfferCard
-            v-for="offer in thirdOffersLine"
-            :key="offer.id"
-            :offer="offer"
-            @price-clicked="handlePriceClick"
-          />
-        </div>
-
-        <!-- THIRD DRESSING LINE -->
-        <Dressing :dressingInfo="thirdDressingLine" v-if="secondDressingLine" />
-
-        <!-- FOURTH 4 OFFERS LINE -->
-        <div class="offers-list">
-          <OfferCard
-            v-for="offer in fourthOffersLine"
-            :key="offer.id"
-            :offer="offer"
-            @price-clicked="handlePriceClick"
-          />
-        </div>
-
-        <!-- VOIR PLUS OFFRES  -->
-        <div class="offers-list" v-if="offersListPlus">
-          <OfferCard
-            v-for="offer in offersListPlus"
-            :key="offer.id"
-            :offer="offer"
-            @price-clicked="handlePriceClick"
-          />
-        </div>
-
-        <button @click="loadMoreOffer">Voir plus</button>
-      </div>
-    </section>
-  </div>
+  </main>
 
   <!-- POPUP GLOBAL PRICE DETAIL -->
   <PricePopup
@@ -285,65 +292,259 @@ const loadMoreOffer = async () => {
 </template>
 
 <style scoped>
-/* HERO ---------------------------------- */
+/* SMALL / MOBILE (≤ 720px) */
+
+/* HERO -----------------*/
 .hero {
-  height: 405px;
   max-width: 100%;
-  /* border: 1px solid black; */
+  display: flex;
+  position: relative;
+  justify-content: center;
 }
 
 .hero__background {
-  height: 100%;
-  width: 100%;
-  border: 1px solid red;
-  position: relative;
+  max-width: 100%;
 }
 
-/* IMAGE ---------------*/
-
-.hero__img {
-  height: 100%;
-  width: 100%;
+.hero__background > img {
+  max-width: 100%;
   object-fit: cover;
 }
 
-.hero__overlay {
-  width: 50%;
-  height: 100%;
-  /* border: 3px solid purple; */
+.hero__card-container {
+  background-color: white;
+  padding: 8px;
+  border-radius: var(--radius);
   position: absolute;
-  background-image: url(./../assets/img/home-hero-ripped.svg);
-  background-repeat: no-repeat;
-  background-position: bottom;
-  top: 0;
-  margin-left: 50%;
+  width: 97%;
+  bottom: -150px;
 }
 
-/* CARD ---------------*/
 .hero__card {
-  background-color: pink;
-  position: absolute;
-  top: 300px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
 }
 
-/* BANNER ---------------------------------- */
-.banner {
+.hero__card-buttons {
   width: 100%;
-  height: 312px;
-  background-image: url(./../assets/img/home-banner.jpg);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.hero__card-buttons a {
+  width: 100%;
+}
+
+/* BANNER -----------------*/
+.home__content {
+  padding: 0px 10px 0px 10px;
+}
+
+.banner {
+  margin-top: 174px;
+  width: 100%;
+  height: 200px;
+  padding: 16px;
+  border-radius: var(--radius);
+  background-image: url('/src/assets/img/home-banner.jpg');
   background-size: cover;
+  background-position: left;
+  background-repeat: no-repeat;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: start;
+  margin-bottom: 20px;
 }
 
-/* OFFERS LIST ----------------------------- */
-.offers {
-  margin: 50px 0px;
-  border: 1px solid black;
+.banner__content-text > span,
+.banner__content-text > h2 {
+  color: white;
 }
 
+.banner__content-text > h2 {
+  margin-top: 10px;
+  width: 80%;
+}
+
+.banner__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: var(--radius);
+  background: white;
+  text-decoration: none;
+  color: var(--color-black);
+  font-size: 12px;
+  line-height: 1;
+}
+
+/* OFFERS ---------------------- */
 .offers-list {
-  border: 1px solid red;
   display: flex;
   flex-wrap: wrap;
-  gap: 15px;
+  width: 100%;
+  gap: 10px;
+}
+
+.container > h1 {
+  margin-bottom: 10px;
+}
+
+/* BTN VOIR PLUS */
+.offers-load-more {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.ds-filter-btn {
+  margin-top: 15px;
+  margin-bottom: 10px;
+}
+
+/* MEDIUM (721px à 960px) */
+@media (min-width: 720px) {
+  /* HERO -----------------*/
+  .hero__background {
+    height: 810px;
+    width: 100vw;
+  }
+
+  .hero__background > img {
+    height: 100%;
+    width: 100%;
+  }
+
+  .hero__card-container {
+    width: 384px;
+    height: 260px;
+    padding: 32px;
+    left: 20px;
+    top: 295px;
+  }
+
+  .hero__card {
+    padding: 0px 0px 0px 0px;
+    gap: 30px;
+  }
+
+  /* BANNER ---------------*/
+  .home__content {
+    padding: 0px 20px;
+  }
+
+  .banner {
+    margin-top: 30px;
+    margin-bottom: 30px;
+    height: 312px;
+    padding: 30px;
+  }
+
+  .banner__content-text > h2 {
+    font-size: var(--font-h1);
+    line-height: var(--line-height-heading);
+  }
+
+  .banner__button {
+    font-size: var(--font-span-md);
+    height: 34px;
+  }
+
+  /* OFFERS ---------------*/
+  .offers-list {
+    gap: 15px;
+  }
+}
+
+/* DESKTOP (960px à 1200px) */
+@media (min-width: 960px) {
+  /* HERO ----------------- */
+  .hero__background {
+    height: 776px;
+  }
+
+  .hero__card-container {
+    top: 260px;
+  }
+
+  /* BANNER ---------------*/
+  .home__content {
+    padding: 0px 20px;
+  }
+
+  .banner {
+    padding: 32px;
+    height: 312px;
+  }
+
+  /* OFFERS ---------------------- */
+  .offers-list {
+    gap: 15px;
+  }
+}
+
+/* DESKTOP ( > 1200px) */
+@media (min-width: 1200px) {
+  /* HERO ----------------- */
+  .hero {
+    height: 640px;
+    max-width: 100%;
+  }
+
+  .hero__background {
+    height: 100%;
+    width: 100%;
+    position: relative;
+  }
+
+  .hero__img {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+  }
+
+  .hero__overlay {
+    width: 50%;
+    height: 100%;
+    position: absolute;
+    background-image: url(./../assets/img/home-hero-ripped.svg);
+    background-repeat: no-repeat;
+    background-position: bottom;
+    top: 0;
+    margin-left: 50%;
+  }
+
+  .hero__card-container {
+    left: 235px;
+    top: 190px;
+  }
+
+  .hero__card-content > h1 {
+    font-size: 24px;
+    line-height: 32px;
+    font-weight: 500;
+    width: 70%;
+  }
+
+  /* BANNER ------------- */
+  .banner {
+    margin-top: 60px;
+  }
+
+  /* OFFERS LIST -------- */
+  .offers {
+    margin: 50px 0px;
+  }
 }
 </style>

@@ -14,6 +14,14 @@
         <span>Test</span>
       </div>
     </div>
+
+    <!-- Button -->
+    <button class="ds-btn ds-btn--primary">
+      <h2>Vends maintenant</h2>
+    </button>
+    <button class="ds-btn ds-btn--secondary">
+      <h2>Découvrir comment ça marche</h2>
+    </button>
   </div>
 </template>
 

@@ -35,15 +35,24 @@ const props = defineProps({
         :src="offer.attributes.images.data[0].attributes.url"
       />
     </RouterLink>
-    <p v-if="offer.attributes.brand.data?.attributes.displayName">
+
+    <p v-if="offer.attributes.brand.data?.attributes.displayName" class="offer-brand">
       {{ offer.attributes.brand.data.attributes.displayName }}
     </p>
-    <p v-if="offer.attributes.size.data?.attributes.displayName">
+
+    <span v-if="offer.attributes.size.data?.attributes.displayName">
       {{ offer.attributes.size.data.attributes.displayName }}
-    </p>
-    <p v-else>{{ offer.attributes.condition }}</p>
-    <p>{{ offer.attributes.price.toFixed(2) }} €</p>
-    <p @click="emit('price-clicked', offer)">
+    </span>
+
+    <span v-if="offer.attributes.size.data?.attributes.displayName && offer.attributes?.condition">
+      ·
+    </span>
+
+    <span v-if="offer.attributes?.condition">{{ offer.attributes.condition }}</span>
+
+    <p class="offer-price">{{ offer.attributes.price.toFixed(2) }} €</p>
+
+    <p class="offer-price--shield" @click="emit('price-clicked', offer)">
       {{ (offer.attributes.price + offer.attributes.price * (9.38 / 100)).toFixed(2) }} €
       <span>incl. <font-awesome-icon :icon="['fas', 'shield-alt']" /></span>
     </p>
@@ -59,15 +68,22 @@ const props = defineProps({
         :src="offer.images[0].url"
       />
     </RouterLink>
+
     <p v-if="offer.brand?.displayName">
       {{ offer.brand.displayName }}
     </p>
-    <p v-if="offer.size?.displayName">
+
+    <span v-if="offer.size?.displayName">
       {{ offer.size.displayName }}
-    </p>
-    <p v-else>{{ offer.condition }}</p>
-    <p>{{ offer.price.toFixed(2) }} €</p>
-    <p @click="emit('price-clicked', offer)" v-if="!disablePricePopup">
+    </span>
+
+    <span v-if="offer.size?.displayName && offer?.condition"> · </span>
+
+    <span v-if="offer.condition">{{ offer.condition }}</span>
+
+    <p class="offer-price">{{ offer.price.toFixed(2) }} €</p>
+
+    <p class="offer-price--shield" @click="emit('price-clicked', offer)" v-if="!disablePricePopup">
       {{ (offer.price + offer.price * (9.38 / 100)).toFixed(2) }} €
       <span>incl. <font-awesome-icon :icon="['fas', 'shield-alt']" /></span>
     </p>
@@ -75,56 +91,112 @@ const props = defineProps({
 </template>
 
 <style scoped>
+/* SMALL / MOBILE (≤ 720px) */
+
 /* CARD --------- */
 /* FROM HOME */
 .offer-card {
-  border: 1px solid turquoise;
-  width: calc((100% - (4 * 15px)) / 5);
-  height: 447px;
+  width: calc((100% - (1 * 10px)) / 2);
+  aspect-ratio: 2/3;
+  border-radius: var(--radius);
 }
 
 img {
   width: 100%;
-  height: 352px;
+  height: 90%;
   object-fit: cover;
+  border-radius: var(--radius);
 }
 
-/* FROM PRODUCT */
-.offer-card-from-product {
-  border: 1px solid royalblue;
-  width: calc((100% - (4 * 15px)) / 4);
-  height: 372px;
+p,
+span {
+  font-size: var(--font-p);
+  line-height: var(--line-height-small);
+  color: var(--color-gray);
 }
 
-.img-from-product {
-  width: 100%;
-  height: 278px;
-  object-fit: cover;
+.offer-brand {
+  margin-top: 5px;
 }
 
-/* FROM PROFILE */
-.offer-card-from-profile {
-  border: 1px solid royalblue;
-  width: calc((100% - (4 * 15px)) / 5);
-  height: 450px;
+.offer-price {
+  margin-top: 10px;
 }
 
-.img-from-profile {
-  width: 100%;
-  height: 339px;
-  object-fit: cover;
+.offer-price--shield {
+  font-size: var(--font-span-md);
+  color: var(--color-primary);
+  margin-bottom: 10px;
 }
 
-/* FROM CATALOG */
-.offer-card-from-catalog {
-  border: 1px solid royalblue;
-  width: calc((100% - (3 * 15px)) / 4);
-  height: 422px;
+.offer-price--shield span,
+.offer-price--shield svg {
+  color: var(--color-primary);
 }
 
-.img-from-catalog {
-  width: 100%;
-  height: 329px;
-  object-fit: cover;
+/* MEDIUM (721px à 960px) */
+@media (min-width: 720px) {
+  .offer-card {
+    width: calc((100% - (2 * 15px)) / 3);
+  }
+}
+
+/* DESKTOP (960px à 1200px) */
+@media (min-width: 960px) {
+  .offer-card {
+    width: calc((100% - (3 * 15px)) / 4);
+  }
+}
+
+/* DESKTOP ( > 1200px) */
+@media (min-width: 1200px) {
+  /* CARD --------- */
+  /* FROM HOME */
+  .offer-card {
+    width: calc((100% - (4 * 15px)) / 5);
+  }
+
+  img {
+    height: 352px;
+  }
+
+  /* FROM PRODUCT */
+  .offer-card-from-product {
+    border: 1px solid royalblue;
+    width: calc((100% - (4 * 15px)) / 4);
+    height: 372px;
+  }
+
+  .img-from-product {
+    width: 100%;
+    height: 278px;
+    object-fit: cover;
+  }
+
+  /* FROM PROFILE */
+  .offer-card-from-profile {
+    border: 1px solid royalblue;
+    width: calc((100% - (4 * 15px)) / 5);
+    height: 450px;
+  }
+
+  .img-from-profile {
+    width: 100%;
+    height: 339px;
+    object-fit: cover;
+  }
+
+  /* FROM CATALOG */
+  .offer-card-from-catalog {
+    border: 1px solid royalblue;
+    width: calc((100% - (3 * 15px)) / 4);
+    height: 422px;
+  }
+
+  .img-from-catalog {
+    width: 100%;
+    height: 329px;
+    object-fit: cover;
+  }
 }
 </style>
