@@ -210,3 +210,15 @@ body {
     margin-top: 115px;
   }
 }
+
+/* MEDIUM (721px à 960px) */
+@media (min-width: 721px) and (max-width: 960px) {
+}
+
+/* DESKTOP (> 961px) */
+@media (min-width: 961px) {
+}
+
+/* DESKTOP LARGE (> 1200px) */
+@media (min-width: 1200px) {
+}

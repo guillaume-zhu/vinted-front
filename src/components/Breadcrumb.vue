@@ -57,12 +57,12 @@ watch(() => props.category, buildBreadCrumbArray)
 
 <template>
   <nav>
-    <RouterLink :to="{ name: 'home' }"> <span>Accueil </span></RouterLink>
-    <span v-for="item in breadCrumbArray" :key="item.id"
-      >/
+    <RouterLink :to="{ name: 'home' }">Accueil</RouterLink>
+    <span v-for="item in breadCrumbArray" :key="item.id">
+      &nbsp;/&nbsp;
       <RouterLink :to="{ name: 'catalog', params: { id: item.id } }">
-        <span>{{ item.displayName }}</span></RouterLink
-      >
+        {{ item.displayName }}
+      </RouterLink>
     </span>
   </nav>
 </template>
@@ -70,5 +70,15 @@ watch(() => props.category, buildBreadCrumbArray)
 <style scoped>
 nav {
   display: flex;
+}
+
+a {
+  text-decoration: underline;
+}
+
+span,
+a {
+  font-size: var(--font-span-md);
+  color: var(--color-gray);
 }
 </style>

@@ -1,27 +1,71 @@
 <script setup>
-// A ne pas oublier
-// Adapter body to header
+import { ref } from 'vue'
+import Breadcrumb from '@/components/Breadcrumb.vue'
+
+const categoryData = ref({
+  id: '15',
+  attributes: {
+    name: 'jacket-coats',
+    displayName: 'Vestes & Manteaux',
+    categoryLevel: 'level3',
+    parent: {
+      data: {
+        id: '8',
+        attributes: {
+          name: 'outerwear',
+          displayName: 'Hauts',
+          categoryLevel: 'level2',
+          parent: {
+            data: {
+              id: '1',
+              attributes: {
+                name: 'clothing',
+                displayName: 'Vêtements',
+                categoryLevel: 'level1',
+                parent: {
+                  data: null,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    children: { data: [] },
+  },
+})
 </script>
 
 <template>
-  <!-- Filter button -->
   <div class="container">
     <h1>Design system</h1>
 
-    <div>
-      <h2>ds-filter-btn</h2>
-      <div class="ds-filter-btn">
-        <span>Test</span>
+    <div class="content">
+      <!-- Filter button -->
+      <section>
+        <h2>ds-filter-btn</h2>
+        <div class="ds-filter-btn">
+          <span>Test</span>
+        </div>
+      </section>
+
+      <!-- Button -->
+      <section>
+        <h2>btn</h2>
+        <button class="ds-btn ds-btn--primary">
+          <h2>Vends maintenant</h2>
+        </button>
+        <button class="ds-btn ds-btn--secondary">
+          <h2>Découvrir comment ça marche</h2>
+        </button>
+      </section>
+
+      <!-- Breadcrumb -->
+      <div>
+        <h2>Breadcrumb</h2>
+        <Breadcrumb :category="categoryData" />
       </div>
     </div>
-
-    <!-- Button -->
-    <button class="ds-btn ds-btn--primary">
-      <h2>Vends maintenant</h2>
-    </button>
-    <button class="ds-btn ds-btn--secondary">
-      <h2>Découvrir comment ça marche</h2>
-    </button>
   </div>
 </template>
 
@@ -29,5 +73,21 @@
 h1 {
   font-size: 100px;
   line-height: 150px;
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+section {
+  margin: 40px 0px;
+}
+
+.content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
 }
 </style>

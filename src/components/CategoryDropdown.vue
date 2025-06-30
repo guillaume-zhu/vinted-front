@@ -353,13 +353,11 @@ const aboutLinks = [
   display: flex;
   background: white;
   padding: 20px;
-  border: 1px solid red;
 }
 
 .dropdown-category li {
   font-size: var(--font-h2);
   color: var(--color-gray);
-  border: 1px solid red;
   padding: 20px 10px;
   border-radius: 3px;
   background-color: white;
@@ -390,7 +388,6 @@ const aboutLinks = [
 .dropdown-category__right {
   column-count: 2;
   /* column-gap: 20px; */
-  border: 1px solid peru;
   width: 700px;
 }
 
@@ -409,7 +406,8 @@ const aboutLinks = [
   width: 350px;
   padding-right: 20px;
   list-style: none;
-  border-right: 1px solid #eee;
+  border-right: 1px solid var(--color-light);
+  margin-right: 5px;
 }
 
 .dropdown-category__left-icon-sub {
