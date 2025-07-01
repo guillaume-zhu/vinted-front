@@ -203,6 +203,88 @@ const removeAllFilters = () => {
   page.value = 1
 }
 
+// 10. Mobile Filter Menu
+const isMobileFilterOpen = ref(false)
+const mobileFilterSection = ref(null)
+const mobileFilterTitles = {
+  size: 'Tailles',
+  brand: 'Marque',
+  condition: 'État',
+  color: 'Couleurs',
+  price: 'Prix',
+  material: 'Matières',
+  sort: 'Tri',
+}
+
+const mobileFiltersSummaries = computed(() => {
+  const summaries = {}
+  const maxChars = 30
+
+  for (const key in mobileFilterTitles) {
+    const val = addedFilters.value[key]
+    let text
+
+    if (Array.isArray(val) && val.length > 0) {
+      text = val.join(',')
+    } else if (typeof val === 'string' && val) {
+      text = val
+    } else {
+      text = 'Tous'
+    }
+
+    if (text.length > maxChars) {
+      text = text.slice(0, maxChars) + '...'
+    }
+
+    summaries[key] = text
+  }
+  return summaries
+})
+
+const resetDropdowns = () => {
+  for (const key in showDropdown.value) {
+    showDropdown.value[key] = false
+  }
+}
+
+const onMobileHeaderBack = () => {
+  if (mobileFilterSection.value) {
+    mobileFilterSection.value = null
+    resetDropdowns()
+  } else {
+    isMobileFilterOpen.value = false
+  }
+}
+
+const handleHeaderClear = (key) => {
+  // si section précise
+  if (mobileFilterSection.value) {
+    // supprimer filtre en question
+    const key = mobileFilterSection.value
+    if (Array.isArray(filters.value[key])) {
+      filters.value[key] = []
+    } else {
+      filters.value[key] = null
+    }
+
+    // si section principale
+    // supprimer tout les filtres
+  } else {
+    removeAllFilters()
+  }
+}
+
+const selectMobileFilter = (key) => {
+  mobileFilterSection.value = key
+  toggleDropdown(key)
+}
+
+const closeMobileFilters = () => {
+  isMobileFilterOpen.value = false
+  mobileFilterSection.vale = null
+  resetDropdowns()
+}
+
 // ----------------------------------------------
 // 🔎 API FUNCTIONS FETCH
 // ----------------------------------------------
@@ -274,72 +356,6 @@ const debouncedFetchOffers = debounce(() => {
 // ----------------------------------------------
 // 🛟 FILTRAGE & EXTRACT FUNCTIONS
 // ----------------------------------------------
-
-// 1. Filtered Offers
-// const filteredOffers = computed(() => {
-//   let results = offersList.value.data || []
-
-//   // 1. Filtre taille
-//   if (filters.value.size?.length > 0) {
-//     results = results.filter((offer) => {
-//       const offerSize = offer.attributes.size?.data?.attributes?.name
-//       return filters.value.size.includes(offerSize)
-//     })
-//   }
-
-//   // 2. Filtre marque
-//   if (filters.value.brand?.length > 0) {
-//     results = results.filter((offer) => {
-//       const offerBrand = offer.attributes.brand?.data?.attributes?.name
-//       return filters.value.brand.includes(offerBrand)
-//     })
-//   }
-
-//   // 3. Filtre condition
-//   if (filters.value.condition?.length > 0) {
-//     results = results.filter((offer) => {
-//       const offerCondition = offer.attributes.condition
-//       return filters.value.condition.includes(offerCondition)
-//     })
-//   }
-
-//   // 4. Filtre color
-//   if (filters.value.color.length > 0) {
-//     results = results.filter((offer) => {
-//       const offerColors = offer.attributes.colors?.data?.map((c) => c.attributes.name) || []
-//       return offerColors.some((color) => filters.value.color.includes(color))
-//     })
-//   }
-
-//   // 5. Filtre material
-//   if (filters.value.material.length > 0) {
-//     results = results.filter((offer) => {
-//       const offerMaterials = offer.attributes.materials?.data || []
-//       const offerMaterialIds = offerMaterials.map((m) => m.id)
-//       return filters.value.material.some((id) => offerMaterialIds.includes(id))
-//     })
-//   }
-
-//   // 6. Filtre prix
-//   const min = filters.value.priceMin
-//   const max = filters.value.priceMax
-
-//   if (min !== null) {
-//     results = results.filter((offer) => offer.attributes.price >= min)
-//   }
-//   if (max !== null) {
-//     results = results.filter((offer) => offer.attributes.price <= max)
-//   }
-
-//   // 7. Filtre sort
-//   if (filters.value.sort === 'priceAsc') {
-//     results.sort((a, b) => a.attributes.price - b.attributes.price)
-//   } else if (filters.value.sort === 'priceDesc') {
-//     results.sort((a, b) => b.attributes.price - a.attributes.price)
-//   }
-
-//   return results
-// })
 
 // 2. Size
 const extractSizesFromOffers = (offers) => {
@@ -472,20 +488,6 @@ watch(
   { deep: true },
 )
 
-// watch(
-//   [filters, page],
-//   () => {
-//     const query = { q: q.value || undefined, page: page.value }
-//     // ne pas injecter les clés vides
-//     Object.entries(filters.value).forEach(([key, val]) => {
-//       if (Array.isArray(val) && val.length) query[key] = val
-//       else if (!Array.isArray(val) && val != null) query[key] = val
-//     })
-//     router.replace({ name: 'search', query })
-//   },
-//   { deep: true },
-// )
-
 // 3. Watch added filters
 watchEffect(() => {
   const updated = {}
@@ -551,6 +553,17 @@ const changePage = (order, actualNum) => {
         <h1 v-else>Articles</h1>
 
         <!-- FILTERS & SORT -->
+        <!-- mobile filters -->
+        <button class="ds-filter-btn small-only" @click="isMobileFilterOpen = true">
+          <font-awesome-icon :icon="['fas', 'sliders-h']" />Filtres
+          <span v-if="Object.values(filters).some((v) => v?.length || v !== null)"
+            >({{
+              Object.values(filters).filter((v) => (Array.isArray(v) ? v.length : v !== null))
+                .length
+            }})</span
+          >
+        </button>
+
         <div class="filters">
           <!-- size -->
           <div
@@ -844,10 +857,218 @@ const changePage = (order, actualNum) => {
     :fromCatalog="true"
     @closePricePopup="closePricePopup"
   />
+
+  <!-- MOBILE FILTERS MENU -->
+  <div class="mobile-filters__overlay" v-if="isMobileFilterOpen">
+    <!-- header ------>
+    <div class="mobile-filters__header">
+      <button class="mobile-filters__back-btn" @click="onMobileHeaderBack">
+        <font-awesome-icon :icon="['fas', mobileFilterSection ? 'arrow-left' : 'times']" />
+      </button>
+
+      <h2>{{ mobileFilterSection ? mobileFilterTitles[mobileFilterSection] : 'Filtrer' }}</h2>
+
+      <h2 @click="handleHeaderClear">{{ mobileFilterSection ? 'Supprimer' : 'Effacer tout' }}</h2>
+    </div>
+
+    <!-- content ----->
+    <div class="mobile-filters__content">
+      <!-- 1. filters list -->
+      <div v-if="!mobileFilterSection">
+        <div
+          class="mobile-filter__item"
+          v-for="(label, key) in mobileFilterTitles"
+          :key="key"
+          @click="selectMobileFilter(key)"
+        >
+          <span class="mobile-filter__label">{{ label }}</span>
+          <span class="mobile-filter__summary">{{ mobileFiltersSummaries[key] }}</span>
+          <font-awesome-icon :icon="['fas', 'chevron-right']" />
+        </div>
+      </div>
+
+      <!-- 2. size -->
+      <div v-else-if="mobileFilterSection === 'size'">
+        <p>{{ mobileFilterTitles[mobileFilterSection] }}</p>
+        <ul class="mobile-filter__list">
+          <li v-for="size in availableSizes" :key="size.id" class="mobile-filter__list-item">
+            <label>
+              <span>{{ size.displayName }}</span>
+              <input type="checkbox" :value="size.name" v-model="filters.size" />
+            </label>
+          </li>
+        </ul>
+      </div>
+
+      <!-- 3. brand -->
+      <div v-else-if="mobileFilterSection === 'brand'">
+        <input
+          class="mobile-filter__search"
+          type="text"
+          v-model="inputBrand"
+          placeholder="Recherche une marque"
+        />
+        <ul class="mobile-filter__list">
+          <li v-for="brand in filteredBrands" :key="brand.id" class="mobile-filter__list-item">
+            <label>
+              <span>{{ brand.displayName }}</span>
+              <input type="checkbox" :value="brand.name" v-model="filters.brand" />
+            </label>
+          </li>
+        </ul>
+      </div>
+
+      <!-- 4. condition -->
+      <div v-else-if="mobileFilterSection === 'condition'">
+        <p>{{ mobileFilterTitles[mobileFilterSection] }}</p>
+        <ul class="mobile-filter__list">
+          <li
+            v-for="condition in availableConditions"
+            :key="condition.name"
+            class="mobile-filter__list-item"
+          >
+            <label>
+              <span>{{ condition.name }}</span>
+              <input type="checkbox" :value="condition.name" v-model="filters.condition" />
+            </label>
+          </li>
+        </ul>
+      </div>
+
+      <!-- 5. color -->
+      <div v-else-if="mobileFilterSection === 'color'">
+        <p>{{ mobileFilterTitles[mobileFilterSection] }}</p>
+        <ul class="mobile-filter__list">
+          <li v-for="color in availableColors" :key="color.id" class="mobile-filter__list-item">
+            <label>
+              <div
+                class="filter__color-circle"
+                :style="color.hex ? { backgroundColor: color.hex } : { background: color.style }"
+                :class="{
+                  isWhite:
+                    color.name === 'blanc' || color.name === 'creme' || color.name === 'beige',
+                }"
+              ></div>
+              <span> {{ color.displayName }}</span>
+              <input type="checkbox" :value="color.name" v-model="filters.color" />
+            </label>
+          </li>
+        </ul>
+      </div>
+
+      <!-- 5. price -->
+      <div v-else-if="mobileFilterSection === 'price'">
+        <p>{{ mobileFilterTitles[mobileFilterSection] }}</p>
+        <div>
+          <label>
+            <span>De</span>
+            <input
+              type="number"
+              name="priceMin"
+              id="priceMin"
+              placeholder="0,00€"
+              v-model.number="filters.priceMin"
+            />
+          </label>
+
+          <label>
+            <span>À</span>
+            <input
+              type="number"
+              name="priceMax"
+              id="priceMax"
+              placeholder="€"
+              v-model.number="filters.priceMax"
+            />
+          </label>
+        </div>
+      </div>
+
+      <!-- 6. material -->
+      <div v-else-if="mobileFilterSection === 'material'">
+        <p>{{ mobileFilterTitles[mobileFilterSection] }}</p>
+        <ul class="mobile-filter__list">
+          <li
+            v-for="material in availableMaterials"
+            :key="material.id"
+            class="mobile-filter__list-item"
+          >
+            <label>
+              <span>{{ material.displayName }}</span>
+              <input type="checkbox" :value="material.id" v-model="filters.material" />
+            </label>
+          </li>
+        </ul>
+      </div>
+
+      <!-- 7. sort -->
+      <div v-else-if="mobileFilterSection === 'sort'">
+        <p>{{ mobileFilterTitles[mobileFilterSection] }}</p>
+        <ul class="mobile-filter__list">
+          <li v-for="sort in availableSorts" :key="sort.name" class="mobile-filter__list-item">
+            <label>
+              <span>{{ sort.displayName }}</span>
+              <input type="radio" name="sort" id="sort" :value="sort.name" v-model="filters.sort" />
+            </label>
+          </li>
+        </ul>
+      </div>
+      <div class="mobile-filters__footer"></div>
+      <button
+        class="mobile-filters__apply-btn"
+        @click="closeMobileFilters"
+        v-if="mobileFilterSection"
+      >
+        Afficher les résultats
+        <span v-if="offersList.data.length > 0">{{ offersList.data.length + ' résultats' }}</span>
+      </button>
+    </div>
+  </div>
 </template>
 
 <style scoped>
-/* TRI ET FILTRES */
+/* SMALL / MOBILE (≤ 720px) */
+.container {
+  margin-top: 145px;
+}
+
+.container__catalog {
+  padding: 10px;
+}
+
+/* HEADER -----------------------*/
+/* BANNER --------------*/
+.catalog__banner {
+  border: 1px solid red;
+  width: 100%;
+}
+
+.catalog__banner > img {
+  width: 100%;
+}
+
+/* TRI ET FILTRES -----*/
+h1 {
+  margin-top: 10px;
+}
+
+/* MOBILE FILTERS -----*/
+.mobile-filters__overlay {
+  position: fixed;
+  top: 0px;
+  width: 100%;
+  background-color: white;
+  border: 1px solid blue;
+  z-index: 2000;
+}
+
+/* HEADER */
+.mobile-filters__header {
+  display: flex;
+  justify-content: space-between;
+  background-color: pink;
+}
+
 .filters {
   display: flex;
   align-items: center;
@@ -867,6 +1088,13 @@ const changePage = (order, actualNum) => {
   border: 1px solid lightgray;
 }
 
+/* CHILD LINKS */
+.catalog__child-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 /* OFFERS */
 .catalog__offers {
   display: flex;
@@ -882,5 +1110,17 @@ const changePage = (order, actualNum) => {
 
 .disable {
   opacity: 0.2;
+}
+
+/* MEDIUM (721px à 960px) */
+@media (min-width: 721px) and (max-width: 960px) {
+}
+
+/* DESKTOP (> 961px) */
+@media (min-width: 961px) {
+}
+
+/* DESKTOP LARGE (> 1200px) */
+@media (min-width: 1200px) {
 }
 </style>
