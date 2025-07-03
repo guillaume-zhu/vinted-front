@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watchEffect, watch, computed, onBeforeUnmount } from 'vue'
+import { ref, onMounted, watchEffect, watch, computed, onBeforeUnmount, nextTick } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 
@@ -28,6 +28,7 @@ const isLoading = ref(false)
 const offersList = ref([])
 const totalPage = ref(null)
 const page = ref(1)
+const offersContainer = ref(null)
 
 // 2. Price Pop-up
 const selectedOfferForPopup = ref(null)
@@ -172,7 +173,7 @@ const mobileFilterTitles = {
   color: 'Couleurs',
   price: 'Prix',
   material: 'Matières',
-  sort: 'Tri',
+  sort: 'Trier par',
 }
 
 const mobileFiltersSummaries = computed(() => {
@@ -180,18 +181,37 @@ const mobileFiltersSummaries = computed(() => {
   const maxChars = 30
 
   for (const key in mobileFilterTitles) {
-    const val = addedFilters.value[key]
-    let text
+    let text = 'Tous'
 
-    if (Array.isArray(val) && val.length > 0) {
-      text = val.join(',')
-    } else if (typeof val === 'string' && val) {
-      text = val
+    if (key === 'price') {
+      const minRaw = filters.value.priceMin
+      const maxRaw = filters.value.priceMax
+
+      const minNum = parseFloat(minRaw)
+      const maxNum = parseFloat(maxRaw)
+
+      const minValid = !Number.isNaN(minNum)
+      const maxValid = !Number.isNaN(maxNum)
+
+      if (minValid && maxValid) {
+        text = `De ${minNum.toFixed(2)}€ à ${maxNum.toFixed(2)}€`
+      } else if (minValid) {
+        text = `De ${minNum.toFixed(2)}€`
+      } else if (maxValid) {
+        text = `À ${maxNum.toFixed(2)}€`
+      }
     } else {
-      text = 'Tous'
+      const val = addedFilters.value[key]
+      if (Array.isArray(val) && val.length > 0) {
+        text = val.join(', ')
+      } else if (typeof val === 'string' && val) {
+        text = val
+      } else {
+        text = 'Tous'
+      }
     }
 
-    if (text.length > maxChars) {
+    if (text?.length > maxChars) {
       text = text.slice(0, maxChars) + '...'
     }
 
@@ -585,6 +605,12 @@ const changePage = (order, actualNum) => {
   } else if (order === 'num' && page.value !== actualNum) {
     page.value = actualNum
   }
+
+  nextTick(() => {
+    if (offersContainer.value) {
+      offersContainer.value.scrollIntoView({ behavior: 'smooth' })
+    }
+  })
 }
 </script>
 
@@ -605,7 +631,11 @@ const changePage = (order, actualNum) => {
 
         <!-- FILTERS & SORT -->
         <!-- mobile filters -->
-        <button class="ds-filter-btn small-only" @click="isMobileFilterOpen = true">
+        <button
+          class="ds-filter-btn small-only"
+          :class="{ activeBtn: Object.values(filters).some((v) => v?.length || v > 1) }"
+          @click="isMobileFilterOpen = true"
+        >
           <font-awesome-icon :icon="['fas', 'sliders-h']" />Filtres
           <span v-if="Object.values(filters).some((v) => v?.length || v !== null)"
             >({{
@@ -644,13 +674,20 @@ const changePage = (order, actualNum) => {
               </button>
 
               <div v-if="showDropdown.brand" class="filter__dropdown">
-                <input
-                  type="text"
-                  name="inputBrand"
-                  id="inputBrand"
-                  v-model="inputBrand"
-                  placeholder="Recherche une marque"
-                />
+                <div class="ds-search-input">
+                  <font-awesome-icon :icon="['fas', 'search']" />
+                  <input
+                    class="mobile-filters__search"
+                    type="text"
+                    v-model="inputBrand"
+                    placeholder="Recherche une marque"
+                  />
+                  <font-awesome-icon
+                    :icon="['fas', 'times']"
+                    v-if="inputBrand"
+                    @click="inputBrand = ''"
+                  />
+                </div>
                 <ul class="filter__list">
                   <li v-for="brand in filteredBrands" :key="brand.id" class="filter__item">
                     <label>
@@ -888,7 +925,7 @@ const changePage = (order, actualNum) => {
 
       <!-- NUMBER OF RESULTS -->
       <div class="catalog__number-results" v-if="offersList.data">
-        <p>
+        <p class="text-md">
           {{
             offersList.data.length > 0 ? offersList.data.length + ' résultats' : 'Pas de résultats'
           }}
@@ -896,7 +933,7 @@ const changePage = (order, actualNum) => {
       </div>
 
       <!-- CATLOG OFFERS ----------------------->
-      <div class="catalog__offers" v-if="offersList">
+      <div class="catalog__offers" v-if="offersList" ref="offersContainer">
         <OfferCard
           v-for="offer in offersList.data"
           :key="offer.id"
@@ -907,13 +944,25 @@ const changePage = (order, actualNum) => {
       </div>
 
       <div class="catalog__offers-pagination" v-if="totalPage">
-        <div @click="changePage('prev')" :class="{ disable: page === 1 }">
+        <div
+          @click="changePage('prev')"
+          :class="{ disable: page === 1 }"
+          class="offers-pagination__box"
+        >
           <font-awesome-icon :icon="['fas', 'chevron-left']" />
         </div>
-        <div v-for="num in totalPage">
-          <p @click="changePage('num', num)">{{ num }}</p>
+        <div
+          v-for="num in totalPage"
+          class="offers-pagination__box"
+          :class="{ activePage: page === num }"
+        >
+          <span @click="changePage('num', num)" class="text-md">{{ num }}</span>
         </div>
-        <div @click="changePage('next')" :class="{ disable: page === totalPage }">
+        <div
+          @click="changePage('next')"
+          :class="{ disable: page === totalPage }"
+          class="offers-pagination__box"
+        >
           <font-awesome-icon :icon="['fas', 'chevron-right']" />
         </div>
       </div>
@@ -930,13 +979,28 @@ const changePage = (order, actualNum) => {
   <div class="mobile-filters__overlay" v-if="isMobileFilterOpen">
     <!-- header ------>
     <div class="mobile-filters__header">
-      <button class="mobile-filters__back-btn" @click="onMobileHeaderBack">
-        <font-awesome-icon :icon="['fas', mobileFilterSection ? 'arrow-left' : 'times']" />
-      </button>
+      <div class="mobile-filters__header-top">
+        <button class="mobile-filters__back-btn" @click="onMobileHeaderBack">
+          <font-awesome-icon :icon="['fas', mobileFilterSection ? 'arrow-left' : 'times']" />
+        </button>
 
-      <h2>{{ mobileFilterSection ? mobileFilterTitles[mobileFilterSection] : 'Filtrer' }}</h2>
+        <h2>{{ mobileFilterSection ? mobileFilterTitles[mobileFilterSection] : 'Filtrer' }}</h2>
 
-      <h2 @click="handleHeaderClear">{{ mobileFilterSection ? 'Supprimer' : 'Effacer tout' }}</h2>
+        <h2 @click="handleHeaderClear">{{ mobileFilterSection ? 'Supprimer' : 'Effacer tout' }}</h2>
+      </div>
+
+      <div class="brand__navigation" v-if="mobileFilterSection === 'brand'">
+        <div class="ds-search-input">
+          <font-awesome-icon :icon="['fas', 'search']" />
+          <input
+            class="mobile-filters__search"
+            type="text"
+            v-model="inputBrand"
+            placeholder="Recherche une marque"
+          />
+          <font-awesome-icon :icon="['fas', 'times']" v-if="inputBrand" @click="inputBrand = ''" />
+        </div>
+      </div>
     </div>
 
     <!-- content ----->
@@ -944,22 +1008,28 @@ const changePage = (order, actualNum) => {
       <!-- 1. filters list -->
       <div v-if="!mobileFilterSection">
         <div
-          class="mobile-filter__item"
+          class="mobile-filters__item"
           v-for="(label, key) in mobileFilterTitles"
           :key="key"
           @click="selectMobileFilter(key)"
         >
-          <span class="mobile-filter__label">{{ label }}</span>
-          <span class="mobile-filter__summary">{{ mobileFiltersSummaries[key] }}</span>
-          <font-awesome-icon :icon="['fas', 'chevron-right']" />
+          <span class="mobile-filters__label">{{ label }}</span>
+
+          <div class="mobile-filters__summary-svg">
+            <span
+              class="mobile-filters__summary"
+              :class="{ summaryActive: mobileFiltersSummaries[key] != 'Tous' }"
+              >{{ mobileFiltersSummaries[key] }}</span
+            >
+            <font-awesome-icon :icon="['fas', 'chevron-right']" />
+          </div>
         </div>
       </div>
 
       <!-- 2. size -->
       <div v-else-if="mobileFilterSection === 'size'">
-        <p>{{ mobileFilterTitles[mobileFilterSection] }}</p>
-        <ul class="mobile-filter__list">
-          <li v-for="size in availableSizes" :key="size.id" class="mobile-filter__list-item">
+        <ul class="mobile-filters__list">
+          <li v-for="size in availableSizes" :key="size.id" class="mobile-filters__list-item">
             <label>
               <span>{{ size.displayName }}</span>
               <input type="checkbox" :value="size.name" v-model="filters.size" />
@@ -970,14 +1040,8 @@ const changePage = (order, actualNum) => {
 
       <!-- 3. brand -->
       <div v-else-if="mobileFilterSection === 'brand'">
-        <input
-          class="mobile-filter__search"
-          type="text"
-          v-model="inputBrand"
-          placeholder="Recherche une marque"
-        />
-        <ul class="mobile-filter__list">
-          <li v-for="brand in filteredBrands" :key="brand.id" class="mobile-filter__list-item">
+        <ul class="mobile-filters__list">
+          <li v-for="brand in filteredBrands" :key="brand.id" class="mobile-filters__list-item">
             <label>
               <span>{{ brand.displayName }}</span>
               <input type="checkbox" :value="brand.name" v-model="filters.brand" />
@@ -988,15 +1052,17 @@ const changePage = (order, actualNum) => {
 
       <!-- 4. condition -->
       <div v-else-if="mobileFilterSection === 'condition'">
-        <p>{{ mobileFilterTitles[mobileFilterSection] }}</p>
-        <ul class="mobile-filter__list">
+        <ul class="mobile-filters__list">
           <li
             v-for="condition in availableConditions"
             :key="condition.name"
-            class="mobile-filter__list-item"
+            class="mobile-filters__list-item"
           >
             <label>
-              <span>{{ condition.name }}</span>
+              <div>
+                <span>{{ condition.name }}</span>
+                <p class="condition__description">{{ condition.description }}</p>
+              </div>
               <input type="checkbox" :value="condition.name" v-model="filters.condition" />
             </label>
           </li>
@@ -1005,19 +1071,20 @@ const changePage = (order, actualNum) => {
 
       <!-- 5. color -->
       <div v-else-if="mobileFilterSection === 'color'">
-        <p>{{ mobileFilterTitles[mobileFilterSection] }}</p>
-        <ul class="mobile-filter__list">
-          <li v-for="color in availableColors" :key="color.id" class="mobile-filter__list-item">
+        <ul class="mobile-filters__list">
+          <li v-for="color in availableColors" :key="color.id" class="mobile-filters__list-item">
             <label>
-              <div
-                class="filter__color-circle"
-                :style="color.hex ? { backgroundColor: color.hex } : { background: color.style }"
-                :class="{
-                  isWhite:
-                    color.name === 'blanc' || color.name === 'creme' || color.name === 'beige',
-                }"
-              ></div>
-              <span> {{ color.displayName }}</span>
+              <div class="color__item-block">
+                <div
+                  class="filter__color-circle"
+                  :style="color.hex ? { backgroundColor: color.hex } : { background: color.style }"
+                  :class="{
+                    isWhite:
+                      color.name === 'blanc' || color.name === 'creme' || color.name === 'beige',
+                  }"
+                ></div>
+                <span> {{ color.displayName }}</span>
+              </div>
               <input type="checkbox" :value="color.name" v-model="filters.color" />
             </label>
           </li>
@@ -1026,9 +1093,8 @@ const changePage = (order, actualNum) => {
 
       <!-- 5. price -->
       <div v-else-if="mobileFilterSection === 'price'">
-        <p>{{ mobileFilterTitles[mobileFilterSection] }}</p>
-        <div>
-          <label>
+        <div class="filters__price-group">
+          <label class="filters__price-bloc">
             <span>De</span>
             <input
               type="number"
@@ -1039,7 +1105,7 @@ const changePage = (order, actualNum) => {
             />
           </label>
 
-          <label>
+          <label class="filters__price-bloc">
             <span>À</span>
             <input
               type="number"
@@ -1054,12 +1120,11 @@ const changePage = (order, actualNum) => {
 
       <!-- 6. material -->
       <div v-else-if="mobileFilterSection === 'material'">
-        <p>{{ mobileFilterTitles[mobileFilterSection] }}</p>
-        <ul class="mobile-filter__list">
+        <ul class="mobile-filters__list">
           <li
             v-for="material in availableMaterials"
             :key="material.id"
-            class="mobile-filter__list-item"
+            class="mobile-filters__list-item"
           >
             <label>
               <span>{{ material.displayName }}</span>
@@ -1071,9 +1136,8 @@ const changePage = (order, actualNum) => {
 
       <!-- 7. sort -->
       <div v-else-if="mobileFilterSection === 'sort'">
-        <p>{{ mobileFilterTitles[mobileFilterSection] }}</p>
-        <ul class="mobile-filter__list">
-          <li v-for="sort in availableSorts" :key="sort.name" class="mobile-filter__list-item">
+        <ul class="mobile-filters__list">
+          <li v-for="sort in availableSorts" :key="sort.name" class="mobile-filters__list-item">
             <label>
               <span>{{ sort.displayName }}</span>
               <input type="radio" name="sort" id="sort" :value="sort.name" v-model="filters.sort" />
@@ -1081,14 +1145,14 @@ const changePage = (order, actualNum) => {
           </li>
         </ul>
       </div>
-      <div class="mobile-filters__footer"></div>
-      <button
-        class="mobile-filters__apply-btn"
-        @click="closeMobileFilters"
-        v-if="mobileFilterSection"
-      >
-        Afficher les résultats
+    </div>
+
+    <!-- Footer -->
+    <div class="mobile-filters__footer">
+      <button class="mobile-filters__apply-btn ds-btn ds-btn--primary" @click="closeMobileFilters">
+        Afficher les
         <span v-if="offersList.data.length > 0">{{ offersList.data.length + ' résultats' }}</span>
+        <span v-else>résultats</span>
       </button>
     </div>
   </div>
@@ -1121,27 +1185,206 @@ h1 {
 }
 
 /* MOBILE FILTERS -----*/
+.ds-filter-btn {
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+.ds-filter-btn > svg {
+  margin-right: 5px;
+}
+
+/* MENU */
 .mobile-filters__overlay {
   position: fixed;
   top: 0px;
   width: 100%;
+  height: 100%;
   background-color: white;
   border: 1px solid blue;
   z-index: 2000;
+  display: flex;
+  flex-direction: column;
 }
 
 /* HEADER */
 .mobile-filters__header {
-  display: flex;
-  justify-content: space-between;
-  background-color: pink;
+  border-bottom: 1px solid var(--color-light-gray);
 }
 
-.filters {
+.mobile-filters__header-top {
+  display: flex;
+  justify-content: space-between;
+  padding: 16px;
+  align-items: center;
+}
+
+.brand__navigation {
+  padding: 0px 6px 6px 6px;
+}
+
+.mobile-filters__header button {
+  color: var(--color-primary);
+  border: none;
+  background-color: white;
+  font-size: 20px;
+}
+
+/* CONTENT-LIST */
+.mobile-filters__content {
+  width: 100%;
+  height: 100%;
+  overflow-y: scroll;
+}
+
+.mobile-filters__item,
+.mobile-filters__list-item {
+  border: 1px solid red;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mobile-filters__label,
+.mobile-filters__list-item > label > span,
+.mobile-filters__list-item > label > div > span {
+  color: var(--color-black);
+  font-weight: var(--font-weight-medium);
+}
+
+.mobile-filters__summary-svg {
+  color: var(--color-gray);
+  display: flex;
+  align-items: center;
+  font-weight: var(--font-weight-light);
+}
+
+.mobile-filters__summary {
+  margin-right: 10px;
+}
+
+.summaryActive {
+  color: var(--color-primary);
+}
+
+.mobile-filters__summary-svg svg {
+  color: var(--color-light-gray);
+  font-size: 14px;
+}
+
+/* CONTENT-INPUT */
+.mobile-filters__list-item label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+/* checkbox */
+.mobile-filters__list input[type='checkbox'] {
+  /* desactiver */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  margin: 0;
+  padding: 0;
+
+  /* style */
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--color-light-gray);
+  border-radius: var(--radius);
+  background-color: white;
+  cursor: pointer;
+  position: relative; /* nécessaire pour positionner le “check” */
+}
+
+input[type='checkbox']::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 7px;
+  width: 4px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  opacity: 0;
+  transition: opacity 0.1s ease-in-out;
+}
+
+input[type='checkbox']:checked {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary);
+}
+
+input[type='checkbox']:checked::after {
+  opacity: 1;
+}
+
+/* condition */
+.condition__description {
+  color: var(--color-gray);
+  font-size: var(--font-span-lg);
+  font-weight: var(--font-weight-light);
+  line-height: var(--line-height-mid);
+  margin-top: 5px;
+}
+
+/* color */
+.color__item-block {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin: 10px 0;
+}
+
+/* price */
+.filters__price-group {
+  display: flex;
+  justify-content: flex-start;
+  padding: 16px;
+  gap: 20px;
+}
+
+.filters__price-bloc {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 194px;
+}
+
+.filters__price-bloc span {
+  color: var(--color-gray);
+  font-size: var(--font-span-md);
+}
+
+input[type='number'] {
+  border: none;
+  border-bottom: 1px solid var(--color-light);
+  font-size: var(--font-span-lg);
+  font-weight: var(--font-weight-light);
+  padding: 0px 0px 6px 0px;
+  color: var(--color-black);
+}
+
+input[type='number']:focus {
+  outline: none;
+  border-bottom: 1px solid var(--color-primary);
+}
+
+/* APPLY BTN */
+.mobile-filters__footer {
+  width: 100%;
+  padding: 16px;
+  position: fixed;
+  bottom: 0px;
+  background-color: white;
+}
+
+/* FILTERS NORMAL -------*/
+.filters {
+  display: none;
 }
 
 /* COLORS */
@@ -1156,24 +1399,56 @@ h1 {
   border: 1px solid lightgray;
 }
 
-/* CHILD LINKS */
-.catalog__child-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+/* ADDED FILTERS --------*/
+.filters__button {
+  display: none;
 }
 
-/* OFFERS */
+/* CHILD LINKS ----------*/
+.catalog__child-links {
+  display: none;
+}
+
+/* OFFERS -----------------------*/
+.catalog__number-results > p {
+  color: var(--color-gray);
+}
+
 .catalog__offers {
   display: flex;
   flex-wrap: wrap;
-  gap: 15px;
+  gap: 10px;
+  margin-top: 20px;
+  scroll-margin-top: var(--header-mobile-height);
 }
 
-/* PAGINATION */
+/* PAGINATION -----------*/
 .catalog__offers-pagination {
   display: flex;
-  gap: 30px;
+  border: 1px solid var(--color-light);
+  border-radius: var(--radius);
+  width: 100%;
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+.offers-pagination__box {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--color-gray);
+}
+
+.activePage {
+  background-color: #fafafb;
+  color: var(--color-black);
+}
+
+.catalog__offers-pagination svg {
+  color: var(--color-gray);
+  font-size: var(--font-span-md);
 }
 
 .disable {

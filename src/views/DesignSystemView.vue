@@ -61,10 +61,25 @@ const categoryData = ref({
       </section>
 
       <!-- Breadcrumb -->
-      <div>
+      <section>
         <h2>Breadcrumb</h2>
         <Breadcrumb :category="categoryData" />
-      </div>
+      </section>
+
+      <!-- SearchInput -->
+      <section class="ds-search-input">
+        <font-awesome-icon :icon="['fas', 'search']" />
+        <input
+          type="text"
+          name="searchbar"
+          id="searchbar"
+          @keydown.enter="OnSearch"
+          placeholder="Rechercher des articles"
+          v-model="searchTerm"
+          class="text-lg"
+        />
+        <font-awesome-icon :icon="['fas', 'times']" v-if="searchTerm" @click="searchTerm = ''" />
+      </section>
     </div>
   </div>
 </template>
@@ -81,7 +96,7 @@ h2 {
 }
 
 section {
-  margin: 40px 0px;
+  margin: 20px 0px;
 }
 
 .content {

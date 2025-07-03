@@ -14,9 +14,12 @@
   --color-black: #15191a;
 
   /* DIMENSIONS ----------------- */
-  --header-height: 98px;
   --header-main-height: 52px;
   --header-nav-height: 44px;
+  --header-nav-mobile-height: 88px;
+
+  --header-height: calc(var(--header-main-height) + var(--header-nav-height));
+  --header-mobile-height: calc(var(--header-main-height) + var(--header-nav-mobile-height));
 
   /* FONT ----------------------- */
   --font-main: 'Inter', 'Helvetica Neue', Arial, sans-serif;
@@ -124,7 +127,8 @@ body {
   margin-top: calc(var(--header-height));
 }
 
-/* DESIGN STYLES ----------------*/ /* Filter buttons */
+/* DESIGN STYLES ----------------*/
+/* Filter buttons */
 .ds-filter-btn {
   border: 1px solid var(--color-light-gray);
   border-radius: 50px;
@@ -149,10 +153,13 @@ body {
   border-radius: var(--radius);
   border: none;
   padding: 10px 16px 10px 16px;
+  font-size: var(--font-span-lg);
+  font-weight: var(--font-weight-medium);
 }
 
 .ds-btn--primary {
   background-color: var(--color-primary);
+  color: white;
 }
 
 .ds-btn--primary > h2 {
@@ -173,6 +180,33 @@ body {
 
 .ds-btn--secondary:hover {
   background-color: var(--color-light);
+}
+
+/* Search Input */
+.ds-search-input {
+  width: 100%;
+  height: 36px;
+  border-radius: 0px var(--radius) var(--radius) 0px;
+  background-color: var(--color-light);
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0px 12px 0px 12px;
+}
+
+.ds-search-input > input {
+  border: none;
+  background: none;
+  font: inherit;
+  outline: none;
+  color: var(--color-black);
+  font-weight: 375;
+  width: 100%;
+}
+
+.ds-search-input > svg {
+  color: var(--color-gray);
 }
 
 /* RESPONSIVE ----------*/

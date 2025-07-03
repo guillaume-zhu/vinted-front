@@ -57,12 +57,12 @@ watch(() => props.category, buildBreadCrumbArray)
 
 <template>
   <nav>
-    <RouterLink :to="{ name: 'home' }">Accueil</RouterLink>
+    <!-- <RouterLink :to="{ name: 'home' }"></RouterLink> -->
     <span v-for="item in breadCrumbArray" :key="item.id">
-      &nbsp;/&nbsp;
       <RouterLink :to="{ name: 'catalog', params: { id: item.id } }">
         {{ item.displayName }}
       </RouterLink>
+      &nbsp;/&nbsp;
     </span>
   </nav>
 </template>
