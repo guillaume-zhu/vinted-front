@@ -417,7 +417,7 @@ const loadMoreOffer = async () => {
 @media (min-width: 720px) {
   /* HERO -----------------*/
   .hero__background {
-    height: 810px;
+    max-height: 80vh;
     width: 100vw;
   }
 
@@ -431,7 +431,8 @@ const loadMoreOffer = async () => {
     height: 260px;
     padding: 32px;
     left: 20px;
-    top: 295px;
+    top: 50%;
+    transform: translateY(-50%);
   }
 
   .hero__card {
@@ -475,7 +476,8 @@ const loadMoreOffer = async () => {
   }
 
   .hero__card-container {
-    top: 260px;
+    top: 50%;
+    transform: translateY(-50%);
   }
 
   /* BANNER ---------------*/
@@ -497,45 +499,6 @@ const loadMoreOffer = async () => {
 /* DESKTOP ( > 1200px) */
 @media (min-width: 1200px) {
   /* HERO ----------------- */
-  .hero {
-    height: 640px;
-    max-width: 100%;
-  }
-
-  .hero__background {
-    height: 100%;
-    width: 100%;
-    position: relative;
-  }
-
-  .hero__img {
-    height: 100%;
-    width: 100%;
-    object-fit: cover;
-  }
-
-  .hero__overlay {
-    width: 50%;
-    height: 100%;
-    position: absolute;
-    background-image: url(./../assets/img/home-hero-ripped.svg);
-    background-repeat: no-repeat;
-    background-position: bottom;
-    top: 0;
-    margin-left: 50%;
-  }
-
-  .hero__card-container {
-    left: 235px;
-    top: 190px;
-  }
-
-  .hero__card-content > h1 {
-    font-size: 24px;
-    line-height: 32px;
-    font-weight: 500;
-    width: 70%;
-  }
 
   /* BANNER ------------- */
   .banner {
