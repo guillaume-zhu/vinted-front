@@ -49,6 +49,15 @@ const categoryData = ref({
         </div>
       </section>
 
+      <!-- Filter added button -->
+      <section>
+        <h2>ds-filter-btn</h2>
+        <button class="ds-filter-btn ds-filter-btn--added">
+          Added
+          <font-awesome-icon :icon="['fas', 'times']" />
+        </button>
+      </section>
+
       <!-- Button -->
       <section>
         <h2>btn</h2>

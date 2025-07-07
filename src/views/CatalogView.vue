@@ -6,6 +6,10 @@ import axios from 'axios'
 import Breadcrumb from '@/components/Breadcrumb.vue'
 import OfferCard from '@/components/OfferCard.vue'
 import PricePopup from '@/components/PricePopup.vue'
+import { isNumber } from 'lodash'
+
+// To do
+// Ajouter le bouton afficher les resultats dans les dropdown des filtres
 
 // ----------------------------------------------
 // 📄 PROPS / ROUTER / BASE VARIABLES
@@ -260,7 +264,7 @@ const selectMobileFilter = (key) => {
 
 const closeMobileFilters = () => {
   isMobileFilterOpen.value = false
-  mobileFilterSection.vale = null
+  mobileFilterSection.value = null
   resetDropdowns()
 }
 
@@ -645,16 +649,27 @@ const changePage = (order, actualNum) => {
           >
         </button>
 
+        <!-- desktop filters -->
         <div class="filters">
           <!-- size -->
-          <div class="filters__size" :ref="(element) => (dropdownRef.size = element)">
-            <button @click="toggleDropdown('size')" class="filters__button">
+          <div class="filters__bloc" :ref="(element) => (dropdownRef.size = element)">
+            <button
+              @click="toggleDropdown('size')"
+              class="filter__toggle ds-filter-btn"
+              :class="{ activeBtn: showDropdown.size || filters.size.length > 0 }"
+            >
               Taille <font-awesome-icon :icon="['fas', 'chevron-down']" v-if="!showDropdown.size" />
               <font-awesome-icon :icon="['fas', 'chevron-up']" v-else />
             </button>
 
             <div v-if="showDropdown.size" class="filter__dropdown">
-              <p class="filter__title">Tailles</p>
+              <div class="size__title-div">
+                <p class="filter__title text-md">
+                  {{
+                    availableSizes?.length > 0 ? availableSizes[0].displayCategoryName : 'Tailles'
+                  }}
+                </p>
+              </div>
               <ul class="filter__list">
                 <li v-for="size in availableSizes" :key="size.id" class="filter__item">
                   <label>
@@ -663,89 +678,141 @@ const changePage = (order, actualNum) => {
                   </label>
                 </li>
               </ul>
-            </div>
-
-            <!-- brand -->
-            <div class="filters__brand" :ref="(element) => (dropdownRef.brand = element)">
-              <button @click="toggleDropdown('brand')" class="filters__button">
-                Marque
-                <font-awesome-icon :icon="['fas', 'chevron-down']" v-if="!showDropdown.brand" />
-                <font-awesome-icon :icon="['fas', 'chevron-up']" v-else />
-              </button>
-
-              <div v-if="showDropdown.brand" class="filter__dropdown">
-                <div class="ds-search-input">
-                  <font-awesome-icon :icon="['fas', 'search']" />
-                  <input
-                    class="mobile-filters__search"
-                    type="text"
-                    v-model="inputBrand"
-                    placeholder="Recherche une marque"
-                  />
-                  <font-awesome-icon
-                    :icon="['fas', 'times']"
-                    v-if="inputBrand"
-                    @click="inputBrand = ''"
-                  />
-                </div>
-                <ul class="filter__list">
-                  <li v-for="brand in filteredBrands" :key="brand.id" class="filter__item">
-                    <label>
-                      {{ brand.displayName }}
-                      <input
-                        type="checkbox"
-                        name="brand"
-                        :value="brand.name"
-                        v-model="filters.brand"
-                      />
-                    </label>
-                  </li>
-                </ul>
+              <div class="filter__results">
+                <button
+                  class="mobile-filters__apply-btn ds-btn ds-btn--primary"
+                  @click="resetDropdowns"
+                >
+                  Afficher les
+                  <span v-if="offersList.data.length > 0">{{
+                    offersList.data.length + ' résultats'
+                  }}</span>
+                  <span v-else>résultats</span>
+                </button>
               </div>
             </div>
+          </div>
 
-            <!-- condition -->
-            <div class="filters__condition" :ref="(element) => (dropdownRef.condition = element)">
-              <button @click="toggleDropdown('condition')">
-                État
-                <font-awesome-icon :icon="['fas', 'chevron-down']" v-if="!showDropdown.condition" />
-                <font-awesome-icon :icon="['fas', 'chevron-up']" v-else />
-              </button>
+          <!-- brand -->
+          <div class="filters__bloc" :ref="(element) => (dropdownRef.brand = element)">
+            <button
+              @click="toggleDropdown('brand')"
+              class="filter__toggle ds-filter-btn"
+              :class="{ activeBtn: showDropdown.brand || filters.brand.length > 0 }"
+            >
+              Marque
+              <font-awesome-icon :icon="['fas', 'chevron-down']" v-if="!showDropdown.brand" />
+              <font-awesome-icon :icon="['fas', 'chevron-up']" v-else />
+            </button>
 
-              <div v-if="showDropdown.condition" class="filter__dropdown">
-                <ul class="filter__list">
-                  <li
-                    v-for="condition in availableConditions"
-                    :key="condition.name"
-                    class="filter__item"
-                  >
-                    <label
-                      >{{ condition.name }}
+            <div v-if="showDropdown.brand" class="filter__dropdown">
+              <div class="ds-search-input">
+                <input
+                  class="mobile-filters__search"
+                  type="text"
+                  v-model="inputBrand"
+                  placeholder="Recherche une marque"
+                />
+                <font-awesome-icon
+                  :icon="['fas', 'times']"
+                  v-if="inputBrand"
+                  @click="inputBrand = ''"
+                />
+              </div>
+              <ul class="filter__list">
+                <li v-for="brand in filteredBrands" :key="brand.id" class="filter__item">
+                  <label>
+                    {{ brand.displayName }}
+                    <input
+                      type="checkbox"
+                      name="brand"
+                      :value="brand.name"
+                      v-model="filters.brand"
+                    />
+                  </label>
+                </li>
+              </ul>
+              <div class="filter__results">
+                <button
+                  class="mobile-filters__apply-btn ds-btn ds-btn--primary"
+                  @click="resetDropdowns"
+                >
+                  Afficher les
+                  <span v-if="offersList.data.length > 0">{{
+                    offersList.data.length + ' résultats'
+                  }}</span>
+                  <span v-else>résultats</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- condition -->
+          <div class="filters__bloc" :ref="(element) => (dropdownRef.condition = element)">
+            <button
+              @click="toggleDropdown('condition')"
+              class="filter__toggle ds-filter-btn"
+              :class="{ activeBtn: showDropdown.condition || filters.condition.length > 0 }"
+            >
+              État
+              <font-awesome-icon :icon="['fas', 'chevron-down']" v-if="!showDropdown.condition" />
+              <font-awesome-icon :icon="['fas', 'chevron-up']" v-else />
+            </button>
+
+            <div v-if="showDropdown.condition" class="filter__dropdown">
+              <ul class="filter__list">
+                <li
+                  v-for="condition in availableConditions"
+                  :key="condition.name"
+                  class="filter__item"
+                >
+                  <label class="condition__label">
+                    <div>
+                      {{ condition.name }}
                       <p>{{ condition.description }}</p>
-                      <input
-                        type="checkbox"
-                        name="condition"
-                        v-model="filters.condition"
-                        :value="condition.name"
-                      />
-                    </label>
-                  </li>
-                </ul>
+                    </div>
+
+                    <input
+                      type="checkbox"
+                      name="condition"
+                      v-model="filters.condition"
+                      :value="condition.name"
+                    />
+                  </label>
+                </li>
+              </ul>
+              <div class="filter__results">
+                <button
+                  class="mobile-filters__apply-btn ds-btn ds-btn--primary"
+                  @click="resetDropdowns"
+                >
+                  Afficher les
+                  <span v-if="offersList.data.length > 0">{{
+                    offersList.data.length + ' résultats'
+                  }}</span>
+                  <span v-else>résultats</span>
+                </button>
               </div>
             </div>
+          </div>
 
-            <!-- color -->
-            <div class="filters__color" :ref="(element) => (dropdownRef.color = element)">
-              <button @click="toggleDropdown('color')">
-                Couleur
-                <font-awesome-icon :icon="['fas', 'chevron-down']" v-if="!showDropdown.color" />
-                <font-awesome-icon :icon="['fas', 'chevron-up']" v-else />
-              </button>
+          <!-- color -->
+          <div class="filters__bloc" :ref="(element) => (dropdownRef.color = element)">
+            <button
+              @click="toggleDropdown('color')"
+              class="filter__toggle ds-filter-btn"
+              :class="{ activeBtn: showDropdown.color || filters.color.length > 0 }"
+            >
+              Couleur
+              <font-awesome-icon :icon="['fas', 'chevron-down']" v-if="!showDropdown.color" />
+              <font-awesome-icon :icon="['fas', 'chevron-up']" v-else />
+            </button>
 
-              <div v-if="showDropdown.color" class="filter__dropdown">
-                <ul class="filter__list">
-                  <li v-for="color in availableColors" :key="color.id" class="filter__item">
-                    <label>
+            <div v-if="showDropdown.color" class="filter__dropdown">
+              <ul class="filter__list">
+                <li v-for="color in availableColors" :key="color.id" class="filter__item">
+                  <label>
+                    <div class="filter__color-name">
                       <div
                         class="filter__color-circle"
                         :style="
@@ -759,211 +826,255 @@ const changePage = (order, actualNum) => {
                         }"
                       ></div>
                       <p>{{ color.displayName }}</p>
-                      <input
-                        type="checkbox"
-                        name="color"
-                        v-model="filters.color"
-                        :value="color.name"
-                      />
-                    </label>
-                  </li>
-                </ul>
+                    </div>
+                    <input
+                      type="checkbox"
+                      name="color"
+                      v-model="filters.color"
+                      :value="color.name"
+                    />
+                  </label>
+                </li>
+              </ul>
+              <div class="filter__results">
+                <button
+                  class="mobile-filters__apply-btn ds-btn ds-btn--primary"
+                  @click="resetDropdowns"
+                >
+                  Afficher les
+                  <span v-if="offersList.data.length > 0">{{
+                    offersList.data.length + ' résultats'
+                  }}</span>
+                  <span v-else>résultats</span>
+                </button>
               </div>
             </div>
+          </div>
 
-            <!-- pricemin & pricemax -->
-            <div class="filters__price" :ref="(element) => (dropdownRef.price = element)">
-              <button @click="toggleDropdown('price')" class="filter__button">
-                Prix
-                <font-awesome-icon :icon="['fas', 'chevron-down']" v-if="!showDropdown.price" />
-                <font-awesome-icon :icon="['fas', 'chevron-up']" v-else />
-              </button>
+          <!-- pricemin & pricemax -->
+          <div class="filters__bloc" :ref="(element) => (dropdownRef.price = element)">
+            <button
+              @click="toggleDropdown('price')"
+              class="filter__toggle ds-filter-btn"
+              :class="{ activeBtn: showDropdown.price || filters.priceMin || filters.priceMax }"
+            >
+              Prix
+              <font-awesome-icon :icon="['fas', 'chevron-down']" v-if="!showDropdown.price" />
+              <font-awesome-icon :icon="['fas', 'chevron-up']" v-else />
+            </button>
 
-              <div v-if="showDropdown.price" class="filter__dropdown">
-                <label>
-                  De
-                  <input
-                    type="number"
-                    name="priceMin"
-                    id="priceMin"
-                    placeholder="0,00€"
-                    v-model.number="filters.priceMin"
-                  />
-                </label>
-
-                <label
-                  >À
-                  <input
-                    type="number"
-                    name="priceMax"
-                    id="priceMax"
-                    placeholder="€"
-                    v-model.number="filters.priceMax"
-                  />
-                </label>
-              </div>
-            </div>
-
-            <!-- material -->
-            <div class="filters__material" :ref="(element) => (dropdownRef.material = element)">
-              <button @click="toggleDropdown('material')">
-                Matière<font-awesome-icon
-                  :icon="['fas', 'chevron-down']"
-                  v-if="!showDropdown.material"
+            <div v-if="showDropdown.price" class="filter__dropdown price__dropdown">
+              <label>
+                De
+                <input
+                  type="number"
+                  name="priceMin"
+                  id="priceMin"
+                  placeholder="0,00€"
+                  v-model.number="filters.priceMin"
                 />
-                <font-awesome-icon :icon="['fas', 'chevron-up']" v-else />
-              </button>
+              </label>
 
-              <div v-if="showDropdown.material" class="filter__dropdown">
-                <ul class="filter__list">
-                  <li
-                    v-for="material in availableMaterials"
-                    :key="material.id"
-                    class="filter__item"
-                  >
-                    <label>
-                      {{ material.displayName }}
-                      <input
-                        type="checkbox"
-                        name="material"
-                        id="material"
-                        v-model="filters.material"
-                        :value="material.id"
-                      />
-                    </label>
-                  </li>
-                </ul>
+              <label
+                >À
+                <input
+                  type="number"
+                  name="priceMax"
+                  id="priceMax"
+                  placeholder="€"
+                  v-model.number="filters.priceMax"
+                />
+              </label>
+            </div>
+          </div>
+
+          <!-- material -->
+          <div class="filters__bloc" :ref="(element) => (dropdownRef.material = element)">
+            <button
+              @click="toggleDropdown('material')"
+              class="filters__toggle ds-filter-btn"
+              :class="{ activeBtn: showDropdown.material || filters.material.length > 0 }"
+            >
+              Matière<font-awesome-icon
+                :icon="['fas', 'chevron-down']"
+                v-if="!showDropdown.material"
+              />
+              <font-awesome-icon :icon="['fas', 'chevron-up']" v-else />
+            </button>
+
+            <div v-if="showDropdown.material" class="filter__dropdown filter__dropdown-left">
+              <ul class="filter__list">
+                <li v-for="material in availableMaterials" :key="material.id" class="filter__item">
+                  <label>
+                    {{ material.displayName }}
+                    <input
+                      type="checkbox"
+                      name="material"
+                      id="material"
+                      v-model="filters.material"
+                      :value="material.id"
+                    />
+                  </label>
+                </li>
+              </ul>
+              <div class="filter__results">
+                <button
+                  class="mobile-filters__apply-btn ds-btn ds-btn--primary"
+                  @click="resetDropdowns"
+                >
+                  Afficher les
+                  <span v-if="offersList.data.length > 0">{{
+                    offersList.data.length + ' résultats'
+                  }}</span>
+                  <span v-else>résultats</span>
+                </button>
               </div>
             </div>
+          </div>
 
-            <!-- sort by price -->
-            <div class="filters__sort" :ref="(element) => (dropdownRef.sort = element)">
-              <button @click="toggleDropdown('sort')" class="filters__button">
-                Tri
-                <font-awesome-icon :icon="['fas', 'chevron-down']" v-if="!showDropdown.sort" />
-                <font-awesome-icon :icon="['fas', 'chevron-up']" v-else />
-              </button>
+          <!-- sort by price -->
+          <div class="filters__bloc" :ref="(element) => (dropdownRef.sort = element)">
+            <button
+              @click="toggleDropdown('sort')"
+              class="filters__toggle ds-filter-btn"
+              :class="{ activeBtn: showDropdown.sort || filters.sort }"
+            >
+              Tri
+              <font-awesome-icon :icon="['fas', 'chevron-down']" v-if="!showDropdown.sort" />
+              <font-awesome-icon :icon="['fas', 'chevron-up']" v-else />
+            </button>
 
-              <div class="filter__dropdown" v-if="showDropdown.sort">
-                <ul class="filter__list">
-                  <li
-                    class="filter__item"
-                    v-for="(sort, index) in availableSorts"
-                    :key="sort.index"
-                  >
-                    <label>
-                      {{ sort.displayName }}
-                      <input
-                        type="radio"
-                        name="sort"
-                        id="sort"
-                        v-model="filters.sort"
-                        :value="sort.name"
-                      />
-                    </label>
-                  </li>
-                </ul>
+            <div class="filter__dropdown filter__dropdown-left" v-if="showDropdown.sort">
+              <ul class="filter__list">
+                <li class="filter__item" v-for="(sort, index) in availableSorts" :key="sort.index">
+                  <label>
+                    {{ sort.displayName }}
+                    <input
+                      type="radio"
+                      name="sort"
+                      id="sort"
+                      v-model="filters.sort"
+                      :value="sort.name"
+                    />
+                  </label>
+                </li>
+              </ul>
+              <div class="filter__results">
+                <button
+                  class="mobile-filters__apply-btn ds-btn ds-btn--primary"
+                  @click="resetDropdowns"
+                >
+                  Afficher les
+                  <span v-if="offersList.data.length > 0">{{
+                    offersList.data.length + ' résultats'
+                  }}</span>
+                  <span v-else>résultats</span>
+                </button>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Buttons addedFilters -->
-        <div class="filters__button" v-if="addedFilters && filters">
-          <div v-for="(value, key) in addedFilters" :key="key" v-if="addedFilters && filters">
-            <button
-              v-if="Array.isArray(value)"
-              v-for="(val, index) in value"
-              @click="removeFilter(key, index)"
-            >
-              {{ val }}
-              <font-awesome-icon :icon="['fas', 'times']" />
-            </button>
+        <div class="filters__button" v-if="Object.keys(addedFilters).length">
+          <div class="filters__button-flex">
+            <template v-for="(value, key) in addedFilters" :key="key">
+              <!-- cas d’une liste (ex: brand, condition…) -->
+              <button
+                v-if="Array.isArray(value)"
+                v-for="(val, idx) in value"
+                :key="`${key}-${val}`"
+                @click="removeFilter(key, idx)"
+                class="ds-filter-btn ds-filter-btn--added"
+              >
+                {{ val }} <font-awesome-icon :icon="['fas', 'times']" />
+              </button>
 
-            <button v-else-if="key === 'sort'" @click="removeFilter(key)">
-              {{ value }}
-              <font-awesome-icon :icon="['fas', 'times']" />
-            </button>
-
-            <button
-              v-else-if="
-                (key === 'priceMin' && addedFilters.priceMin) ||
-                (key === 'priceMax' && addedFilters.priceMax)
-              "
-              @click="removeFilter(key)"
-            >
-              {{
-                key === 'priceMin'
-                  ? 'De ' + Number(value).toFixed(2) + ' €'
-                  : 'À ' + Number(value).toFixed(2) + ' €'
-              }}
-              <font-awesome-icon :icon="['fas', 'times']" />
-            </button>
+              <!-- cas d’un filtre simple (sort, priceMin, priceMax) -->
+              <button
+                v-else-if="Number(value)"
+                @click="removeFilter(key)"
+                class="ds-filter-btn ds-filter-btn--added"
+              >
+                {{
+                  key === 'priceMin'
+                    ? `De ${Number(value).toFixed(2)} €`
+                    : key === 'priceMax'
+                      ? `À ${Number(value).toFixed(2)} €`
+                      : value
+                }}
+                <font-awesome-icon :icon="['fas', 'times']" />
+              </button>
+            </template>
           </div>
 
+          <!-- lien effacer les filtres -->
           <p
             v-if="
               Object.values(filters).some((v) => v !== null && (!Array.isArray(v) || v.length > 0))
             "
-            @click="removeAllFilters()"
+            @click="removeAllFilters"
+            class="filter__clear-all"
           >
             Effacer les filtres
           </p>
         </div>
 
         <!-- CHILD LINKS -->
-        <div>
-          <ul v-if="categoryChildren" class="catalog__child-links">
+        <div class="catalog__child-links">
+          <ul v-if="categoryChildren">
             <li v-for="child in categoryChildren" :key="child.id">
               <RouterLink :to="{ name: 'catalog', params: { id: child.id } }">
-                <p>{{ child.displayName }}</p>
+                {{ child.displayName }}
               </RouterLink>
             </li>
           </ul>
         </div>
-      </div>
 
-      <!-- NUMBER OF RESULTS -->
-      <div class="catalog__number-results" v-if="offersList.data">
-        <p class="text-md">
-          {{
-            offersList.data.length > 0 ? offersList.data.length + ' résultats' : 'Pas de résultats'
-          }}
-        </p>
-      </div>
-
-      <!-- CATLOG OFFERS ----------------------->
-      <div class="catalog__offers" v-if="offersList" ref="offersContainer">
-        <OfferCard
-          v-for="offer in offersList.data"
-          :key="offer.id"
-          :offer="offer"
-          :fromCatalog="true"
-          @price-clicked="handlePriceClick"
-        />
-      </div>
-
-      <div class="catalog__offers-pagination" v-if="totalPage">
-        <div
-          @click="changePage('prev')"
-          :class="{ disable: page === 1 }"
-          class="offers-pagination__box"
-        >
-          <font-awesome-icon :icon="['fas', 'chevron-left']" />
+        <!-- NUMBER OF RESULTS -->
+        <div class="catalog__number-results" v-if="offersList.data">
+          <p class="text-md">
+            {{
+              offersList.data.length > 0
+                ? offersList.data.length + ' résultats'
+                : 'Pas de résultats'
+            }}
+          </p>
         </div>
-        <div
-          v-for="num in totalPage"
-          class="offers-pagination__box"
-          :class="{ activePage: page === num }"
-        >
-          <span @click="changePage('num', num)" class="text-md">{{ num }}</span>
+
+        <!-- CATLOG OFFERS ----------------------->
+        <div class="catalog__offers" v-if="offersList" ref="offersContainer">
+          <OfferCard
+            v-for="offer in offersList.data"
+            :key="offer.id"
+            :offer="offer"
+            :fromCatalog="true"
+            @price-clicked="handlePriceClick"
+          />
         </div>
-        <div
-          @click="changePage('next')"
-          :class="{ disable: page === totalPage }"
-          class="offers-pagination__box"
-        >
-          <font-awesome-icon :icon="['fas', 'chevron-right']" />
+
+        <div class="catalog__offers-pagination" v-if="totalPage">
+          <div
+            @click="changePage('prev')"
+            :class="{ disable: page === 1 }"
+            class="offers-pagination__box"
+          >
+            <font-awesome-icon :icon="['fas', 'chevron-left']" />
+          </div>
+          <div
+            v-for="num in totalPage"
+            class="offers-pagination__box"
+            :class="{ activePage: page === num }"
+          >
+            <span @click="changePage('num', num)" class="text-md">{{ num }}</span>
+          </div>
+          <div
+            @click="changePage('next')"
+            :class="{ disable: page === totalPage }"
+            class="offers-pagination__box"
+          >
+            <font-awesome-icon :icon="['fas', 'chevron-right']" />
+          </div>
         </div>
       </div>
     </div>
@@ -1160,10 +1271,6 @@ const changePage = (order, actualNum) => {
 
 <style scoped>
 /* SMALL / MOBILE (≤ 720px) */
-.container {
-  margin-top: 145px;
-}
-
 .container__catalog {
   padding: 10px;
 }
@@ -1171,7 +1278,6 @@ const changePage = (order, actualNum) => {
 /* HEADER -----------------------*/
 /* BANNER --------------*/
 .catalog__banner {
-  border: 1px solid red;
   width: 100%;
 }
 
@@ -1190,10 +1296,6 @@ h1 {
   margin-bottom: 20px;
 }
 
-.ds-filter-btn > svg {
-  margin-right: 5px;
-}
-
 /* MENU */
 .mobile-filters__overlay {
   position: fixed;
@@ -1201,7 +1303,6 @@ h1 {
   width: 100%;
   height: 100%;
   background-color: white;
-  border: 1px solid blue;
   z-index: 2000;
   display: flex;
   flex-direction: column;
@@ -1239,7 +1340,6 @@ h1 {
 
 .mobile-filters__item,
 .mobile-filters__list-item {
-  border: 1px solid red;
   padding: 16px;
   display: flex;
   justify-content: space-between;
@@ -1282,7 +1382,7 @@ h1 {
 }
 
 /* checkbox */
-.mobile-filters__list input[type='checkbox'] {
+input[type='checkbox'] {
   /* desactiver */
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -1354,7 +1454,8 @@ input[type='checkbox']:checked::after {
   width: 194px;
 }
 
-.filters__price-bloc span {
+.filters__price-bloc span,
+.price__dropdown label {
   color: var(--color-gray);
   font-size: var(--font-span-md);
 }
@@ -1391,7 +1492,6 @@ input[type='number']:focus {
 .filter__color-circle {
   width: 20px;
   height: 20px;
-  /* border: 1px solid black; */
   border-radius: 50px;
 }
 
@@ -1455,8 +1555,170 @@ input[type='number']:focus {
   opacity: 0.2;
 }
 
-/* MEDIUM (721px à 960px) */
-@media (min-width: 721px) and (max-width: 960px) {
+/* MEDIUM (721px) */
+@media (min-width: 721px) {
+  .container {
+    padding: 0px 10px;
+  }
+  h1 {
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--color-light);
+  }
+
+  /* FILTERS -------------- */
+  .filters {
+    display: flex;
+    margin-top: 16px;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .ds-filter-btn {
+    margin-top: 0px;
+    margin-bottom: 0px;
+  }
+  .filters__bloc {
+    position: relative;
+  }
+  .filter__dropdown {
+    background-color: white;
+    width: 340px;
+    max-height: 440px;
+    position: absolute;
+    top: 60px;
+    box-shadow: rgba(21, 25, 26, 0.12) 0px 4px 12px 0px;
+    overflow-y: scroll;
+  }
+
+  .filter__item {
+    padding: 16px 16px;
+    border-bottom: 1px solid var(--color-light);
+    background-color: white;
+    transition: background-color 0.3s;
+  }
+
+  .filter__item:hover {
+    background-color: var(--color-light);
+  }
+
+  .filter__item > label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: var(--font-weight-medium);
+  }
+  .filter__results {
+    padding: 16px;
+  }
+
+  /* Size */
+  .filter__title {
+    color: var(--color-gray);
+    padding-left: 16px;
+    padding-top: 16px;
+    margin-bottom: 5px;
+  }
+
+  /* Brand search */
+  .filter__dropdown > .ds-search-input {
+    background-color: white;
+    padding: 16px;
+    margin-top: 16px;
+  }
+  .filter__dropdown > .ds-search-input > input[type='text'] {
+    background-color: white;
+    border-bottom: 1px solid var(--color-light);
+    padding: 0px 0px 6px 0px;
+  }
+
+  /* Condition */
+  .condition__label > div {
+    flex: 1 1 0;
+  }
+
+  .condition__label > div > p {
+    font-size: var(--font-span-lg);
+    font-weight: var(--font-weight-light);
+    color: var(--color-gray);
+    line-height: var(--line-height-mid);
+    margin-top: 5px;
+  }
+
+  /* Color */
+  .filter__color-name {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .filter__color-name p {
+    font-size: var(--font-span-lg);
+    font-weight: var(--font-weight-medium);
+  }
+
+  /* Price */
+  .price__dropdown {
+    padding: 16px;
+    display: flex;
+    gap: 25px;
+    width: fit-content;
+  }
+  .price__dropdown label {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100px;
+  }
+
+  /* Material & Sort */
+  .filter__dropdown-left {
+    right: 0;
+  }
+
+  /* ADDED FILTERS -------- */
+  .filters__button {
+    display: flex;
+    margin-top: 32px;
+    flex-direction: column;
+    gap: 16px;
+    border-bottom: 1px solid var(--color-light);
+  }
+
+  .filters__button-flex {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .filter__clear-all {
+    align-self: flex-end;
+    color: var(--color-primary);
+    cursor: pointer;
+    font-weight: var(--font-weight-medium);
+    margin-bottom: 16px;
+  }
+
+  /* CHILD LINKS ------- */
+  .catalog__child-links {
+    display: block;
+    padding: 16px 0px;
+    border-bottom: 1px solid var(--color-light);
+  }
+  .catalog__child-links > ul {
+    columns: 3;
+  }
+  .catalog__child-links li {
+    margin-bottom: 10px;
+  }
+  .catalog__child-links a {
+    text-decoration: none;
+    color: var(--color-primary);
+    font-size: 13px;
+  }
+
+  /* RESULTS */
+  .catalog__number-results {
+    margin-top: 16px;
+  }
 }
 
 /* DESKTOP (> 961px) */
