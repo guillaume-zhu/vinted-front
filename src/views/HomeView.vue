@@ -166,25 +166,25 @@ const loadMoreOffer = async () => {
     <div class="hero">
       <div class="hero__background">
         <img class="hero__img" src="./../assets/img/home-hero.jpg" alt="" />
-
-        <div class="hero__overlay"></div>
       </div>
 
-      <div class="hero__card-container container">
-        <div class="hero__card">
-          <div class="hero__card-content">
-            <h1>Prêt à faire du tri dans tes placards ?</h1>
-          </div>
+      <div class="hero__overlay container">
+        <div class="hero__card-container">
+          <div class="hero__card">
+            <div class="hero__card-content">
+              <h1>Prêt à faire du tri dans tes placards ?</h1>
+            </div>
 
-          <div class="hero__card-buttons">
-            <RouterLink :to="{ name: 'sell' }">
-              <button class="ds-btn ds-btn--primary">
-                <h2>Commence à vendre</h2>
+            <div class="hero__card-buttons">
+              <RouterLink :to="{ name: 'sell' }">
+                <button class="ds-btn ds-btn--primary">
+                  <h2>Commence à vendre</h2>
+                </button>
+              </RouterLink>
+              <button class="ds-btn ds-btn--secondary">
+                <h2>Découvrir comment ça marche</h2>
               </button>
-            </RouterLink>
-            <button class="ds-btn ds-btn--secondary">
-              <h2>Découvrir comment ça marche</h2>
-            </button>
+            </div>
           </div>
         </div>
       </div>
@@ -304,6 +304,10 @@ const loadMoreOffer = async () => {
 
 .hero__background {
   max-width: 100%;
+}
+
+.hero__overlay {
+  display: contents;
 }
 
 .hero__background > img {
@@ -477,6 +481,7 @@ const loadMoreOffer = async () => {
 
   .hero__card-container {
     top: 50%;
+    left: 20px;
     transform: translateY(-50%);
   }
 
@@ -499,6 +504,9 @@ const loadMoreOffer = async () => {
 /* DESKTOP ( > 1200px) */
 @media (min-width: 1200px) {
   /* HERO ----------------- */
+  .hero__card-container {
+    left: 20;
+  }
 
   /* BANNER ------------- */
   .banner {
@@ -508,6 +516,24 @@ const loadMoreOffer = async () => {
   /* OFFERS LIST -------- */
   .offers {
     margin: 50px 0px;
+  }
+}
+
+@media (min-width: 1281px) {
+  /* HERO ----------------- */
+  .hero {
+    position: relative;
+  }
+  .hero__overlay {
+    height: 100%;
+    width: 1240px;
+    position: absolute;
+    top: 0;
+    left: calc((100vw - 1240px) / 2);
+    display: initial;
+  }
+  .hero__card-container {
+    left: 0;
   }
 }
 </style>

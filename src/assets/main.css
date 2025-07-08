@@ -114,9 +114,9 @@ button {
   margin: 0 auto;
 }
 
-.container__catalog {
+/* .container__catalog {
   max-width: 960px;
-}
+} */
 
 .rounded {
   border-radius: var(--radius);
