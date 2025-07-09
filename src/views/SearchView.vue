@@ -39,6 +39,10 @@ console.log('q ---->', q.value)
 // 4. pagination
 const totalPage = ref(null)
 const page = ref(Number(route.query.page) || 1)
+const pageSize = ref(window.innerWidth >= 1200 ? 95 : 96)
+const updatePageSize = () => {
+  pageSize.value = window.innerWidth >= 1200 ? 95 : 96
+}
 
 // ----------------------------------------------
 // 🎯 FILTER SYSTEM
@@ -312,7 +316,7 @@ const fetchOffers = async () => {
 
   const params = {
     'filters[name][$containsi]': q.value,
-    'pagination[pageSize]': 96,
+    'pagination[pageSize]': pageSize.value,
     'pagination[page]': page.value,
     populate: '*',
   }
@@ -469,12 +473,17 @@ watch(q, () => {
   fetchOffers()
 })
 
-// 2. Watch p
+// 2. Watch page
 watch(page, () => {
   fetchOffers()
 })
 
-// 3. Watch filters
+// 3. Watch pageSize
+watch(pageSize, () => {
+  fetchOffers()
+})
+
+// 4. Watch filters
 watch(
   filters,
   () => {
@@ -483,7 +492,7 @@ watch(
   { deep: true },
 )
 
-// 4. Watch filters pour sync l'url
+// 5. Watch filters pour sync l'url
 watch(
   filters,
   (newFilters) => {
@@ -504,7 +513,7 @@ watch(
   { deep: true },
 )
 
-// 3. Watch added filters
+// 6. Watch added filters
 watchEffect(() => {
   const updated = {}
 
@@ -539,10 +548,12 @@ watchEffect(() => {
 onMounted(() => {
   fetchOffers()
   document.addEventListener('click', handleClickOutside)
+  window.addEventListener('resize', updatePageSize)
 })
 
 onBeforeUnmount(() => {
   document.addEventListener('click', handleClickOutside)
+  window.removeEventListener('resize', updatePageSize)
 })
 
 // ----------------------------------------------
@@ -999,13 +1010,25 @@ const changePage = (order, actualNum) => {
 
       <!-- PAGINATION ------------------------->
       <div class="catalog__offers-pagination" v-if="totalPage">
-        <div @click="changePage('prev')" :class="{ disable: page === 1 }">
+        <div
+          @click="changePage('prev')"
+          :class="{ disable: page === 1 }"
+          class="offers-pagination__box"
+        >
           <font-awesome-icon :icon="['fas', 'chevron-left']" />
         </div>
-        <div v-for="num in totalPage">
-          <p @click="changePage('num', num)">{{ num }}</p>
+        <div
+          v-for="num in totalPage"
+          class="offers-pagination__box"
+          :class="{ activePage: page === num }"
+        >
+          <span @click="changePage('num', num)" class="text-md">{{ num }}</span>
         </div>
-        <div @click="changePage('next')" :class="{ disable: page === totalPage }">
+        <div
+          @click="changePage('next')"
+          :class="{ disable: page === totalPage }"
+          class="offers-pagination__box"
+        >
           <font-awesome-icon :icon="['fas', 'chevron-right']" />
         </div>
       </div>

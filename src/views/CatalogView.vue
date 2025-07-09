@@ -29,11 +29,21 @@ const categoryChildren = []
 const isLoading = ref(false)
 
 const offersList = ref([])
-const totalPage = ref(null)
-const page = ref(1)
 const offersContainer = ref(null)
 
-// 2. Price Pop-up
+// 2. Pagination
+const totalPage = ref(null)
+const page = ref(1)
+const pageSize = ref(window.innerWidth >= 1200 ? 95 : 96)
+const updatePageSize = () => {
+  const newSize = window.innerWidth >= 1200 ? 95 : 96
+  if (newSize !== pageSize.value) {
+    pageSize.value = newSize
+    fetchCatalogOffers()
+  }
+}
+
+// 3. Price Pop-up
 const selectedOfferForPopup = ref(null)
 const showPricePopup = ref(false)
 
@@ -355,6 +365,85 @@ const fetchMaterialsByCategory = async (categorySlug) => {
   }
 }
 
+const fetchCatalogOffers = async () => {
+  if (!categoryData.value.attributes) return
+
+  const categoryName = categoryData.value.attributes.name
+  console.log('categoryName ---->', categoryName)
+
+  //// GESTION PARAMS
+  const params = {}
+
+  // categoryName
+  params['filters[category][name][$containsi]'] = categoryName
+
+  // pagination
+  params['pagination[pageSize]'] = pageSize.value
+  params['pagination[page]'] = page.value
+
+  // size
+  if (filters.value.size) {
+    params['filters[size][name][$in]'] = filters.value.size
+  }
+
+  // brand
+  if (filters.value.brand) {
+    params['filters[brand][name][$in]'] = filters.value.brand
+  }
+
+  // condition
+  if (filters.value.condition?.length > 0) {
+    params['filters[condition][$in]'] = filters.value.condition
+  }
+
+  // colors
+  if (filters.value.color?.length > 0) {
+    params['filters[colors][name][$in]'] = filters.value.color
+  }
+
+  // price
+  // priceMin only
+  if (filters.value.priceMin && !filters.value.priceMax) {
+    params['filters[price][$gte]'] = filters.value.priceMin
+
+    // priceMax only
+  } else if (filters.value.priceMax && !filters.value.priceMin) {
+    params['filters[price][$lte]'] = filters.value.priceMax
+
+    // priceMin > priceMax
+  } else if (filters.value.priceMin > filters.value.priceMax) {
+    params['filters[price][$gte]'] = filters.value.priceMax
+    params['filters[price][$lte]'] = filters.value.priceMin
+
+    // piceMin + priceMax normal
+  } else if (filters.value.priceMin < filters.value.priceMax) {
+    params['filters[price][$gte]'] = filters.value.priceMin
+    params['filters[price][$lte]'] = filters.value.priceMax
+  }
+
+  //  materials
+  if (filters.value.material?.length > 0) {
+    params['filters[materials][id][$in]'] = filters.value.material
+  }
+
+  // sort
+  if (filters.value.sort) {
+    params['sort'] = filters.value.sort
+  }
+
+  const responseOffers = await axios.get(`http://localhost:1337/api/offers?populate=*&`, {
+    params,
+  })
+
+  offersList.value = responseOffers.data
+
+  totalPage.value = offersList.value.meta.pagination.pageCount
+
+  if (page.value > totalPage.value) {
+    page.value = totalPage.value || 1
+  }
+}
+
 // ----------------------------------------------
 // 🛟 UTILS (helpers)
 // ----------------------------------------------
@@ -447,6 +536,23 @@ watch(
   { deep: true },
 )
 
+watch(
+  [() => page.value, () => pageSize.value],
+  () => {
+    fetchCatalogOffers()
+  },
+  { deep: true, immediate: true },
+)
+
+watch(
+  filters,
+  () => {
+    page.value = 1
+    fetchCatalogOffers()
+  },
+  { deep: true },
+)
+
 // Update addedFilters
 watchEffect(() => {
   const updated = {}
@@ -506,86 +612,10 @@ onMounted(async () => {
 
     fetchMaterialsByCategory(categoryData.value.attributes.name)
 
+    fetchCatalogOffers()
+
     collectCategoryNames(categoryData.value)
     console.log('categoryChildren ---->', categoryChildren)
-
-    watchEffect(async () => {
-      if (!categoryData.value.attributes) return
-
-      const categoryName = categoryData.value.attributes.name
-      console.log('categoryName ---->', categoryName)
-
-      //// GESTION PARAMS
-      const params = {}
-
-      // categoryName
-      params['filters[category][name][$containsi]'] = categoryName
-
-      // pagination
-      params['pagination[pageSize]'] = 96
-      params['pagination[page]'] = page.value
-
-      // size
-      if (filters.value.size) {
-        params['filters[size][name][$in]'] = filters.value.size
-      }
-
-      // brand
-      if (filters.value.brand) {
-        params['filters[brand][name][$in]'] = filters.value.brand
-      }
-
-      // condition
-      if (filters.value.condition?.length > 0) {
-        params['filters[condition][$in]'] = filters.value.condition
-      }
-
-      // colors
-      if (filters.value.color?.length > 0) {
-        params['filters[colors][name][$in]'] = filters.value.color
-      }
-
-      // price
-      // priceMin only
-      if (filters.value.priceMin && !filters.value.priceMax) {
-        params['filters[price][$gte]'] = filters.value.priceMin
-
-        // priceMax only
-      } else if (filters.value.priceMax && !filters.value.priceMin) {
-        params['filters[price][$lte]'] = filters.value.priceMax
-
-        // priceMin > priceMax
-      } else if (filters.value.priceMin > filters.value.priceMax) {
-        params['filters[price][$gte]'] = filters.value.priceMax
-        params['filters[price][$lte]'] = filters.value.priceMin
-
-        // piceMin + priceMax normal
-      } else if (filters.value.priceMin < filters.value.priceMax) {
-        params['filters[price][$gte]'] = filters.value.priceMin
-        params['filters[price][$lte]'] = filters.value.priceMax
-      }
-
-      //  materials
-      if (filters.value.material?.length > 0) {
-        params['filters[materials][id][$in]'] = filters.value.material
-      }
-
-      // sort
-      if (filters.value.sort) {
-        params['sort'] = filters.value.sort
-      }
-
-      console.log('params envoyé à axios ---->', params)
-
-      const responseOffers = await axios.get(`http://localhost:1337/api/offers?populate=*&`, {
-        params,
-      })
-
-      offersList.value = responseOffers.data
-      console.log('offersList ---->', offersList.value)
-
-      totalPage.value = offersList.value.meta.pagination.pageCount
-    })
   } catch (error) {
     console.log('Erreur lors du chargement des offres')
   }
@@ -594,10 +624,12 @@ onMounted(async () => {
 // DROPDOWN EVENT CLICK LISTENER
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
+  window.addEventListener('resize', updatePageSize)
 })
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside)
+  window.removeEventListener('resize', updatePageSize)
 })
 
 // ----------------------------------------------
@@ -1082,6 +1114,7 @@ const changePage = (order, actualNum) => {
           />
         </div>
 
+        <!-- PAGINATION ------------------------->
         <div class="catalog__offers-pagination" v-if="totalPage">
           <div
             @click="changePage('prev')"
