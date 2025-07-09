@@ -9,7 +9,7 @@ const emit = defineEmits(['closePricePopup'])
 </script>
 
 <template>
-  <div class="price-popup__overlay" v-if="showPricePopup">
+  <div class="price-popup__overlay" v-if="showPricePopup && selectedOfferForPopup">
     <div class="price-popup__content">
       <div>
         <h2>Details du prix</h2>
@@ -19,8 +19,15 @@ const emit = defineEmits(['closePricePopup'])
       <div>
         <div>
           <h3>Article</h3>
-          <p v-if="fromCatalog">{{ selectedOfferForPopup.attributes.price.toFixed(2) + ' €' }}</p>
-          <p v-else>{{ selectedOfferForPopup.price.toFixed(2) + ' €' }}</p>
+          <p v-if="fromCatalog && selectedOfferForPopup.attributes?.price != null">
+            {{ selectedOfferForPopup.attributes.price.toFixed(2) + ' €' }}
+          </p>
+
+          <p v-else-if="!fromCatalog && selectedOfferForPopup.price != null">
+            {{ selectedOfferForPopup.price.toFixed(2) + ' €' }}
+          </p>
+
+          <p v-else>Chargement ...</p>
         </div>
 
         <div>

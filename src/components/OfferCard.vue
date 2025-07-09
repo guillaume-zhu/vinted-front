@@ -59,7 +59,11 @@ const props = defineProps({
   </div>
 
   <!-- FROM PRODUCT & PROFILE -->
-  <div class="offer-card-from-product" :class="{ 'offer-card-from-profile': fromProfile }" v-else>
+  <div
+    class="offer-card offer-card-from-product"
+    :class="{ 'offer-card-from-profile': fromProfile }"
+    v-else
+  >
     <RouterLink :to="{ name: 'product', params: { id: offer.id } }">
       <img
         class="img-from-product"
@@ -151,7 +155,7 @@ span {
 /* DESKTOP ( > 1200px) */
 @media (min-width: 1200px) {
   /* CARD --------- */
-  /* FROM HOME */
+  /* FROM HOME & CATALOG */
   .offer-card {
     width: calc((100% - (4 * 15px)) / 5);
   }
@@ -161,42 +165,42 @@ span {
   }
 
   /* FROM PRODUCT */
-  .offer-card-from-product {
+  /* .offer-card-from-product {
     border: 1px solid royalblue;
     width: calc((100% - (4 * 15px)) / 4);
     height: 372px;
-  }
+  } */
 
-  .img-from-product {
+  /* .img-from-product {
     width: 100%;
     height: 278px;
     object-fit: cover;
-  }
+  } */
 
   /* FROM PROFILE */
-  .offer-card-from-profile {
+  /* .offer-card-from-profile {
     border: 1px solid royalblue;
     width: calc((100% - (4 * 15px)) / 5);
     height: 450px;
-  }
+  } */
 
-  .img-from-profile {
+  /* .img-from-profile {
     width: 100%;
     height: 339px;
     object-fit: cover;
-  }
+  } */
 
   /* FROM CATALOG */
-  .offer-card-from-catalog {
+  /* .offer-card-from-catalog {
     border: 1px solid royalblue;
     width: calc((100% - (3 * 15px)) / 4);
     height: 422px;
-  }
+  } */
 
-  .img-from-catalog {
+  /* .img-from-catalog {
     width: 100%;
     height: 329px;
     object-fit: cover;
-  }
+  } */
 }
 </style>

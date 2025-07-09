@@ -6,7 +6,6 @@ import axios from 'axios'
 import Breadcrumb from '@/components/Breadcrumb.vue'
 import OfferCard from '@/components/OfferCard.vue'
 import PricePopup from '@/components/PricePopup.vue'
-import { isNumber } from 'lodash'
 
 // To do
 // Ajouter le bouton afficher les resultats dans les dropdown des filtres
@@ -456,27 +455,31 @@ watchEffect(() => {
     const sourceList = availableRefs.value[key]
     const value = filters.value[key]
 
-    console.log('key boucle + value ---->', key, value)
-
     if (key === 'priceMin' || key === 'priceMax') {
       updated[key] = value
+      continue
     }
 
     if (!value || !sourceList) continue
 
     if (Array.isArray(value)) {
-      // console.log('SourceList ---->' + [key], sourceList)
-
       updated[key] = value.map(
         (val) =>
           sourceList.find((item) => item.name === val || item.id === val)?.displayName || val,
       )
-    } else {
+      continue
+    }
+
+    if (key === 'sort') {
+      updated[key] = value
+      continue
+    }
+
+    if (value && !Array.isArray(value)) {
       updated[key] =
         sourceList.find((item) => item.name === value || item.id === value)?.displayName || value
     }
   }
-  // console.log('type of test ---->', filters.value)
   addedFilters.value = updated
 })
 
@@ -618,6 +621,7 @@ const changePage = (order, actualNum) => {
 }
 </script>
 
+<!-- end. Vérifier que tout est resposive -->
 <template>
   <div class="container">
     <!-- CATALOG BANNER IMG ------------------>
@@ -663,21 +667,28 @@ const changePage = (order, actualNum) => {
             </button>
 
             <div v-if="showDropdown.size" class="filter__dropdown">
-              <div class="size__title-div">
-                <p class="filter__title text-md">
-                  {{
-                    availableSizes?.length > 0 ? availableSizes[0].displayCategoryName : 'Tailles'
-                  }}
-                </p>
+              <div class="filter__list-wrapper">
+                <div class="size__title-div">
+                  <p class="filter__title text-md">
+                    {{
+                      availableSizes?.length > 0 ? availableSizes[0].displayCategoryName : 'Tailles'
+                    }}
+                  </p>
+                </div>
+                <ul class="filter__list">
+                  <li v-for="size in availableSizes" :key="size.id" class="filter__item">
+                    <label>
+                      {{ size.displayName }}
+                      <input
+                        type="checkbox"
+                        name="size"
+                        :value="size.name"
+                        v-model="filters.size"
+                      />
+                    </label>
+                  </li>
+                </ul>
               </div>
-              <ul class="filter__list">
-                <li v-for="size in availableSizes" :key="size.id" class="filter__item">
-                  <label>
-                    {{ size.displayName }}
-                    <input type="checkbox" name="size" :value="size.name" v-model="filters.size" />
-                  </label>
-                </li>
-              </ul>
               <div class="filter__results">
                 <button
                   class="mobile-filters__apply-btn ds-btn ds-btn--primary"
@@ -706,32 +717,29 @@ const changePage = (order, actualNum) => {
             </button>
 
             <div v-if="showDropdown.brand" class="filter__dropdown">
-              <div class="ds-search-input">
-                <input
-                  class="mobile-filters__search"
-                  type="text"
-                  v-model="inputBrand"
-                  placeholder="Recherche une marque"
-                />
-                <font-awesome-icon
-                  :icon="['fas', 'times']"
-                  v-if="inputBrand"
-                  @click="inputBrand = ''"
-                />
+              <div class="filter__list-wrapper">
+                <div class="ds-search-input">
+                  <input type="text" v-model="inputBrand" placeholder="Recherche une marque" />
+                  <font-awesome-icon
+                    :icon="['fas', 'times']"
+                    v-if="inputBrand"
+                    @click="inputBrand = ''"
+                  />
+                </div>
+                <ul class="filter__list">
+                  <li v-for="brand in filteredBrands" :key="brand.id" class="filter__item">
+                    <label>
+                      {{ brand.displayName }}
+                      <input
+                        type="checkbox"
+                        name="brand"
+                        :value="brand.name"
+                        v-model="filters.brand"
+                      />
+                    </label>
+                  </li>
+                </ul>
               </div>
-              <ul class="filter__list">
-                <li v-for="brand in filteredBrands" :key="brand.id" class="filter__item">
-                  <label>
-                    {{ brand.displayName }}
-                    <input
-                      type="checkbox"
-                      name="brand"
-                      :value="brand.name"
-                      v-model="filters.brand"
-                    />
-                  </label>
-                </li>
-              </ul>
               <div class="filter__results">
                 <button
                   class="mobile-filters__apply-btn ds-btn ds-btn--primary"
@@ -760,27 +768,29 @@ const changePage = (order, actualNum) => {
             </button>
 
             <div v-if="showDropdown.condition" class="filter__dropdown">
-              <ul class="filter__list">
-                <li
-                  v-for="condition in availableConditions"
-                  :key="condition.name"
-                  class="filter__item"
-                >
-                  <label class="condition__label">
-                    <div>
-                      {{ condition.name }}
-                      <p>{{ condition.description }}</p>
-                    </div>
+              <div class="filter__list-wrapper">
+                <ul class="filter__list">
+                  <li
+                    v-for="condition in availableConditions"
+                    :key="condition.name"
+                    class="filter__item"
+                  >
+                    <label class="condition__label">
+                      <div>
+                        {{ condition.name }}
+                        <p>{{ condition.description }}</p>
+                      </div>
 
-                    <input
-                      type="checkbox"
-                      name="condition"
-                      v-model="filters.condition"
-                      :value="condition.name"
-                    />
-                  </label>
-                </li>
-              </ul>
+                      <input
+                        type="checkbox"
+                        name="condition"
+                        v-model="filters.condition"
+                        :value="condition.name"
+                      />
+                    </label>
+                  </li>
+                </ul>
+              </div>
               <div class="filter__results">
                 <button
                   class="mobile-filters__apply-btn ds-btn ds-btn--primary"
@@ -809,33 +819,36 @@ const changePage = (order, actualNum) => {
             </button>
 
             <div v-if="showDropdown.color" class="filter__dropdown">
-              <ul class="filter__list">
-                <li v-for="color in availableColors" :key="color.id" class="filter__item">
-                  <label>
-                    <div class="filter__color-name">
-                      <div
-                        class="filter__color-circle"
-                        :style="
-                          color.hex ? { backgroundColor: color.hex } : { background: color.style }
-                        "
-                        :class="{
-                          isWhite:
-                            color.name === 'blanc' ||
-                            color.name === 'creme' ||
-                            color.name === 'beige',
-                        }"
-                      ></div>
-                      <p>{{ color.displayName }}</p>
-                    </div>
-                    <input
-                      type="checkbox"
-                      name="color"
-                      v-model="filters.color"
-                      :value="color.name"
-                    />
-                  </label>
-                </li>
-              </ul>
+              <div class="filter__list-wrapper">
+                <ul class="filter__list">
+                  <li v-for="color in availableColors" :key="color.id" class="filter__item">
+                    <label>
+                      <div class="filter__color-name">
+                        <div
+                          class="filter__color-circle"
+                          :style="
+                            color.hex ? { backgroundColor: color.hex } : { background: color.style }
+                          "
+                          :class="{
+                            isWhite:
+                              color.name === 'blanc' ||
+                              color.name === 'creme' ||
+                              color.name === 'beige',
+                          }"
+                        ></div>
+                        <p>{{ color.displayName }}</p>
+                      </div>
+                      <input
+                        type="checkbox"
+                        name="color"
+                        v-model="filters.color"
+                        :value="color.name"
+                      />
+                    </label>
+                  </li>
+                </ul>
+              </div>
+
               <div class="filter__results">
                 <button
                   class="mobile-filters__apply-btn ds-btn ds-btn--primary"
@@ -902,21 +915,28 @@ const changePage = (order, actualNum) => {
               <font-awesome-icon :icon="['fas', 'chevron-up']" v-else />
             </button>
 
-            <div v-if="showDropdown.material" class="filter__dropdown filter__dropdown-left">
-              <ul class="filter__list">
-                <li v-for="material in availableMaterials" :key="material.id" class="filter__item">
-                  <label>
-                    {{ material.displayName }}
-                    <input
-                      type="checkbox"
-                      name="material"
-                      id="material"
-                      v-model="filters.material"
-                      :value="material.id"
-                    />
-                  </label>
-                </li>
-              </ul>
+            <div v-if="showDropdown.material" class="filter__dropdown filter__dropdown-material">
+              <div class="filter__list-wrapper">
+                <ul class="filter__list">
+                  <li
+                    v-for="material in availableMaterials"
+                    :key="material.id"
+                    class="filter__item"
+                  >
+                    <label>
+                      {{ material.displayName }}
+                      <input
+                        type="checkbox"
+                        name="material"
+                        id="material"
+                        v-model="filters.material"
+                        :value="material.name"
+                      />
+                    </label>
+                  </li>
+                </ul>
+              </div>
+
               <div class="filter__results">
                 <button
                   class="mobile-filters__apply-btn ds-btn ds-btn--primary"
@@ -944,7 +964,7 @@ const changePage = (order, actualNum) => {
               <font-awesome-icon :icon="['fas', 'chevron-up']" v-else />
             </button>
 
-            <div class="filter__dropdown filter__dropdown-left" v-if="showDropdown.sort">
+            <div class="filter__dropdown filter__dropdown-sort" v-if="showDropdown.sort">
               <ul class="filter__list">
                 <li class="filter__item" v-for="(sort, index) in availableSorts" :key="sort.index">
                   <label>
@@ -990,7 +1010,7 @@ const changePage = (order, actualNum) => {
                 {{ val }} <font-awesome-icon :icon="['fas', 'times']" />
               </button>
 
-              <!-- cas d’un filtre simple (sort, priceMin, priceMax) -->
+              <!-- cas d’un filtre simple (priceMin, priceMax) -->
               <button
                 v-else-if="Number(value)"
                 @click="removeFilter(key)"
@@ -1003,6 +1023,16 @@ const changePage = (order, actualNum) => {
                       ? `À ${Number(value).toFixed(2)} €`
                       : value
                 }}
+                <font-awesome-icon :icon="['fas', 'times']" />
+              </button>
+
+              <!-- cas du filtre sort -->
+              <button
+                v-else-if="key === 'sort' && value"
+                class="ds-filter-btn ds-filter-btn--added"
+                @click="removeFilter(key)"
+              >
+                {{ value === 'price:asc' ? 'Prix croissant' : 'Prix décroissant' }}
                 <font-awesome-icon :icon="['fas', 'times']" />
               </button>
             </template>
@@ -1460,6 +1490,15 @@ input[type='checkbox']:checked::after {
   font-size: var(--font-span-md);
 }
 
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type='number'] {
+  -moz-appearance: textfield;
+}
+
 input[type='number'] {
   border: none;
   border-bottom: 1px solid var(--color-light);
@@ -1582,18 +1621,24 @@ input[type='number']:focus {
   .filter__dropdown {
     background-color: white;
     width: 340px;
-    max-height: 440px;
+    max-height: 416px;
     position: absolute;
     top: 60px;
+    display: flex;
     box-shadow: rgba(21, 25, 26, 0.12) 0px 4px 12px 0px;
-    overflow-y: scroll;
+    flex-direction: column;
+  }
+  .filter__list-wrapper {
+    overflow-y: auto;
+    flex: 1 1 auto;
   }
 
   .filter__item {
-    padding: 16px 16px;
     border-bottom: 1px solid var(--color-light);
     background-color: white;
     transition: background-color 0.3s;
+    width: 100%;
+    height: 100%;
   }
 
   .filter__item:hover {
@@ -1601,13 +1646,21 @@ input[type='number']:focus {
   }
 
   .filter__item > label {
+    padding: 16px 16px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     font-weight: var(--font-weight-medium);
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
   }
+
   .filter__results {
     padding: 16px;
+    background: white;
+    width: 100%;
+    flex: 0 0 auto;
   }
 
   /* Size */
@@ -1619,12 +1672,12 @@ input[type='number']:focus {
   }
 
   /* Brand search */
-  .filter__dropdown > .ds-search-input {
+  .ds-search-input {
     background-color: white;
     padding: 16px;
     margin-top: 16px;
   }
-  .filter__dropdown > .ds-search-input > input[type='text'] {
+  .ds-search-input > input[type='text'] {
     background-color: white;
     border-bottom: 1px solid var(--color-light);
     padding: 0px 0px 6px 0px;
@@ -1660,6 +1713,8 @@ input[type='number']:focus {
     display: flex;
     gap: 25px;
     width: fit-content;
+    flex-direction: row;
+    box-shadow: rgba(21, 25, 26, 0.12) 0px 4px 12px 0px;
   }
   .price__dropdown label {
     display: flex;
@@ -1669,7 +1724,8 @@ input[type='number']:focus {
   }
 
   /* Material & Sort */
-  .filter__dropdown-left {
+  .filter__dropdown-material,
+  .filter__dropdown-sort {
     right: 0;
   }
 
@@ -1721,8 +1777,17 @@ input[type='number']:focus {
   }
 }
 
+@media (min-width: 844px) {
+  .filter__dropdown-material {
+    left: 0;
+  }
+}
+
 /* DESKTOP (> 961px) */
 @media (min-width: 961px) {
+  .filter__dropdown-sort {
+    left: 0;
+  }
 }
 
 /* DESKTOP LARGE (> 1200px) */
