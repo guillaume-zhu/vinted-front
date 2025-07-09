@@ -464,6 +464,7 @@ const extractMaterialsFromOffers = (offers) => {
 
 // 1. Watch q
 watch(q, () => {
+  removeAllFilters()
   page.value = 1
   fetchOffers()
 })
