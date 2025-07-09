@@ -621,7 +621,6 @@ const changePage = (order, actualNum) => {
 }
 </script>
 
-<!-- end. Vérifier que tout est resposive -->
 <template>
   <div class="container">
     <!-- CATALOG BANNER IMG ------------------>
