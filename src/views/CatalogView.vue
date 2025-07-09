@@ -1113,6 +1113,7 @@ const changePage = (order, actualNum) => {
   <PricePopup
     :selectedOfferForPopup="selectedOfferForPopup"
     :showPricePopup="showPricePopup"
+    :from-catalog="true"
     @closePricePopup="closePricePopup"
   />
 
