@@ -4,7 +4,7 @@ import axios from 'axios'
 import { RouterLink, useRouter } from 'vue-router'
 
 import Breadcrumb from '@/components/Breadcrumb.vue'
-import OfferGallery from '@/components/OfferGallery.vue'
+import OfferGalleryV2 from '@/components/OfferGalleryV2.vue'
 import OfferCard from '@/components/OfferCard.vue'
 import PricePopup from '@/components/PricePopup.vue'
 
@@ -137,15 +137,16 @@ const deleteOffer = async () => {
 
 <template>
   <div class="container">
-    <div class="product">
+    <!-- BREADCRUMB -------->
+    <Breadcrumb v-if="breadCrumb" :category="breadCrumb" />
+    <div class="product" v-if="offerInfo">
       <!-- PICTURES & DRESSING BLOC -------------------->
       <div class="pictures-dressing">
         <!-- PICTURES GRID ----->
         <div class="pictures">
-          <OfferGallery v-if="offerPictures" :offerPictures="offerPictures" />
+          <OfferGalleryV2 :images="offerInfo.attributes.images.data" />
         </div>
-        <!-- BREADCRUMB -------->
-        <Breadcrumb v-if="breadCrumb" :category="breadCrumb" />
+
         <!-- DRESSING  --------->
         <div class="dressing" v-if="ownerOffersFiltered">
           <h2>({{ ownerOffers.length }}) articles disponibles</h2>
