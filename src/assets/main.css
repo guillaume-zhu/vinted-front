@@ -6,9 +6,11 @@
   --color-primary: #017580;
   --color-dark-primary: #00636c;
   --color-secondary: #e6f9fa;
+  --color-third: #caf1ef;
   --color-danger: #d04555;
   --color-lightest: #f3f9f9;
   --color-light: #edf2f2;
+  --color-lightest-gray: #e3e3e3;
   --color-light-gray: #b6bebf;
   --color-gray: #5a6566;
   --color-black: #15191a;
@@ -191,6 +193,22 @@ body {
   background-color: var(--color-light);
 }
 
+.ds-btn--third {
+  background-color: white;
+  border: 1px solid var(--color-primary);
+  color: var(--color-primary);
+}
+
+.ds-btn--third:hover {
+  background-color: var(--color-lightest);
+}
+
+.ds-btn--danger {
+  background-color: white;
+  border: 1px solid var(--color-danger);
+  color: var(--color-danger);
+}
+
 /* Search Input */
 .ds-search-input {
   width: 100%;
@@ -254,8 +272,8 @@ body {
   }
 }
 
-/* MEDIUM (721px à 960px) */
-@media (min-width: 721px) and (max-width: 960px) {
+/* MEDIUM (> 721px ) */
+@media (min-width: 721px) {
 }
 
 /* DESKTOP (> 961px) */

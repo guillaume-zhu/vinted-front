@@ -69,7 +69,11 @@ watch(() => props.category, buildBreadCrumbArray)
 
 <style scoped>
 nav {
-  display: flex;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 a {

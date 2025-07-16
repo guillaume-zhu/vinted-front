@@ -144,6 +144,9 @@ footer ul {
 
 /* SMALL / MOBILE (≤ 720px) */
 @media (max-width: 720px) {
+  footer {
+    margin-bottom: 75px;
+  }
 }
 
 /* MEDIUM (721px à 960px) */
