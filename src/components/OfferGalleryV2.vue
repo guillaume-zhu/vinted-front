@@ -80,7 +80,7 @@ const goTo = (i) => {
 </template>
 
 <style scoped>
-/* SMALL / MOBILE (≤ 720px) */
+/* SMALL / MOBILE (< 720px) */
 .gallery__thumbnail {
   display: none;
 }
@@ -103,7 +103,6 @@ const goTo = (i) => {
 }
 
 /* SLIDE ANIMATIONS */
-
 .transition {
   display: flex;
 }
@@ -197,7 +196,7 @@ const goTo = (i) => {
   height: 6px;
 }
 
-/* MEDIUM (> 720px) */
+/* MEDIUM (>= 720px) */
 @media (min-width: 720px) {
   .pictures {
     display: flex;
@@ -255,14 +254,14 @@ const goTo = (i) => {
   }
 }
 
-/* DESKTOP (> 960px) */
+/* DESKTOP (>= 960px) */
 @media (min-width: 960px) {
   .pictures {
     min-width: 613px;
   }
 }
 
-/* DESKTOP LARGE (> 1200px) */
+/* DESKTOP LARGE (>= 1200px) */
 @media (min-width: 1200px) {
 }
 </style>

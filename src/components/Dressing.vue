@@ -116,7 +116,7 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-/* SMALL / MOBILE (≤ 720px) */
+/* SMALL / MOBILE (< 720px) */
 
 /* DRESSING -----------*/
 .offers__dressing {
@@ -240,7 +240,7 @@ span {
   justify-content: flex-end;
 }
 
-/* MEDIUM (721px à 960px) */
+/* MEDIUM (>= 720px) */
 @media (min-width: 720px) {
   .offers__dressing-offers {
     gap: 15px;
@@ -252,14 +252,14 @@ span {
   }
 }
 
-/* DESKTOP (960px à 1200px) */
+/* DESKTOP (>= 960px) */
 @media (min-width: 960px) {
   .offers__dressing-card {
     flex: 0 0 calc(25% - 15px);
   }
 }
 
-/* DESKTOP ( > 1200px) */
+/* DESKTOP (>= 1200px) */
 @media (min-width: 1200px) {
   .offers__dressing-card {
     max-width: 235px;

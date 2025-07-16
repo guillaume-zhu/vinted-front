@@ -367,9 +367,9 @@ const deleteOffer = async () => {
 </template>
 
 <style scoped>
-/* SMALL / MOBILE (≤ 720px) */
+/* SMALL / MOBILE (< 720px) */
 .container {
-  padding: 20px;
+  padding: 10px;
 }
 .breadcrumb {
   margin-bottom: 25px;
@@ -611,6 +611,9 @@ h3 > span {
 }
 
 /* DRESSING */
+.dressing-desktop {
+  display: none;
+}
 .dressing {
   margin-top: 32px;
 }
@@ -622,21 +625,27 @@ h3 > span {
   gap: 10px;
 }
 
-/* MEDIUM (> 720px ) */
+/* MEDIUM (>= 720px ) */
 @media (min-width: 720px) {
+  .container {
+    padding: 20px;
+  }
+  .details__description {
+    padding-bottom: 16px;
+  }
   .details button {
     max-width: 50%;
   }
   .details__btn-buy {
     position: relative;
-    padding: 0px;
+    padding: 16px 0px 0px 0px;
   }
   .dressing {
     margin-bottom: 40px;
   }
 }
 
-/* DESKTOP (> 960px) */
+/* DESKTOP (>= 960px) */
 @media (min-width: 960px) {
   .dressing {
     display: none;
@@ -663,7 +672,7 @@ h3 > span {
   }
 }
 
-/* DESKTOP LARGE (> 1200px) */
+/* DESKTOP LARGE (>= 1200px) */
 @media (min-width: 1200px) {
 }
 </style>

@@ -64,7 +64,7 @@ const emit = defineEmits(['closePricePopup'])
 <style scoped>
 /* PRICE POPUP ----------------------------- */
 
-/* SMALL / MOBILE (≤ 720px) */
+/* SMALL / MOBILE (< 720px) */
 /* overlay & content */
 .price-popup__overlay {
   position: fixed;
@@ -144,8 +144,8 @@ const emit = defineEmits(['closePricePopup'])
   display: none;
 }
 
-/* MEDIUM (> 720px) */
-@media (min-width: 721px) {
+/* MEDIUM (>= 720px) */
+@media (min-width: 720px) {
   /* overlay & content */
   .price-popup__overlay {
     align-items: center;

@@ -1333,7 +1333,7 @@ const changePage = (order, actualNum) => {
 </template>
 
 <style scoped>
-/* SMALL / MOBILE (≤ 720px) */
+/* SMALL / MOBILE (< 720px) */
 .container__catalog {
   padding: 10px;
 }
@@ -1627,8 +1627,8 @@ input[type='number']:focus {
   opacity: 0.2;
 }
 
-/* MEDIUM (721px) */
-@media (min-width: 721px) {
+/* MEDIUM (>= 720px) */
+@media (min-width: 720px) {
   .container {
     padding: 0px 10px;
   }
@@ -1808,6 +1808,11 @@ input[type='number']:focus {
   .catalog__number-results {
     margin-top: 16px;
   }
+
+  /* OFFERS */
+  .catalog__offers {
+    gap: 15px;
+  }
 }
 
 @media (min-width: 844px) {
@@ -1816,8 +1821,8 @@ input[type='number']:focus {
   }
 }
 
-/* DESKTOP (> 961px) */
-@media (min-width: 961px) {
+/* DESKTOP (>= 960px) */
+@media (min-width: 960px) {
   .filter__dropdown-sort {
     left: 0;
   }

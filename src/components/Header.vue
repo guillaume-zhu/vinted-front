@@ -382,7 +382,7 @@ header {
   justify-content: space-between;
   align-items: center;
   gap: 50px;
-  padding: 7px 16px 7px 16px;
+  padding: 7px 20px 7px 20px;
 }
 
 .header-main > a > img {
@@ -430,6 +430,10 @@ header {
   align-items: center;
   gap: 6px;
   padding: 0px 12px 0px 12px;
+}
+
+.header-main__search-input input::selection {
+  background: transparent;
 }
 
 .header-main__search-input > input {
@@ -512,14 +516,12 @@ header {
 
 .header-main__profile-container {
   position: relative;
-  /* background-color: red; */
   display: flex;
 }
 
 .header-main__dropdown {
   position: absolute;
   top: 50px;
-  /* border: 1px solid red; */
   background-color: white;
   z-index: 1000;
 }
@@ -565,16 +567,10 @@ header {
 
 /* 1200px ---------------------- */
 @media (max-width: 1200px) {
-  header {
-    /* background-color: red; */
-  }
 }
 
 /* 960px ----------------------- */
-@media (max-width: 960px) {
-  header {
-    /* background-color: #8a2be2; */
-  }
+@media (max-width: 959px) {
   .header-main__search-group,
   .header-main__buttons,
   .category-dropdown {
@@ -582,7 +578,7 @@ header {
   }
 
   .header-main {
-    padding: 7px 16px 7px 16px;
+    padding: 7px 20px 7px 20px;
   }
 
   /* RESPONSIVE MENU -----*/
@@ -633,10 +629,6 @@ header {
     padding: 24px 24px 8px 24px;
   }
 
-  .responsive-menu__category li {
-    /* border: 1px solid red; */
-  }
-
   .responsive-menu__category a,
   .responsive-menu__account > li,
   .responsive-menu__discover > li {
@@ -674,7 +666,7 @@ header {
 
   /* HEADER BOT -----*/
   .header-bot {
-    padding: 8px 16px 8px 16px;
+    padding: 8px 20px 8px 20px;
   }
 
   /* SEARCHBAR */
@@ -692,10 +684,7 @@ header {
 }
 
 /* 720px ----------------------- */
-@media (max-width: 720px) {
-  header {
-    /* background-color: pink; */
-  }
+@media (max-width: 719px) {
   .header-main,
   .header-bot {
     padding: 7px 10px 7px 10px;

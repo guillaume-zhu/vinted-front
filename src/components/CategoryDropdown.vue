@@ -313,7 +313,6 @@ const aboutLinks = [
 
 /* HEADER NAV ----------------------------- */
 .header-nav {
-  /* border: 1px solid green; */
   height: var(--header-nav-height);
   display: flex;
   justify-content: flex-start;
@@ -327,7 +326,7 @@ const aboutLinks = [
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 0px 16px 0px 16px;
+  padding: 0px 20px 0px 20px;
   background-color: white;
   transition: background-color 0.3s;
   color: var(--color-gray);
@@ -378,16 +377,8 @@ const aboutLinks = [
   font-weight: var(--font-weight-medium);
 }
 
-/* .dropdown-category__right {
-  padding-left: 20px;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(100px, 1fr));
-  gap: 0px 20px;
-} */
-
 .dropdown-category__right {
   column-count: 2;
-  /* column-gap: 20px; */
   width: 700px;
 }
 
@@ -467,13 +458,4 @@ const aboutLinks = [
   font-size: 0.9rem;
   font-weight: bold;
 }
-
-/* RESPONSIVE STYLES -------------------------- */
-
-/* 1200px ---------------------- */
-@media (max-width: 1200px) {
-}
-/* 960px ----------------------- */
-
-/* 720px ----------------------- */
 </style>
