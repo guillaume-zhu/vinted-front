@@ -197,8 +197,8 @@ const goTo = (i) => {
   height: 6px;
 }
 
-/* MEDIUM (> 721px) */
-@media (min-width: 721px) {
+/* MEDIUM (> 720px) */
+@media (min-width: 720px) {
   .pictures {
     display: flex;
     gap: 30px;
@@ -217,6 +217,7 @@ const goTo = (i) => {
   }
   .gallery__thumbnail img {
     border-radius: var(--radius);
+    width: 100%;
     height: 85px;
   }
   .activeThumb {
@@ -254,8 +255,11 @@ const goTo = (i) => {
   }
 }
 
-/* DESKTOP (> 961px) */
-@media (min-width: 961px) {
+/* DESKTOP (> 960px) */
+@media (min-width: 960px) {
+  .pictures {
+    min-width: 613px;
+  }
 }
 
 /* DESKTOP LARGE (> 1200px) */
