@@ -8,13 +8,20 @@ const props = defineProps({
 })
 
 const currentIndex = ref(0)
+const direction = ref(0)
+
 const prev = () => {
+  direction.value = -1
   currentIndex.value = currentIndex.value > 0 ? currentIndex.value - 1 : props.images.length - 1
 }
+
 const next = () => {
+  direction.value = +1
   currentIndex.value = currentIndex.value < props.images.length - 1 ? currentIndex.value + 1 : 0
 }
+
 const goTo = (i) => {
+  direction.value = i > currentIndex.value ? 1 : -1
   currentIndex.value = i
 }
 </script>
@@ -22,20 +29,35 @@ const goTo = (i) => {
 <template>
   <div class="gallery">
     <!-- prev -->
-    <font-awesome-icon :icon="['fas', 'chevron-left']" @click="prev" class="arrow left" />
+    <div class="gallery__arrow-box gallery__arrow-box--left">
+      <font-awesome-icon :icon="['fas', 'chevron-left']" @click="prev" />
+    </div>
 
     <!-- actual img -->
-    <img class="gallery__img" :src="images[currentIndex].attributes.url" alt="Image produit" />
+    <transition :name="direction > 0 ? 'slide-next' : 'slide-prev'">
+      <img
+        class="gallery__img"
+        :key="currentIndex"
+        :src="images[currentIndex].attributes.url"
+        alt="Image produit"
+      />
+    </transition>
 
     <!-- next -->
-    <font-awesome-icon :icon="['fas', 'chevron-right']" @click="next" class="arrow right" />
+    <div class="gallery__arrow-box gallery__arrow-box--right">
+      <font-awesome-icon :icon="['fas', 'chevron-right']" @click="next" />
+    </div>
 
     <!-- dots pagination -->
     <div class="gallery__dots">
       <span
         v-for="(_, i) in images"
         :key="i"
-        :class="{ active: currentIndex === i }"
+        :class="{
+          active: currentIndex === i,
+          nearActive: currentIndex + 1 === i || currentIndex - 1 === i,
+          farActive: currentIndex + 2 === i || currentIndex - 2 === i,
+        }"
         @click="goTo(i)"
       ></span>
     </div>
@@ -48,26 +70,83 @@ const goTo = (i) => {
   .gallery {
     position: relative;
     width: 100%;
-    height: 600px;
+    height: 470px;
+    overflow: hidden;
   }
 
   .gallery__img {
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover;
+    border-radius: var(--radius);
+    position: absolute;
+    top: 0;
+    left: 0;
   }
 
-  .arrow {
+  /* SLIDE ANIMATIONS */
+
+  .transition {
+    display: flex;
+  }
+
+  /* next */
+  .slide-next-enter-from {
+    transform: translateX(100%);
+  }
+  .slide-next-enter-to {
+    transform: translateX(0);
+  }
+  .slide-next-leave-from {
+    transform: translateX(0);
+  }
+  .slide-next-leave-to {
+    transform: translateX(-100%);
+  }
+
+  /* prev */
+  .slide-prev-enter-from {
+    transform: translateX(-100%);
+  }
+  .slide-prev-enter-to {
+    transform: translateX(0);
+  }
+  .slide-prev-leave-from {
+    transform: translateX(0);
+  }
+  .slide-prev-leave-to {
+    transform: translateX(100%);
+  }
+
+  /* timing */
+  .slide-next-enter-active,
+  .slide-next-leave-active,
+  .slide-prev-enter-active,
+  .slide-prev-leave-active {
+    transition: transform 0.3s ease;
+  }
+
+  .gallery__arrow-box {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
     cursor: pointer;
     z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.3);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 14px;
   }
-  .left {
+
+  .gallery__arrow-box--left {
     left: 10px;
   }
-  .right {
+  .gallery__arrow-box--right {
     right: 10px;
   }
 
@@ -78,18 +157,26 @@ const goTo = (i) => {
     transform: translateX(-50%);
     display: flex;
     gap: 8px;
-    border: 1px solid red;
   }
   .gallery__dots span {
-    width: 10px;
-    height: 10px;
+    width: 4px;
+    height: 4px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.6);
-    border: 1px solid red;
     cursor: pointer;
   }
-  .dots span.active {
+  .gallery__dots span.active {
     background: rgba(255, 255, 255, 1);
+    width: 8px;
+    height: 8px;
+  }
+  .gallery__dots span.nearActive {
+    width: 8px;
+    height: 8px;
+  }
+  .gallery__dots span.farActive {
+    width: 6px;
+    height: 6px;
   }
 }
 
