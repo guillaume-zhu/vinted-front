@@ -29,11 +29,13 @@ const props = defineProps({
     v-if="offer.attributes"
   >
     <RouterLink :to="{ name: 'product', params: { id: offer.id } }">
-      <img
-        :class="{ 'img-from-catalog': fromCatalog }"
-        v-if="offer.attributes.images"
-        :src="offer.attributes.images.data[0].attributes.url"
-      />
+      <div class="offer-card__img-wrapper">
+        <img
+          :class="{ 'img-from-catalog': fromCatalog }"
+          v-if="offer.attributes.images"
+          :src="offer.attributes.images.data[0].attributes.url"
+        />
+      </div>
     </RouterLink>
 
     <p v-if="offer.attributes.brand.data?.attributes.displayName" class="offer-brand">
@@ -65,12 +67,14 @@ const props = defineProps({
     v-else
   >
     <RouterLink :to="{ name: 'product', params: { id: offer.id } }">
-      <img
-        class="img-from-product"
-        :class="{ 'img-from-profile': fromProfile }"
-        v-if="offer.images"
-        :src="offer.images[0].url"
-      />
+      <div class="offer-card__img-wrapper">
+        <img
+          class="img-from-product"
+          :class="{ 'img-from-profile': fromProfile }"
+          v-if="offer.images"
+          :src="offer.images[0].url"
+        />
+      </div>
     </RouterLink>
 
     <p v-if="offer.brand?.displayName">
@@ -101,15 +105,20 @@ const props = defineProps({
 /* FROM HOME */
 .offer-card {
   width: calc((100% - (1 * 10px)) / 2);
-  aspect-ratio: 2/3;
   border-radius: var(--radius);
+}
+
+.offer-card__img-wrapper {
+  aspect-ratio: 2/3;
+  overflow: hidden;
+  border-radius: var(--radius);
+  margin-bottom: 10px;
 }
 
 img {
   width: 100%;
-  height: 90%;
+  height: 100%;
   object-fit: cover;
-  border-radius: var(--radius);
 }
 
 p,
@@ -165,42 +174,5 @@ span {
   }
 
   /* FROM PRODUCT */
-  /* .offer-card-from-product {
-    border: 1px solid royalblue;
-    width: calc((100% - (4 * 15px)) / 4);
-    height: 372px;
-  } */
-
-  /* .img-from-product {
-    width: 100%;
-    height: 278px;
-    object-fit: cover;
-  } */
-
-  /* FROM PROFILE */
-  /* .offer-card-from-profile {
-    border: 1px solid royalblue;
-    width: calc((100% - (4 * 15px)) / 5);
-    height: 450px;
-  } */
-
-  /* .img-from-profile {
-    width: 100%;
-    height: 339px;
-    object-fit: cover;
-  } */
-
-  /* FROM CATALOG */
-  /* .offer-card-from-catalog {
-    border: 1px solid royalblue;
-    width: calc((100% - (3 * 15px)) / 4);
-    height: 422px;
-  } */
-
-  /* .img-from-catalog {
-    width: 100%;
-    height: 329px;
-    object-fit: cover;
-  } */
 }
 </style>
