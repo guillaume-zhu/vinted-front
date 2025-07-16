@@ -202,12 +202,16 @@ onUnmounted(() => {
       <div class="header-main__responsive-menu medium-only small-only" v-if="isBurgerMenuOpen">
         <!-- BUTTONS -->
         <div class="responsive-menu__buttons">
-          <RouterLink :to="{ name: 'sell' }">
+          <RouterLink :to="{ name: 'sell' }" @click="isBurgerMenuOpen = false">
             <button class="btn--secondary">Vends tes articles</button>
           </RouterLink>
 
           <!-- SI NON CONNECTÉ -->
-          <RouterLink :to="{ name: 'login' }" v-if="!GlobalStore.userInfoCookie.value">
+          <RouterLink
+            :to="{ name: 'login' }"
+            v-if="!GlobalStore.userInfoCookie.value"
+            @click="isBurgerMenuOpen = false"
+          >
             <button class="btn--primary">S'inscrire | Se connecter</button>
           </RouterLink>
         </div>
@@ -219,7 +223,10 @@ onUnmounted(() => {
           </div>
           <ul>
             <li v-for="category in categories">
-              <RouterLink :to="{ name: 'catalog', params: { id: category.id } }">
+              <RouterLink
+                :to="{ name: 'catalog', params: { id: category.id } }"
+                @click="isBurgerMenuOpen = false"
+              >
                 <img :src="categoryImages[category.attributes.name]" alt="Icône de catégorie" />
                 <span class="text-lg">{{ category.attributes.displayName }}</span>
               </RouterLink>
@@ -233,13 +240,18 @@ onUnmounted(() => {
             <span class="text-md">Mon compte</span>
           </div>
           <ul class="responsive-menu__account">
-            <li @click="navigate('profile')"><span>Mon profil</span></li>
-            <li @click="navigate('settings')"><span>Mes paramètres</span></li>
+            <li @click="(navigate('profile'), (isBurgerMenuOpen = false))">
+              <span>Mon profil</span>
+            </li>
+            <li @click="(navigate('settings'), (isBurgerMenuOpen = false))">
+              <span>Mes paramètres</span>
+            </li>
             <li
               @click="
                 () => {
                   isOpen = false
                   GlobalStore.logOut()
+                  isBurgerMenuOpen = false
                 }
               "
             >
