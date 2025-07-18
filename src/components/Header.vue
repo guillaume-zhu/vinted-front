@@ -4,7 +4,7 @@ import { computed, inject, watchEffect } from 'vue'
 import { ref, onMounted, onUnmounted } from 'vue'
 import axios from 'axios'
 import CategoryDropdown from './CategoryDropdown.vue'
-
+import Login from './Login.vue'
 // ----------------------------------------------
 // 📄 PROPS / ROUTER / BASE VARIABLES
 // ----------------------------------------------
@@ -78,12 +78,14 @@ const aboutLinks = [
   },
 ]
 
+// 5. Login
+const isLogging = ref(false)
+
 // ----------------------------------------------
 // ⚙️ FUNCTIONS / HELPERS
 // ----------------------------------------------
 
 // 1. Open / Close dropdown menu
-
 // Fonction pour ouvrir / fermer le menu
 const toggleMenu = () => {
   isOpen.value = !isOpen.value
@@ -112,9 +114,15 @@ const closeMenu = (event) => {
 }
 
 // 2. Navigate
-
 const goToCatalog = (id) => {
   router.push({ name: 'catalog', params: { id } })
+}
+
+// 3. Close after log
+const close = () => {
+  isLogging.value = false
+  isOpen.value = false
+  isBurgerMenuOpen.value = false
 }
 
 // ----------------------------------------------
@@ -207,13 +215,13 @@ onUnmounted(() => {
           </RouterLink>
 
           <!-- SI NON CONNECTÉ -->
-          <RouterLink
-            :to="{ name: 'login' }"
+          <button
+            class="btn--primary"
             v-if="!GlobalStore.userInfoCookie.value"
-            @click="isBurgerMenuOpen = false"
+            @click="isLogging = true"
           >
-            <button class="btn--primary">S'inscrire | Se connecter</button>
-          </RouterLink>
+            S'inscrire | Se connecter
+          </button>
         </div>
 
         <!-- NAV LINKS -->
@@ -276,9 +284,13 @@ onUnmounted(() => {
       <!-- BOUTONS ------------------------------->
       <div class="header-main__buttons desktop-only">
         <!-- SI NON CONNECTÉ -->
-        <RouterLink :to="{ name: 'login' }" v-if="!GlobalStore.userInfoCookie.value">
-          <button class="btn--primary">S'inscrire | Se connecter</button>
-        </RouterLink>
+        <button
+          class="btn--primary"
+          v-if="!GlobalStore.userInfoCookie.value"
+          @click="isLogging = true"
+        >
+          S'inscrire | Se connecter
+        </button>
 
         <!-- SI CONNECTÉ --------------->
         <div class="header-main__profile-container" v-else-if="GlobalStore.userInfoCookie.value">
@@ -335,7 +347,7 @@ onUnmounted(() => {
           <input
             type="text"
             name="searchbar"
-            id="searchbar"
+            id="searchbar-responsive"
             @keydown.enter="OnSearch"
             placeholder="Rechercher des articles"
             v-model="searchTerm"
@@ -362,6 +374,9 @@ onUnmounted(() => {
       </div>
     </div>
   </header>
+
+  <!-- LOGIN POPUP ----------------->
+  <Login v-if="isLogging" @close="close()" />
 </template>
 
 <style scoped>
@@ -555,6 +570,7 @@ header {
 .header__separator {
   border-bottom: 1px solid var(--color-light);
 }
+
 /* HEADER BOT --------------------------*/
 .header-bot {
   background-color: white;
@@ -592,12 +608,16 @@ header {
     border-radius: var(--radius);
   }
 
+  .header-main__responsive-burger svg {
+    color: var(--color-light-gray);
+    font-size: 24px;
+  }
+
   .header-main__responsive-burger:hover {
     background-color: var(--color-light);
   }
 
   .header-main__responsive-menu {
-    border: 1px solid green;
     position: fixed;
     background-color: white;
     width: 100vw;
@@ -683,7 +703,7 @@ header {
   }
 }
 
-/* 720px ----------------------- */
+/* < 720px ----------------------- */
 @media (max-width: 719px) {
   .header-main,
   .header-bot {

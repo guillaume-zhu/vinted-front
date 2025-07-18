@@ -116,10 +116,6 @@ button {
   margin: 0 auto;
 }
 
-/* .container__catalog {
-  max-width: 960px;
-} */
-
 .rounded {
   border-radius: var(--radius);
 }
@@ -127,6 +123,47 @@ button {
 /* BODY RESPONSIVE */
 body {
   margin-top: calc(var(--header-height));
+}
+
+/* INPUT STYLES */
+
+/* autofill background */
+input:-webkit-autofill,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:hover {
+  /* réapplique ton background habituel */
+  -webkit-box-shadow: 0 0 0px 1000px white inset !important;
+  box-shadow: 0 0 0px 1000px white inset !important;
+  /* et assure-toi que le texte reste visible */
+  -webkit-text-fill-color: var(--color-black) !important;
+}
+
+/* general input */
+input[type='email'],
+input[type='password'],
+.login__input {
+  border: none;
+  height: 26px;
+  width: 100%;
+  border-bottom: 1px solid var(--color-lightest-gray);
+  font-size: var(--font-span-lg);
+  font-weight: var(--font-weight-light);
+  color: var(--color-black);
+}
+input[type='email']:focus,
+input[type='password']:focus,
+.login__input:focus {
+  outline: none;
+  border-bottom: 1px solid var(--color-primary);
+}
+.login__password-group {
+  display: flex;
+  align-items: center;
+}
+.login__password-group svg {
+  margin-left: -20px;
+  font-size: var(--font-span-lg);
+  color: var(--color-black);
 }
 
 /* DESIGN STYLES ----------------*/
@@ -271,6 +308,8 @@ body {
     margin-top: var(--header-mobile-height);
   }
 }
+
+/* SMALL / MOBILE (< 720px) */
 
 /* MEDIUM (>= 720px ) */
 @media (min-width: 720px) {

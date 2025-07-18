@@ -3,6 +3,7 @@ import './assets/main.css'
 import { computed, createApp, onMounted, watchEffect } from 'vue'
 import App from './App.vue'
 import router from './router'
+import route from './router'
 import { ref } from 'vue'
 import VueCookies from 'vue-cookies'
 
@@ -81,7 +82,7 @@ const setUserInfoCookie = (token, id, username, avatarUrl) => {
 const logOut = () => {
   $cookies.remove('userToken')
   updateInfoCookie()
-  router.push('home')
+  router.push({ path: route.fullPath || '/' })
 }
 
 // Définir l'url si avatar existant
