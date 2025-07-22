@@ -87,7 +87,7 @@ const props = defineProps({
 
     <span v-if="offer.size?.displayName && offer?.condition"> · </span>
 
-    <span v-if="offer.condition">{{ offer.condition }}</span>
+    <span v-if="offer.condition && !fromProfile">{{ offer.condition }}</span>
 
     <p class="offer-price">{{ offer.price.toFixed(2) }} €</p>
 
@@ -146,6 +146,8 @@ span {
 .offer-price--shield svg {
   color: var(--color-primary);
 }
+
+/* FROM PROFILE */
 
 /* MEDIUM (720px) */
 @media (min-width: 720px) {
