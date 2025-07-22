@@ -62,9 +62,22 @@ onMounted(async () => {
     <div class="profile__offers" v-if="actualSection === 1">
       <div class="profile__details">
         <div class="profile__mobile-header">
+          <div>
+            <img :src="userInfo.avatar.url" alt="" v-if="userInfo.avatar?.url" />
+            <img src="../assets/img/user-profile.webp" alt="" v-else />
+            <h1 class="mobile-only">{{ userInfo.username }}</h1>
+          </div>
+
+          <font-awesome-icon
+            :icon="['fas', 'chevron-right']"
+            @click="actualSection = 2"
+            class="chevron-right"
+          />
+        </div>
+
+        <div class="profile__desktop-header">
           <img :src="userInfo.avatar.url" alt="" v-if="userInfo.avatar?.url" />
           <img src="../assets/img/user-profile.webp" alt="" v-else />
-          <h1 class="mobile-only">{{ userInfo.username }}</h1>
         </div>
 
         <div class="profile__infos">
@@ -78,27 +91,39 @@ onMounted(async () => {
                 GlobalStore.userInfoCookie?.value?.id.toString() === id
               "
             >
-              <button><font-awesome-icon :icon="['fas', 'pen']" /> Modifier mon profil</button>
+              <button class="modify-button">
+                <font-awesome-icon :icon="['fas', 'pen']" /> Modifier mon profil
+              </button>
             </RouterLink>
           </div>
 
           <div class="profile__infos-about">
             <div>
-              <p class="medium-only">Informations verifiées</p>
-              <font-awesome-icon :icon="['fas', 'check-circle']" />
-              <span>Email</span>
+              <p class="medium-only">À propos</p>
+
+              <div>
+                <font-awesome-icon :icon="['fas', 'map-marker-alt']" />
+                <span
+                  >{{ userInfo.city[0].toUpperCase() + userInfo.city.slice(1) }},
+                  {{ userInfo.country.displayName }}</span
+                >
+              </div>
             </div>
 
             <div>
-              <p class="medium-only">À propos</p>
-
-              <font-awesome-icon :icon="['fas', 'map-marker-alt']" />
-              <span
-                >{{ userInfo.city[0].toUpperCase() + userInfo.city.slice(1) }},
-                {{ userInfo.country.displayName }}</span
-              >
+              <p class="medium-only">Informations verifiées</p>
+              <div>
+                <font-awesome-icon :icon="['fas', 'check-circle']" />
+                <span>Email</span>
+              </div>
             </div>
           </div>
+
+          <font-awesome-icon
+            :icon="['fas', 'chevron-right']"
+            @click="actualSection = 2"
+            class="chevron-right"
+          />
 
           <div class="profile__infos-description medium-only">
             <p v-if="userInfo.description">{{ userInfo.description }}</p>
@@ -175,6 +200,9 @@ onMounted(async () => {
 .profile {
   padding: 16px 10px;
 }
+.profile__desktop-header {
+  display: none;
+}
 
 /* SECTIONS ------ */
 .profile__sections {
@@ -203,11 +231,19 @@ onMounted(async () => {
 }
 .profile__mobile-header {
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: center;
   padding: 16px;
-  gap: 6px;
   border-bottom: 1px solid var(--color-lightest-gray);
+}
+.profile__mobile-header > div:first-child {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.profile__mobile-header svg > {
+  color: var(--color-gray);
+  cursor: pointer;
 }
 .profile__mobile-header img {
   width: 48px;
@@ -217,6 +253,9 @@ onMounted(async () => {
 .profile__infos {
   padding: 16px;
   border-bottom: 1px solid var(--color-lightest-gray);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 .profile__infos-about,
 .profile__about-infos-about {
@@ -239,6 +278,7 @@ onMounted(async () => {
 /* DRESSING */
 .dressing {
   margin-top: 16px;
+  padding: 0px 16px;
 }
 .dressing__content {
   margin-top: 8px;
@@ -263,7 +303,8 @@ onMounted(async () => {
   padding: 16px;
   border-bottom: 1px solid var(--color-lightest-gray);
 }
-.profile__about-edit button {
+.profile__about-edit button,
+.modify-button {
   width: 100%;
   padding: 0px 14px;
   height: 36px;
@@ -287,10 +328,91 @@ onMounted(async () => {
 
 /* MEDIUM (>= 720px ) */
 @media (min-width: 720px) {
+  .profile__sections,
+  .profile__about,
+  .profile__mobile-header,
+  .chevron-right {
+    display: none;
+  }
+
+  /* PROFILE DETAILS  */
+  .profile__details {
+    padding: 20px;
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+  }
+  .profile__desktop-header {
+    display: initial;
+  }
+  .profile__desktop-header img {
+    width: 192px;
+    height: 192px;
+    object-fit: cover;
+    border-radius: 50%;
+  }
+  .profile__infos-name-edit h1 {
+    margin-bottom: 8px;
+  }
+  .profile__infos-name-edit .modify-button {
+    width: fit-content;
+  }
+  .profile__infos {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 32px;
+    border-bottom: none;
+  }
+  .profile__infos-about {
+    display: flex;
+    flex-direction: row;
+    gap: 66px;
+  }
+  .profile__infos-about > div {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .profile__infos-about > div p {
+    font-size: var(--font-p);
+    color: var(--color-gray);
+  }
+  .profile__infos-description p {
+    font-size: var(--font-span-lg);
+    color: var(--color-gray);
+  }
+  .profile__infos-description {
+    border-bottom: none;
+  }
+
+  /* DRESSING */
+  .dressing {
+    padding: 0px 20px;
+    margin-top: 0px;
+  }
+  .dressing > h2 {
+    margin-bottom: 20px;
+  }
+  .dressing__content {
+    gap: 15px;
+    row-gap: 32px;
+  }
 }
 
 /* DESKTOP (>= 960px) */
 @media (min-width: 960px) {
+  .medium-only {
+    display: initial;
+  }
+  .profile__infos {
+    width: 100%;
+  }
+  .profile__infos-name-edit {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+  }
 }
 
 /* DESKTOP LARGE (>= 1200px) */

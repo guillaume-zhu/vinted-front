@@ -62,7 +62,7 @@ const props = defineProps({
 
   <!-- FROM PRODUCT & PROFILE -->
   <div
-    class="offer-card offer-card-from-product"
+    class="offer-card offer-card-from-product offer-card-from-profile"
     :class="{ 'offer-card-from-profile': fromProfile }"
     v-else
   >
@@ -147,8 +147,6 @@ span {
   color: var(--color-primary);
 }
 
-/* FROM PROFILE */
-
 /* MEDIUM (720px) */
 @media (min-width: 720px) {
   .offer-card {
@@ -164,6 +162,9 @@ span {
   .offer-card-from-product {
     width: calc((100% - (2 * 15px)) / 3);
   }
+  .offer-card-from-profile {
+    width: calc((100% - (3 * 15px)) / 4);
+  }
 }
 
 /* DESKTOP ( > 1200px) */
@@ -173,6 +174,9 @@ span {
   }
   .offer-card-from-product {
     width: calc((100% - (3 * 15px)) / 4);
+  }
+  .offer-card-from-profile {
+    width: calc((100% - (4 * 15px)) / 5);
   }
 
   img {
