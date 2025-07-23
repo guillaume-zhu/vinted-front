@@ -1,9 +1,9 @@
 <script setup>
 import { ref, inject } from 'vue'
 import axios from 'axios'
-import router from '@/router'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
+const router = useRouter()
 const route = useRoute()
 const GlobalStore = inject('GlobalStore')
 // console.log('GlobalStore ---->', GlobalStore)
@@ -57,15 +57,11 @@ const logIn = async () => {
         password: password.value,
       })
 
-      console.log('data log in response ---->', data)
-
       // Stockage de l'id
       const userId = data.user.id
-      console.log('user id from request ---->', userId)
 
       // Stockage du token
       const userToken = data.jwt
-      console.log('user token from request ---->', userToken)
 
       // Requête avec l'id pour obtenir l'objet utilisateur
       const dataUserInfos = await axios.get(
@@ -74,16 +70,15 @@ const logIn = async () => {
 
       // Stockage des infos objet utilisateur
       const userInfo = dataUserInfos.data
-      console.log('userInfo object ---->', userInfo)
 
       // Appel et création du cookie avec les infos de l'utilisateur au GlobalStore
       GlobalStore.setUserInfoCookie(userToken, userId, userInfo.username, userInfo.avatar.url)
-      console.log('Cookie utilisateur créee ---->', $cookies.get('userToken'))
 
       // Mettre à jour la valeur userInfoCookie pour actualiser la ref
       GlobalStore.updateInfoCookie()
 
-      router.push({ name: route.query.redirect || 'home' })
+      router.push({ path: route.fullPath || '/' })
+      emit('close')
     } catch (error) {
       errorMessage.value = 'Identifiants incorrects ou erreur serveur'
     } finally {
@@ -106,19 +101,17 @@ const signUp = async () => {
         password: password.value,
       })
 
-      console.log('data sign up response ---->', data)
-
       // Stockage des informations utilisateurs
       const userInfo = data
 
       // Appel et création du cookie avec les infos de l'utilisateur au GlobalStore
       GlobalStore.setUserInfoCookie(userInfo.jwt, userInfo.user.id, userInfo.user.username, '')
-      console.log('Cookie utilisateur créee ---->', $cookies.get('userToken'))
 
       // Mettre à jour la valeur userInfoCookie pour actualiser la ref
       GlobalStore.updateInfoCookie()
 
-      router.push({ name: route.query.route || 'home' })
+      router.push({ path: route.fullPath || '/' })
+      emit('close')
     } catch (error) {
       errorMessage.value = error.message
     } finally {
@@ -129,26 +122,29 @@ const signUp = async () => {
 </script>
 
 <template>
-  <div class="container login">
-    <div class="login__content">
+  <div class="login__overlay">
+    <div class="login__content container">
+      <!-- CLOSE BUTTON ---------------------------------->
+      <div class="login__close"></div>
+
       <!-- NOT CONNECTED ----------------------------------->
-      <div v-if="!tryConnection">
+      <div class="login__choice" v-if="!tryConnection">
         <h1>Bienvenue !</h1>
 
         <div class="login__social-group">
           <div>
             <img src="./../assets/img/logo-apple.png" alt="" />
-            <p>Continuer avec Apple</p>
+            <span>Continuer avec Apple</span>
           </div>
 
           <div>
             <img src="./../assets/img/logo-google.png" alt="" />
-            <p>Continuer avec Google</p>
+            <span>Continuer avec Google</span>
           </div>
 
           <div>
             <img src="./../assets/img/logo-facebook.png" alt="" />
-            <p>Continuer avec Facebook</p>
+            <span>Continuer avec Facebook</span>
           </div>
         </div>
 
@@ -159,16 +155,17 @@ const signUp = async () => {
       </div>
 
       <!-- WANT TO LOG IN + LOG IN PAGE --------------------------------->
-      <div v-else-if="wantLogIn">
+      <div class="login__login" v-else-if="wantLogIn">
         <h1>Se connecter</h1>
-        <p v-if="errorMessage">{{ errorMessage }}</p>
-        <form @submit.prevent="logIn" v-if="!isLogging">
+        <p class="error-message" v-if="errorMessage">{{ errorMessage }}</p>
+        <form @submit.prevent="logIn" v-if="!isLogging" class="login__form">
           <input
             type="email"
             name="email"
             id="email"
             placeholder="E-mail ou nom d'utilisateur"
             v-model="email"
+            class="login__input"
           />
 
           <div class="login__password-group">
@@ -178,6 +175,7 @@ const signUp = async () => {
               id="password"
               placeholder="Mot de passe"
               v-model="password"
+              class="login__input"
             />
             <font-awesome-icon
               :icon="['far', 'eye-slash']"
@@ -191,33 +189,35 @@ const signUp = async () => {
             />
           </div>
 
-          <button>Continuer</button>
-
-          <p>Mot de passe oublié ?</p>
-          <p>Un problème ?</p>
+          <button class="ds-btn ds-btn--primary">Continuer</button>
         </form>
 
-        <p v-else-if="isLogging">En cours de connexion</p>
+        <p class="loading" v-else-if="isLogging">En cours de connexion</p>
+
+        <div class="login__login-text">
+          <span>Mot de passe oublié ?</span>
+          <span>Un problème ?</span>
+        </div>
       </div>
 
       <!-- WANT TO SIGN UP  -------------------------------->
-      <div v-else-if="wantSignUp">
+      <div v-else-if="wantSignUp" class="login__sign-choice">
         <h1>Rejoins le mouvement de la seconde main et vends sans frais !</h1>
 
         <div class="login__social-group">
           <div>
             <img src="./../assets/img/logo-apple.png" alt="" />
-            <p>Continuer avec Apple</p>
+            <span>Continuer avec Apple</span>
           </div>
 
           <div>
             <img src="./../assets/img/logo-google.png" alt="" />
-            <p>Continuer avec Google</p>
+            <span>Continuer avec Google</span>
           </div>
 
           <div>
             <img src="./../assets/img/logo-facebook.png" alt="" />
-            <p>Continuer avec Facebook</p>
+            <span>Continuer avec Facebook</span>
           </div>
         </div>
 
@@ -229,80 +229,218 @@ const signUp = async () => {
 
       <!-- SIGN UP PAGE -------------------------------->
       <div v-else-if="signPage">
-        <div v-if="!isLogging">
+        <div v-if="!isLogging" class="login__sign">
           <h1>Inscris-toi avec ton email</h1>
-          <p v-if="errorMessage">{{ errorMessage }}</p>
+          <p class="error-message" v-if="errorMessage">{{ errorMessage }}</p>
 
           <form @submit.prevent="signUp">
-            <input
-              type="text"
-              name="name"
-              id="name"
-              placeholder="Nom d'utilisateur"
-              v-model="username"
-            />
-            <p>
-              Crée ton nom d'utilisateur en n'utilisant que des lettres et des chiffres. Choisis-en
-              un qui te plaît, tu ne pourras plus le changer.
-            </p>
-
-            <input type="email" name="email" id="email" placeholder="Email" v-model="email" />
-            <p>Saisis l'adresse e-mail que tu souhaites utiliser sur Vinted</p>
-
-            <div class="login__password-group">
+            <div>
               <input
-                :type="showPassword ? 'text' : 'password'"
-                name="password"
-                id="password"
-                placeholder="Mot de passe"
-                v-model="password"
+                type="text"
+                name="name"
+                id="name"
+                placeholder="Nom d'utilisateur"
+                v-model="username"
+                class="login__input"
               />
-              <font-awesome-icon
-                :icon="['far', 'eye-slash']"
-                v-if="!showPassword"
-                @click="togglePasswordVisibility"
-              />
-              <font-awesome-icon
-                :icon="['far', 'eye']"
-                v-else-if="showPassword"
-                @click="togglePasswordVisibility"
-              />
+              <p>
+                Utilise des chiffres, des lettres ou les deux. Choisis un nom d'utilisateur qui te
+                plaît, car tu ne pourras plus le modifier.
+              </p>
             </div>
 
-            <button>Continuer</button>
-            <p>Besoin d'aide ?</p>
+            <div>
+              <input
+                type="email"
+                name="email"
+                id="email"
+                placeholder="Email"
+                v-model="email"
+                class="login__input"
+              />
+              <p>Saisis l'adresse e-mail que tu souhaites utiliser sur Vinted</p>
+            </div>
+
+            <div>
+              <div class="login__password-group">
+                <input
+                  :type="showPassword ? 'text' : 'password'"
+                  name="password"
+                  id="password"
+                  placeholder="Mot de passe"
+                  v-model="password"
+                  class="login__input"
+                />
+                <font-awesome-icon
+                  :icon="['far', 'eye-slash']"
+                  v-if="!showPassword"
+                  @click="togglePasswordVisibility"
+                />
+                <font-awesome-icon
+                  :icon="['far', 'eye']"
+                  v-else-if="showPassword"
+                  @click="togglePasswordVisibility"
+                />
+              </div>
+              <p>Saisis au moins 7 caractères, dont au moins 1 lettre et 1 chiffre</p>
+            </div>
+
+            <button class="ds-btn ds-btn--primary">Continuer</button>
           </form>
+          <span>Besoin d'aide?</span>
         </div>
 
-        <p v-if="isLogging">En cours de connexion</p>
+        <p class="loading" v-if="isLogging">En cours de connexion</p>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.login {
-  margin-top: 50px;
-  margin-bottom: 50px;
-  border: 1px solid blue;
+/* SMALL / MOBILE (< 720px) */
+.login__overlay {
+  width: 100%;
+  height: 100%;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .login__content {
-  width: 375px;
-  margin: 0 auto;
-  border: 1px solid red;
+  margin: 36px auto;
+  background-color: white;
+  border-radius: 12px;
+  border: 1px solid var(--color-lightest-gray);
+  width: 100%;
+  padding: 16px 16px 24px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
+.login__content > div {
+  width: 100%;
+}
+
+h1 {
+  text-align: center;
+}
+
+.error-message {
+  color: red;
+  font-size: var(--font-span-lg);
+}
+
+.loading {
+  font-size: var(--font-span-lg);
+  color: var(--color-gray);
+  text-align: center;
+}
+
+/* CLOSE ------------------- */
+.login__close {
+  display: flex;
+  justify-content: flex-end;
+}
+.login__close svg {
+  font-size: 24px;
+  color: var(--color-primary);
+}
+
+/* LOGIN WELCOME CHOICE */
+.login__choice,
+.login__login,
+.login__sign-choice,
+.login__sign {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.login__social-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.login__social-group > div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 1px solid black;
+  height: 42px;
+  border-radius: var(--radius);
+}
 .login__social-group img {
   width: 20px;
   height: 20px;
   object-fit: contain;
 }
-
-.login__social-group > div {
+.login__social-group span {
+  font-weight: var(--font-weight-medium);
+}
+.login__not-connected-text-group {
   display: flex;
+  flex-direction: column;
+  gap: 16px;
   align-items: center;
-  gap: 10px;
-  border: 1px solid black;
+}
+.login__not-connected-text-group p {
+  font-size: var(--font-span-lg);
+  font-weight: var(--font-weight-light);
+  color: var(--color-gray);
+}
+.login__not-connected-text-group span {
+  color: var(--color-primary);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* LOGIN */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+.login__login-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+}
+.login__login-text span {
+  cursor: pointer;
+  font-size: var(--font-span-lg);
+  font-weight: var(--font-weight-light);
+  color: var(--color-primary);
+}
+
+/* SIGN */
+.login__sign > form > div > p {
+  color: var(--color-gray);
+  margin-top: 5px;
+  margin-left: 2px;
+}
+.login__sign > span {
+  color: var(--color-primary);
+  text-align: center;
+  cursor: pointer;
+  font-weight: var(--font-weight-light);
+}
+
+/* MEDIUM (>= 720px ) */
+@media (min-width: 720px) {
+  .login__content {
+    width: 375px;
+  }
+}
+
+/* DESKTOP (>= 960px) */
+@media (min-width: 960px) {
+}
+
+/* DESKTOP LARGE (>= 1200px) */
+@media (min-width: 1200px) {
 }
 </style>
