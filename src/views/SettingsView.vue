@@ -5,11 +5,13 @@ import axios from 'axios'
 import vSelect from 'vue-select'
 import 'vue-select/dist/vue-select.css'
 import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 
 const GlobalStore = inject('GlobalStore')
 const userInfo = ref('')
 const isLoading = ref(false)
 const errorMessage = ref('')
+const route = useRoute()
 
 // Requête pour récupérer userInfo
 onMounted(async () => {
@@ -532,8 +534,10 @@ watchEffect(() => {
     <div class="settings__menu">
       <ul>
         <h1>Mes paramètres</h1>
-        <li>Détails du profil</li>
-        <RouterLink :to="{ name: 'account' }">
+        <RouterLink :to="{ name: 'settings' }">
+          <li :class="{ activePage: route.name === 'settings' }">Informations du profil</li>
+        </RouterLink>
+        <RouterLink :to="{ name: 'account' }" :class="{ activePage: route.name === 'account' }">
           <li>Paramètres du compte</li>
         </RouterLink>
         <li>Envoi</li>
@@ -550,16 +554,25 @@ watchEffect(() => {
       <!-- TOP AVATAR & DESCRIPTION -->
       <form @submit.prevent="handleSubmit()">
         <div>
-          <div>
+          <div class="settings__avatar">
             <h2>Ta photo de profil</h2>
+
             <div>
               <img :src="imagePreview" alt="avatar utilisateur" v-if="image" />
               <img :src="GlobalStore.avatarUrl.value" alt="avatar utilisateur" v-else />
-              <input type="file" @change="(event) => (image = event.target.files[0])" />
+              <label for="file-upload" class="custom-file-label ds-btn ds-btn--third">
+                Choisir une photo
+                <input
+                  type="file"
+                  id="file-upload"
+                  class="hidden-file-input"
+                  @change="(event) => (image = event.target.files[0])"
+                />
+              </label>
             </div>
           </div>
 
-          <div>
+          <div class="settings__details-about">
             <h2>À propos de toi</h2>
             <textarea
               placeholder="Présente-toi aux autres membres"
@@ -568,39 +581,43 @@ watchEffect(() => {
           </div>
         </div>
 
-        <!-- MID COUNTRY & CITY --------->
-        <div>
+        <!-- POSITION --------->
+        <div class="settings__position">
           <p>Ma position</p>
           <!-- Sélecteur de pays -->
-          <div>
-            <label for="country">Pays</label>
-            <v-select
-              v-model="selectedCountry"
-              :options="countries"
-              label="displayName"
-              :placeholder="userInfo.country ? userInfo.country.displayName : 'Sélectionne un pays'"
-              @update:modelValue="fetchCities"
-            />
-          </div>
+          <div class="settings__position-content">
+            <div>
+              <label for="country">Pays</label>
+              <v-select
+                v-model="selectedCountry"
+                :options="countries"
+                label="displayName"
+                :placeholder="
+                  userInfo.country ? userInfo.country.displayName : 'Sélectionne un pays'
+                "
+                @update:modelValue="fetchCities"
+              />
+            </div>
 
-          <!-- Sélecteur de villes -->
-          <div>
-            <label for="city">Ville</label>
-            <v-select
-              v-model="selectedCity"
-              :options="cities"
-              label="name"
-              :placeholder="
-                userInfo.city
-                  ? userInfo.city[0].toUpperCase() + userInfo.city.slice(1)
-                  : 'Sélectionne une ville'
-              "
-              :filterable="true"
-              :no-options-text="'Aucune ville trouvée'"
-              @search="fetchDynamicCities"
-            ></v-select>
+            <!-- Sélecteur de villes -->
+            <div>
+              <label for="city">Ville</label>
+              <v-select
+                v-model="selectedCity"
+                :options="cities"
+                label="name"
+                :placeholder="
+                  userInfo.city
+                    ? userInfo.city[0].toUpperCase() + userInfo.city.slice(1)
+                    : 'Sélectionne une ville'
+                "
+                :filterable="true"
+                :no-options-text="'Aucune ville trouvée'"
+                @search="fetchDynamicCities"
+              ></v-select>
+            </div>
           </div>
-          <button>Mettre à jour</button>
+          <button class="ds-btn ds-btn--primary settings__btn-submit">Mettre à jour</button>
         </div>
       </form>
     </div>
@@ -612,27 +629,183 @@ watchEffect(() => {
 </template>
 
 <style scoped>
-/* SETTINGS ----------------------------*/
+/* SMALL / MOBILE (< 720px) */
+/* SETTINGS ----------------*/
 .settings {
+  padding: 20px;
   display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin-bottom: 32px;
+}
+.settings__menu ul {
+  display: flex;
+  width: 100vw;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 36px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--color-lightest-gray);
+}
+.settings__menu ul > li {
+  font-size: var(--font-span-lg);
+  font-weight: var(--font-weight-medium);
+  text-decoration: none;
+  cursor: pointer;
+  color: var(--color-gray);
+}
+ul > a {
+  text-decoration: none;
+  color: var(--color-gray);
+  font-size: var(--font-span-lg);
+  font-weight: var(--font-weight-medium);
+}
+.activePage {
+  color: var(--color-black);
 }
 
-/* MENU -----------*/
-.settings__menu {
-  border: 1px solid blue;
-  max-width: 413px;
-}
-
-/* DETAILS ------- */
+/* DETAILS -----------------*/
 .settings__details {
-  border: 1px solid red;
-  flex: 1;
+  margin-top: 52px;
+  width: 100%;
 }
 
-.settings__details img {
-  width: 100px;
-  height: 100px;
-  border-radius: 100px;
+/* AVATAR */
+.settings__avatar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid var(--color-lightest-gray);
+  border-radius: var(--radius) var(--radius) 0 0;
+  padding: 16px;
+}
+.settings__avatar > div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+}
+.settings__avatar > div > img {
+  width: 64px;
+  height: 64px;
   object-fit: cover;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.hidden-file-input {
+  display: none;
+}
+.ds-btn {
+  font-size: var(--font-p);
+  font-weight: var(--font-weight-light);
+  height: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ABOUT */
+.settings__details-about {
+  padding: 16px;
+  border: 1px solid var(--color-lightest-gray);
+  border-radius: 0 0 var(--radius) var(--radius);
+}
+.settings__details-about h2 {
+  font-size: var(--font-span-md);
+  color: var(--color-gray);
+  font-weight: var(--font-weight-light);
+}
+textarea {
+  height: 115px;
+  margin-top: 5px;
+}
+
+/* POSITION */
+.settings__position {
+  margin-top: 36px;
+  display: flex;
+  flex-direction: column;
+}
+.settings__position > p {
+  margin-left: 16px;
+  font-size: var(--font-span-md);
+  color: var(--color-gray);
+  font-weight: var(--font-weight-light);
+  margin-bottom: 8px;
+}
+.settings__position-content {
+  border: 1px solid var(--color-lightest-gray);
+  border-radius: var(--radius);
+}
+.settings__position-content > div {
+  padding: 16px;
+  border-bottom: 1px solid var(--color-lightest-gray);
+}
+.settings__position-content > div > label {
+  font-size: var(--font-span-md);
+  color: var(--color-gray);
+  font-weight: var(--font-weight-light);
+}
+::v-deep(.vs__dropdown-toggle) {
+  border: none;
+  box-shadow: none;
+  border-bottom: 1px solid var(--color-primary);
+  font-size: var(--font-span-lg);
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-light);
+  color: var(--color-black);
+  height: 38px;
+  width: 100%;
+}
+::v-deep(.vs__dropdown-option) {
+  padding: 16px 12px;
+}
+
+/* SUBMIT BTN */
+.settings__btn-submit {
+  margin-top: 32px;
+  width: fit-content;
+  align-self: flex-end;
+  font-size: var(--font-span-md);
+  display: flex;
+  align-items: center;
+}
+/* MEDIUM (>= 720px ) */
+@media (min-width: 720px) {
+  .settings__avatar,
+  .settings__details-about,
+  .settings__position-content > div {
+    padding: 24px;
+  }
+  .settings__position-content > div {
+    columns: 2;
+  }
+}
+
+/* DESKTOP (>= 960px) */
+@media (min-width: 960px) {
+  .settings {
+    flex-direction: row;
+    padding: 40px 30px 30px 30px;
+    align-items: flex-start;
+  }
+  .settings__menu {
+    flex: 2;
+  }
+  .settings__menu ul {
+    align-items: flex-start;
+    width: 100%;
+    border-bottom: none;
+  }
+  .settings__details {
+    flex: 3;
+    margin-top: 0px;
+  }
+}
+
+/* DESKTOP LARGE (>= 1200px) */
+@media (min-width: 1200px) {
 }
 </style>
