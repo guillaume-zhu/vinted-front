@@ -105,7 +105,7 @@ router.beforeEach((to, from) => {
   // const GlobalStore = inject('GlobalStore')
   const userToken = $cookies.get('userToken')
   if (to.meta.requireAuth && !userToken) {
-    return { name: 'login', query: { redirect: to.name } }
+    return { name: 'login', query: { redirect: to.fullPath } }
   }
 })
 export default router

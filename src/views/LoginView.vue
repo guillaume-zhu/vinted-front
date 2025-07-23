@@ -77,8 +77,8 @@ const logIn = async () => {
       // Mettre à jour la valeur userInfoCookie pour actualiser la ref
       GlobalStore.updateInfoCookie()
 
-      router.push({ path: route.fullPath || '/' })
-      emit('close')
+      const redirectPath = route.query.redirect || '/'
+      router.push(redirectPath)
     } catch (error) {
       errorMessage.value = 'Identifiants incorrects ou erreur serveur'
     } finally {
@@ -110,8 +110,8 @@ const signUp = async () => {
       // Mettre à jour la valeur userInfoCookie pour actualiser la ref
       GlobalStore.updateInfoCookie()
 
-      router.push({ path: route.fullPath || '/' })
-      emit('close')
+      const redirectPath = route.query.redirect || '/'
+      router.push(redirectPath)
     } catch (error) {
       errorMessage.value = error.message
     } finally {
