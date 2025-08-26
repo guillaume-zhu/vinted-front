@@ -34,7 +34,6 @@ const handleChangePassword = async () => {
         },
       },
     )
-    console.log('Réponse requête changePassword ---->', response.data)
 
     currentPassword.value = ''
     newPassword.value = ''
@@ -57,90 +56,140 @@ const handleChangePassword = async () => {
 </script>
 
 <template>
-  <div class="container">
-    <h1>Modifier le mot de passe</h1>
+  <main>
+    <div class="container">
+      <h1>Modifier le mot de passe</h1>
 
-    <div>
-      <div class="password__details">
-        <ol>
-          <p>Pour créer un mot de passe sécurisé :</p>
-          <li>
-            Quand tu décides d'un mot de passe, choisis un mot qui ne soit pas évident. Ce peut être
-            une combinaison de chiffres, de caractères spéciaux, de majuscules et de minuscules. Le
-            mot de passe doit être long d'au moins <span>7 caractères</span>
-          </li>
-          <li>
-            N'utilise pas <span>ton nom ou ta date de naissance, ni ceux d'un proche ! </span>
-          </li>
-          <li>
-            Sois certain.e de pouvoir te remémorer ton mot de passe.
-            <span>N'en garde aucune trace écrite ou enregistrée , et ne le dis à personne.</span>
-          </li>
-          <li>Essaie aussi de modifier ton mot de passe régulièrement.</li>
-          <li>Assure-toi que personne ne te voit changer ton mot de passe.</li>
-        </ol>
-      </div>
+      <div class="password__content">
+        <div class="password__span-details">
+          <span class="text-lg">Pour créer un mot de passe sécurisé :</span>
+          <div class="password__details">
+            <ol>
+              <li>
+                Quand tu décides d'un mot de passe, choisis un mot qui ne soit pas évident. Ce peut
+                être une combinaison de chiffres, de caractères spéciaux, de majuscules et de
+                minuscules. Le mot de passe doit être long d'au moins <span>7 caractères</span>
+              </li>
+              <li>
+                N'utilise pas <span>ton nom ou ta date de naissance, ni ceux d'un proche ! </span>
+              </li>
+              <li>
+                Sois certain.e de pouvoir te remémorer ton mot de passe.
+                <span
+                  >N'en garde aucune trace écrite ou enregistrée , et ne le dis à personne.</span
+                >
+              </li>
+              <li>Essaie aussi de modifier ton mot de passe régulièrement.</li>
+              <li>Assure-toi que personne ne te voit changer ton mot de passe.</li>
+            </ol>
+          </div>
+        </div>
 
-      <div class="password__form">
-        <p v-if="errorMessage">{{ errorMessage }}</p>
-        <p v-if="successMessage">{{ successMessage }}</p>
-        <form @submit.prevent="handleChangePassword()">
-          <input
-            type="password"
-            name="currentPassword"
-            id="currentPassword"
-            placeholder="Mot de passe actuel"
-            v-model="currentPassword"
-            @input="errorMessage = ''"
-          />
+        <div class="password__form">
+          <p v-if="errorMessage">{{ errorMessage }}</p>
+          <p v-if="successMessage">{{ successMessage }}</p>
+          <form @submit.prevent="handleChangePassword()">
+            <input
+              type="password"
+              name="currentPassword"
+              id="currentPassword"
+              placeholder="Mot de passe actuel"
+              v-model="currentPassword"
+              @input="errorMessage = ''"
+            />
 
-          <input
-            type="password"
-            name="newPassword"
-            id="newPassword"
-            placeholder="Nouveau mot de passe"
-            v-model="newPassword"
-            @input="errorMessage = ''"
-          />
+            <input
+              type="password"
+              name="newPassword"
+              id="newPassword"
+              placeholder="Nouveau mot de passe"
+              v-model="newPassword"
+              @input="errorMessage = ''"
+            />
 
-          <input
-            type="password"
-            name="confirmPassword"
-            id="confirmPassword"
-            placeholder="Confirmer mot de passe"
-            v-model="confirmPassword"
-            @input="errorMessage = ''"
-          />
+            <input
+              type="password"
+              name="confirmPassword"
+              id="confirmPassword"
+              placeholder="Confirmer mot de passe"
+              v-model="confirmPassword"
+              @input="errorMessage = ''"
+            />
 
-          <button>Modifier le mot de passe</button>
-        </form>
+            <button class="ds-btn ds-btn--primary">Modifier le mot de passe</button>
+          </form>
+        </div>
       </div>
     </div>
-  </div>
+  </main>
 </template>
 
 <style scoped>
-span {
-  font-weight: bold;
+/* SMALL / MOBILE (< 720px) */
+main {
+  background-color: var(--color-light);
+  margin-top: -35px;
 }
-
-.container > div {
-  display: flex;
-  gap: 50px;
+.container {
+  padding: 64px 10px 32px 10px;
 }
-
-/* DETAILS -------------*/
-.password__details {
-  flex: 1;
+h2 {
+  margin-top: 20px;
 }
-
-/* FORM ----------------*/
+.password__content {
+  background-color: white;
+  padding: 16px;
+  margin-top: 16px;
+}
+.text-lg {
+  font-weight: var(--font-weight-medium);
+}
+ol {
+  list-style-type: disc;
+  padding-left: 16px;
+  margin-top: 16px;
+}
+li {
+  color: var(--color-gray);
+  line-height: var(--line-height-mid);
+  margin-bottom: 16px;
+  font-weight: var(--font-weight-light);
+}
+li > span {
+  font-weight: var(--font-weight-bold);
+}
 .password__form {
-  flex: 1;
+  padding: 16px;
+}
+.password__form input {
+  margin-bottom: 32px;
 }
 
-form {
-  display: flex;
-  flex-direction: column;
+/* MEDIUM (>= 720px ) */
+@media (min-width: 720px) {
+  .container {
+    padding: 64px 20px 32px 20px;
+  }
+}
+
+/* DESKTOP (>= 960px) */
+@media (min-width: 960px) {
+  .password__content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 32px;
+    padding: 24px;
+  }
+  .password__span-details {
+    flex: 1;
+  }
+  .password__form {
+    flex: 1;
+  }
+}
+
+/* DESKTOP LARGE (>= 1200px) */
+@media (min-width: 1200px) {
 }
 </style>

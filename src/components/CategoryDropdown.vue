@@ -123,14 +123,11 @@ onMounted(async () => {
     categories.value = desiredOrder
       .map((name) => filtered.find((cat) => cat.attributes.name === name))
       .filter(Boolean)
-    // console.log('categories.value ---->', categories.value)
 
     // Initialiser openStates
     categories.value.forEach((cat) => {
       openStates.value[cat.attributes.name] = false
     })
-
-    // console.log('openStates', openStates.value)
   } catch (error) {
     console.log('Erreur lors du chargement des catégories', error)
   }

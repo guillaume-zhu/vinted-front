@@ -73,7 +73,7 @@ const emit = defineEmits(['closePricePopup'])
   z-index: 1000;
   height: 100vh;
   width: 100vw;
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: var(--color-overlay);
   display: flex;
   justify-content: center;
   align-items: flex-end;

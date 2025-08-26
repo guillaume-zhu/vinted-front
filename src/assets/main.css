@@ -14,6 +14,7 @@
   --color-light-gray: #b6bebf;
   --color-gray: #5a6566;
   --color-black: #15191a;
+  --color-overlay: rgba(0, 0, 0, 0.6);
 
   /* DIMENSIONS ----------------- */
   --header-main-height: 52px;
