@@ -550,6 +550,7 @@ onBeforeUnmount(() => {
               </button>
             </label>
 
+            <!-- PREVIEW -->
             <div class="form__preview-box" v-if="pictures?.length > 0">
               <div v-for="(url, index) in urlsListPreview" class="form__preview-item">
                 <img :src="url" />
@@ -788,23 +789,28 @@ onBeforeUnmount(() => {
                       </div>
 
                       <!-- by search -->
-                      <div class="form__brand-search" v-if="filteredBrand">
+                      <div class="form__brand-search form__details-scroll" v-if="filteredBrand">
                         <!-- search list -->
-                        <li v-for="b in filteredBrand" :key="b.id">
-                          <label>{{ b.attributes.displayName }}</label>
-                          <input
-                            type="radio"
-                            name="searchBrand"
-                            id="searchBrand"
-                            v-model="brand"
-                            :value="b"
-                            @change="
-                              () => {
-                                ;(dropdowns.brand = false), (customBrand = null)
-                              }
-                            "
-                          />
-                        </li>
+                        <ul class="form__brand-list">
+                          <div class="form__details-click form__details-search">
+                            <li v-for="b in filteredBrand" :key="b.id" class="form__details-item">
+                              <label
+                                >{{ b.attributes.displayName }}
+                                <input
+                                  type="radio"
+                                  name="searchBrand"
+                                  id="searchBrand"
+                                  v-model="brand"
+                                  :value="b"
+                                  @change="
+                                    () => {
+                                      ;(dropdowns.brand = false), (customBrand = null)
+                                    }
+                                  "
+                              /></label>
+                            </li>
+                          </div>
+                        </ul>
                         <!-- custom brand -->
                         <div class="form__details-search-custom">
                           <p>Marque non disponible</p>
@@ -902,7 +908,9 @@ onBeforeUnmount(() => {
               <!-- Condtion dropdown -->
               <!-- results -->
               <div v-if="dropdowns.condition && availableConditions" class="form__dropdown-overlay">
-                <div class="form__dropdown-content form__dropdown-content--condition">
+                <div
+                  class="form__dropdown-content form__dropdown-content--details form__dropdown-content--condition"
+                >
                   <h2>État</h2>
                   <font-awesome-icon
                     :icon="['fas', 'times']"
@@ -1054,7 +1062,7 @@ onBeforeUnmount(() => {
         </div>
 
         <!-- PRICE -->
-        <div class="form-price form-flex">
+        <div class="form__price form-flex">
           <h2>Prix</h2>
           <input type="number" name="price" id="price" v-model="price" placeholder="0,00€" />
           <p v-if="errorMessage.price" class="form__error-message">{{ errorMessage.price }}</p>
@@ -1356,6 +1364,26 @@ textarea {
   line-height: var(--line-height-mid);
 }
 
+/* if not found */
+.form__category-no-result {
+  padding: 16px 16px 32px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+}
+.form__category-no-result svg {
+  font-size: 60px;
+  color: var(--color-primary);
+}
+.form__category-no-result p {
+  font-size: var(--font-span-lg);
+  line-height: var(--line-height-mid);
+  color: var(--color-gray);
+  text-align: center;
+}
+
 /* Details dropdown ------*/
 /* brand */
 .form__dropdown-content--details {
@@ -1375,19 +1403,22 @@ textarea {
 .form__details-click {
   padding: 16px 0px;
 }
+.form__details-search {
+  padding: 0px 0px 16px 0px;
+}
+
 .form__details-click > span {
   color: var(--color-gray);
   font-size: var(--font-span-md);
   margin: 16px;
 }
-.form__details-item {
-  margin-top: 16px;
-}
+
 .form__details-item > label {
   padding: 16px 16px;
   display: flex;
   justify-content: space-between;
   border-bottom: 1px solid var(--color-lightest-gray);
+  line-height: var(--line-height-mid);
 }
 .form__details-search-custom {
   padding: 0px 16px 16px 16px;
@@ -1463,6 +1494,78 @@ input[type='file'] {
 
 /* MEDIUM (>= 720px ) */
 @media (min-width: 720px) {
+  .container {
+    padding: 24px;
+  }
+
+  /* all div input */
+  .form__photo,
+  .form__title,
+  .form__description,
+  .form__category,
+  .form__details-ifcategory .form__brand,
+  .form__details-ifcategory .form__size,
+  .form__details-ifcategory .form__condition,
+  .form__details-ifcategory .form__color,
+  .form__details-ifcategory .form__material,
+  .form__price {
+    padding: 24px;
+  }
+
+  /* all duv input except photo */
+  .form__title,
+  .form__description,
+  .form__category,
+  .form__details-ifcategory .form__brand,
+  .form__details-ifcategory .form__size,
+  .form__details-ifcategory .form__condition,
+  .form__details-ifcategory .form__color,
+  .form__details-ifcategory .form__material,
+  .form__price {
+    columns: 2;
+  }
+
+  /* input h2 */
+  form > div > h2,
+  .form__details > div > h2,
+  .form__details > div > div > h2 {
+    color: var(--color-black);
+    font-size: var(--font-span-lg);
+    font-weight: var(--font-weight-medium);
+  }
+
+  /* details dropdown -----*/
+  /* category */
+  .form__category,
+  .form__brand,
+  .form__size,
+  .form__condition,
+  .form__color,
+  .form__material {
+    position: relative;
+  }
+  .form__dropdown-overlay {
+    position: absolute;
+    width: 46%;
+    height: 100%;
+    top: 50px;
+    left: auto;
+    right: 24px;
+  }
+  .form__dropdown-content,
+  .form__dropdown-content--details {
+    position: absolute;
+    top: -1px;
+    left: 0px;
+    padding: 0px;
+    width: 100%;
+    box-shadow: rgba(21, 25, 26, 0.12) 0px 4px 12px 0px;
+    max-height: 500px;
+  }
+  .form__dropdown-content > h2,
+  .form__dropdown-content > svg {
+    display: none;
+  }
 }
 
 /* DESKTOP (>= 960px) */
