@@ -220,7 +220,10 @@ watch(
               <p>À partir de 3,99€</p>
             </div>
           </div>
-          <div class="checkout__delivery-check">
+          <div
+            class="checkout__delivery-check"
+            :class="{ selectedSvg: selectedDelivery?.name === 'home' }"
+          >
             <font-awesome-icon :icon="['fas', 'check']" />
           </div>
         </div>
@@ -260,16 +263,25 @@ watch(
       <div class="checkout__resume-separator"></div>
 
       <div class="flex">
-        <p>Total</p>
-        <p>
+        <p class="total">Total à payer</p>
+        <p class="total">
           {{ totalPrice }}
           €
         </p>
       </div>
+
+      <div class="checkout__pay only-mid">
+        <button @click="handlePayment" class="ds-btn ds-btn--green">Payer</button>
+
+        <div class="checkout__pay-text">
+          <font-awesome-icon :icon="['fas', 'shield-alt']" />
+          <span>Ce paiement est crypté et sécurisé</span>
+        </div>
+      </div>
     </div>
 
     <!-- PAY BTN -->
-    <div class="checkout__pay">
+    <div class="checkout__pay only-mobile">
       <button @click="handlePayment" class="ds-btn ds-btn--green">Payer</button>
 
       <div class="checkout__pay-text">
@@ -454,6 +466,9 @@ h2 {
   line-height: var(--line-height-mid);
   font-weight: var(--font-weight-light);
 }
+.checkout__resume > div > .total {
+  font-weight: var(--font-weight-medium);
+}
 .checkout__resume-separator {
   width: 100%;
   border: 1px solid var(--color-lightest-gray);
@@ -464,7 +479,6 @@ h2 {
 /* PAY BTN ----- */
 .checkout__pay {
   border-bottom: 1px solid var(--color-lightest-gray);
-  padding-bottom: 16px;
 }
 .checkout__pay-text {
   padding: 16px;
@@ -480,12 +494,56 @@ h2 {
 .checkout__pay-text svg {
   color: var(--color-gray);
 }
+
+.only-mid {
+  display: none !important;
+}
+
 /* MEDIUM (>= 720px ) */
 @media (min-width: 720px) {
+  .only-mobile {
+    display: none;
+  }
+  .only-mid {
+    display: initial !important;
+  }
+  .container {
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 16px 16px 48px 16px;
+  }
+
+  .checkout__infos {
+    flex: 1;
+  }
+  .checkout__resume {
+    flex: 1;
+    border: 1px solid var(--color-lightest-gray);
+    padding: 24px;
+    height: fit-content;
+    border-radius: var(--radius);
+  }
+  .checkout__pay-text {
+    padding: 16px 0px 0px 0px;
+  }
+  .checkout__pay {
+    border: none;
+    margin-top: 8px;
+  }
+  .ds-btn {
+    margin-top: 8px;
+  }
 }
 
 /* DESKTOP (>= 960px) */
 @media (min-width: 960px) {
+  .container {
+    padding: 24px 24px 48px 24px;
+  }
+  .checkout__infos {
+    flex: 2;
+  }
 }
 
 /* DESKTOP LARGE (>= 1200px) */
