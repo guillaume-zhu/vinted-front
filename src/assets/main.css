@@ -255,6 +255,11 @@ select:focus,
   color: var(--color-danger);
 }
 
+.ds-btn--green {
+  background-color: #278459;
+  color: white;
+}
+
 /* Search Input */
 .ds-search-input {
   width: 100%;

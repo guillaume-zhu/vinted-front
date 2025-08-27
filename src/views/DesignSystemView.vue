@@ -73,6 +73,9 @@ const categoryData = ref({
         <button class="ds-btn ds-btn--danger">
           <h2>Découvrir comment ça marche</h2>
         </button>
+        <button class="ds-btn ds-btn--green">
+          <h2>Découvrir comment ça marche</h2>
+        </button>
       </section>
 
       <!-- Breadcrumb -->
