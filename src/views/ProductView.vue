@@ -273,7 +273,7 @@ const deleteOffer = async () => {
 
             <!-- BUY BTN -->
             <div class="details__btn-buy" v-else>
-              <button class="ds-btn ds-btn--primary">Acheter</button>
+              <RouterLink :to="{ name: 'checkout', params: { id: props.id } }">Acheter</RouterLink>
             </div>
           </div>
 
@@ -535,6 +535,22 @@ h3 > span {
   border-top: 1px solid var(--color-lightest-gray);
 }
 
+.details__btn-buy a {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 42px;
+  border-radius: var(--radius);
+  border: none;
+  padding: 10px 16px 10px 16px;
+  font-size: var(--font-span-lg);
+  font-weight: var(--font-weight-medium);
+  background-color: var(--color-primary);
+  color: white;
+  text-decoration: none;
+}
+
 .details img {
   width: 32px;
   height: 32px;
@@ -640,6 +656,7 @@ h3 > span {
     position: relative;
     padding: 16px 0px 0px 0px;
   }
+
   .dressing {
     margin-bottom: 40px;
   }
