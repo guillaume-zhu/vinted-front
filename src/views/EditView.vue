@@ -16,7 +16,7 @@ const props = defineProps({
 })
 
 // 1. Form refs
-const pictures = ref(null)
+const pictures = ref([])
 const fileInput = ref(null)
 const title = ref(null)
 const description = ref(null)
@@ -139,6 +139,33 @@ const urlsListPreview = computed(() => {
   for (const picture of pictures.value) {
     tab.push(URL.createObjectURL(picture))
   }
+  return tab
+})
+
+// fusionner la liste image présente + url preview
+// avoir un tableau qui contient img brut + url preview
+// afficher img en fonction de l'élément en question
+const allPictures = computed(() => {
+  const tab = []
+
+  if (existingPictures.value.length > 0) {
+    for (let i = 0; i < existingPictures.value.length; i++) {
+      const img = existingPictures.value[i]
+      tab.push({
+        type: 'existing',
+        id: img.id,
+        url: img.attributes?.url,
+      })
+    }
+  }
+
+  if (urlsListPreview.value.length > 0)
+    for (let i = 0; i < urlsListPreview.value.length; i++) {
+      tab.push({ type: 'added', index: i, url: urlsListPreview.value[i] })
+    }
+
+  console.log('tab --->', tab)
+
   return tab
 })
 
@@ -522,38 +549,56 @@ onBeforeUnmount(() => {
     <form class="form" @submit.prevent="handleSubmit" v-if="!isSubmitting">
       <!-- PHOTO ------------->
       <div class="form__photo">
-        <label>
-          <input
-            type="file"
-            name="pictures"
-            id="pictures"
-            multiple
-            @input="selectFile"
-            ref="fileInput"
-          />
+        <div class="form__photo-box">
+          <label>
+            <input
+              type="file"
+              name="pictures"
+              id="pictures"
+              multiple
+              @input="selectFile"
+              ref="fileInput"
+            />
 
-          <button type="button" @click="triggerSelectFile">
-            <font-awesome-icon :icon="['fas', 'plus']" />
-            <span>Ajoute des photos</span>
-          </button>
-        </label>
+            <button
+              type="button"
+              @click="triggerSelectFile"
+              class="ds-btn ds-btn--third"
+              v-if="!pictures"
+            >
+              <font-awesome-icon class="form__photo-button-svg" :icon="['fas', 'plus']" />
+              <span>Ajoute des photos</span>
+            </button>
+          </label>
 
-        <!-- IMG PREVIEW -->
-        <div>
-          <!-- Existing -->
-          <div
-            v-for="(img, index) in existingPictures"
-            :key="img.id"
-            v-if="existingPictures?.length > 0"
-          >
-            <img :src="img.attributes.url" />
-            <font-awesome-icon :icon="['fas', 'times']" @click="removeExistingImg(index)" />
-          </div>
+          <!-- IMG PREVIEW -->
+          <div class="form__preview-box">
+            <div
+              v-for="(img, index) in allPictures"
+              :key="img.type === 'existing' ? img.id : img.index"
+              v-if="allPictures?.length > 0"
+              class="form__preview-item"
+            >
+              <img :src="img.url" />
 
-          <!-- Added -->
-          <div v-for="(url, index) in urlsListPreview" v-if="pictures">
-            <img :src="url" />
-            <font-awesome-icon :icon="['fas', 'times']" @click="removeAddedImg(index)" />
+              <div class="form__preview-remove" v-if="img.type === 'existing'">
+                <font-awesome-icon :icon="['fas', 'times']" @click="removeExistingImg(index)" />
+              </div>
+
+              <div class="form__preview-remove" v-else>
+                <font-awesome-icon :icon="['fas', 'times']" @click="removeAddedImg(index)" />
+              </div>
+            </div>
+
+            <div class="form__preview-item form__preview-addbox">
+              <button
+                type="button"
+                @click="triggerSelectFile"
+                class="ds-btn ds-btn--third form__preview-add"
+              >
+                <font-awesome-icon :icon="['fas', 'plus']" />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -961,6 +1006,115 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
+/* SMALL / MOBILE (< 720px) */
+main {
+  background-color: var(--color-light);
+}
+.container {
+  padding: 32px 10px;
+}
+h1 {
+  margin-bottom: 16px;
+}
+h2 {
+  font-size: var(--font-span-md);
+  color: var(--color-gray);
+  font-weight: var(--font-weight-light);
+  margin-bottom: 5px;
+}
+
+/* ----------------------------- */
+/* FORMULAIRE                    */
+/* ----------------------------- */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+form > div {
+  padding: 16px;
+  background-color: white;
+  border-radius: var(--radius);
+}
+
+/* Photo -------*/
+.form__photo-box {
+  border: 2px dashed var(--color-light);
+  min-height: 176px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.form__photo-button-svg {
+  margin-right: 8px;
+}
+.form__photo-advice {
+  background-color: #c9f0ee;
+  padding: 16px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  border-radius: var(--radius);
+}
+.form__photo-advice svg {
+  color: var(--color-primary);
+}
+.form__photo-advice span {
+  color: var(--color-gray);
+  font-weight: var(--font-weight-light);
+}
+
+/* Photo preview */
+.form__preview-box {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 5px;
+}
+.form__preview-item {
+  border-radius: var(--radius);
+  width: calc(((100% - (2 * 10px)) / 3));
+  aspect-ratio: 1/1;
+  position: relative;
+  overflow: hidden;
+}
+.form__preview-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.form__preview-remove {
+  background-color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px;
+  height: 32px;
+  aspect-ratio: 1/1;
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  border-radius: var(--radius);
+}
+.form__preview-add {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.form__preview-addbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+}
+
 input[type='file'] {
   display: none;
 }
@@ -979,5 +1133,17 @@ input[type='file'] {
 
 .form__error-message {
   color: red;
+}
+
+/* MEDIUM (>= 720px ) */
+@media (min-width: 720px) {
+}
+
+/* DESKTOP (>= 960px) */
+@media (min-width: 960px) {
+}
+
+/* DESKTOP LARGE (>= 1200px) */
+@media (min-width: 1200px) {
 }
 </style>
