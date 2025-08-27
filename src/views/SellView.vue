@@ -1483,13 +1483,15 @@ textarea {
   gap: 10px;
 }
 
-/* A ne pas oublier de trier */
+/* Autres */
 input[type='file'] {
   display: none;
 }
-
 .form__error-message {
   color: red;
+}
+.ds-btn {
+  margin-bottom: 6px;
 }
 
 /* MEDIUM (>= 720px ) */
@@ -1570,6 +1572,19 @@ input[type='file'] {
 
 /* DESKTOP (>= 960px) */
 @media (min-width: 960px) {
+  .container {
+    max-width: 960px;
+  }
+  .form__preview-item {
+    width: calc(((100% - (4 * 10px)) / 5));
+  }
+  .form__dropdown-overlay {
+    width: 47%;
+  }
+  .ds-btn {
+    width: fit-content;
+    margin-left: auto;
+  }
 }
 
 /* DESKTOP LARGE (>= 1200px) */
