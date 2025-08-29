@@ -140,7 +140,7 @@ const deleteOffer = async () => {
     <!-- BREADCRUMB -------->
     <Breadcrumb v-if="breadCrumb" :category="breadCrumb" class="breadcrumb" />
 
-    <div class="product" v-if="offerInfo">
+    <div class="product" v-if="offerInfo && !isLoading">
       <!-- PICTURES & DETAILS BLOC -------------------->
       <div class="product__pictures-details">
         <!-- PICTURES GRID ----->
@@ -334,6 +334,10 @@ const deleteOffer = async () => {
           Voir tous les articles ({{ ownerOffers.length }})
         </h2>
       </div>
+    </div>
+
+    <div v-else>
+      <p class="load-message">En cours de chargement</p>
     </div>
   </div>
 

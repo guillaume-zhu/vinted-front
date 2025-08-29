@@ -204,7 +204,7 @@ const loadMoreOffer = async () => {
       <!-- OFFERS -------------------->
       <section class="offers">
         <div v-if="isLoading">
-          <p>En cours de chargement</p>
+          <p class="load-message">En cours de chargement</p>
         </div>
         <div v-else-if="errorMessage">
           <p>{{ errorMessage }}</p>

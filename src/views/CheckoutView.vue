@@ -290,6 +290,10 @@ watch(
       </div>
     </div>
   </div>
+
+  <div v-else>
+    <p class="load-message">En cours de chargement</p>
+  </div>
 </template>
 
 <style scoped>

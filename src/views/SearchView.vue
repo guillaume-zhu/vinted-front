@@ -18,6 +18,8 @@ const router = useRouter()
 
 const offersList = ref([])
 
+const isLoading = ref(false)
+
 // 2. Price Pop-up
 const selectedOfferForPopup = ref(null)
 const showPricePopup = ref(false)
@@ -310,6 +312,7 @@ const closeMobileFilters = () => {
 
 // 1. fetchOffers
 const fetchOffers = async () => {
+  isLoading.value = true
   if (!q.value) {
     return
   }
@@ -362,6 +365,8 @@ const fetchOffers = async () => {
     extractColorsFromOffers(offersList.value.data)
     extractMaterialsFromOffers(offersList.value.data)
     availableRefs.value.sort = availableSorts.value
+
+    isLoading.value = false
   } catch (error) {
     console.log('Erreur lors du chargement des offres', error)
   }
@@ -579,7 +584,7 @@ const changePage = (order, actualNum) => {
     </div>
     <div class="container__catalog">
       <!-- CATALOG HEADER --------------------->
-      <div class="catalog__header">
+      <div class="catalog__header" v-if="!isLoading">
         <h1 v-if="q">Recherche pour "{{ q }}"</h1>
         <h1 v-else>Articles</h1>
 
@@ -995,6 +1000,10 @@ const changePage = (order, actualNum) => {
             Effacer les filtres
           </p>
         </div>
+      </div>
+
+      <div v-else>
+        <p class="load-message">En cours de chargement</p>
       </div>
 
       <!-- OFFERS ----------------------------->

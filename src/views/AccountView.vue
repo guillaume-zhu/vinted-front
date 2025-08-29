@@ -275,8 +275,8 @@ watchEffect(() => {
     </div>
   </div>
 
-  <div class="container" v-else>
-    <p>En cours de chargement</p>
+  <div v-else>
+    <p class="load-message">En cours de chargement</p>
   </div>
 </template>
 

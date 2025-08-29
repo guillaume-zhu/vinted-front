@@ -121,6 +121,14 @@ button {
   border-radius: var(--radius);
 }
 
+.load-message {
+  font-size: var(--font-h1);
+  text-align: center;
+  line-height: var(--line-height-heading);
+  font-weight: var(--font-weight-medium);
+  margin: 16px 16px;
+}
+
 /* BODY RESPONSIVE */
 body {
   margin-top: calc(var(--header-height));

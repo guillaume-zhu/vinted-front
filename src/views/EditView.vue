@@ -31,6 +31,7 @@ const price = ref([])
 
 // 2. Message, Error, isOwner, offerInfo
 const isSubmitting = ref(false)
+const isLoading = ref(false)
 const errorMessage = ref({
   pictures: null,
   title: null,
@@ -544,6 +545,7 @@ const handleSubmit = async () => {
 
 // 7. OfferInfo and isOwner ?
 const fetchOfferInfo = async () => {
+  isLoading.value = true
   try {
     const response = await axios.get(`http://localhost:1337/api/offers/${props.id}?populate=*`)
 
@@ -561,6 +563,8 @@ const fetchOfferInfo = async () => {
     material.value = offerInfo.value.attributes.materials?.data || null
     price.value = offerInfo.value.attributes.price
     existingPictures.value = offerInfo.value.attributes.images.data
+
+    isLoading.value = false
   } catch (error) {
     console.log('Erreur lors de la récupération des informations fetchOfferInfo du produit', error)
   }
@@ -1155,13 +1159,17 @@ onBeforeUnmount(() => {
       </form>
 
       <div v-else-if="isSubmitting">
-        <p>En cours de chargement</p>
+        <p class="load-message">En cours de chargement</p>
       </div>
     </div>
 
-    <div v-if="!isOwner">
-      <h1>Désolé, une erreur s'est produite</h1>
-      <p>Vous devez être propriétaire de l'offre pour la modifier</p>
+    <div v-if="!isOwner && !isLoading">
+      <h1 class="load-message">Désolé, une erreur s'est produite</h1>
+      <p class="load-message">Vous devez être propriétaire de l'offre pour la modifier</p>
+    </div>
+
+    <div v-if="isLoading">
+      <p class="load-message">En cours de chargement</p>
     </div>
   </main>
 </template>

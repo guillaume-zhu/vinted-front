@@ -615,7 +615,8 @@ onMounted(async () => {
     fetchCatalogOffers()
 
     collectCategoryNames(categoryData.value)
-    console.log('categoryChildren ---->', categoryChildren)
+
+    isLoading.value = false
   } catch (error) {
     console.log('Erreur lors du chargement des offres')
   }
@@ -661,7 +662,7 @@ const changePage = (order, actualNum) => {
     </div>
     <div class="container__catalog">
       <!-- CATALOG HEADER ---------------------->
-      <div class="catalog__header" v-if="categoryData.attributes">
+      <div class="catalog__header" v-if="categoryData.attributes && !isLoading">
         <!-- BREADCRUMB -->
         <Breadcrumb :category="categoryData" />
         <h1>
@@ -1103,6 +1104,10 @@ const changePage = (order, actualNum) => {
           </p>
         </div>
 
+        <div v-else>
+          <p class="load-message">En cours de chargement</p>
+        </div>
+
         <!-- CATLOG OFFERS ----------------------->
         <div class="catalog__offers" v-if="offersList" ref="offersContainer">
           <OfferCard
@@ -1138,6 +1143,10 @@ const changePage = (order, actualNum) => {
             <font-awesome-icon :icon="['fas', 'chevron-right']" />
           </div>
         </div>
+      </div>
+
+      <div v-else>
+        <p class="load-message">En cours de chargement</p>
       </div>
     </div>
   </div>

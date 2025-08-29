@@ -213,7 +213,9 @@ onBeforeUnmount(() => {
     </div>
   </div>
 
-  <h1 v-else>En cours de chargement</h1>
+  <div v-else>
+    <p class="load-message">En cours de chargement</p>
+  </div>
 </template>
 
 <style scoped>
