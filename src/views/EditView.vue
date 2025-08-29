@@ -1268,6 +1268,7 @@ form > div {
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-left: 0px !important;
 }
 .form__preview-addbox {
   display: flex;
@@ -1587,6 +1588,10 @@ input[type='file'] {
     padding: 24px;
   }
 
+  .form__preview-item {
+    width: calc(((100% - (4 * 10px)) / 5));
+  }
+
   /* all div input */
   .form__photo,
   .form__title,
@@ -1662,9 +1667,7 @@ input[type='file'] {
   .container {
     max-width: 960px;
   }
-  .form__preview-item {
-    width: calc(((100% - (4 * 10px)) / 5));
-  }
+
   .form__dropdown-overlay {
     width: 47%;
   }

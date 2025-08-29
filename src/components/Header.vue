@@ -539,6 +539,7 @@ header {
   top: 50px;
   background-color: white;
   z-index: 1000;
+  box-shadow: rgba(21, 25, 26, 0.12) 0px 4px 12px 0px;
 }
 
 .header-main__dropdown ul {

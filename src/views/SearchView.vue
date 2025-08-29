@@ -1482,7 +1482,7 @@ input[type='number']:focus {
 .catalog__offers {
   display: flex;
   flex-wrap: wrap;
-  gap: 15px;
+  gap: 10px;
   margin-top: 20px;
   scroll-margin-top: var(--header-mobile-height);
 }
