@@ -1,7 +1,7 @@
 <script setup>
 import { inject } from 'vue'
 import { RouterLink } from 'vue-router'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import axios from 'axios'
 import OfferCard from '@/components/OfferCard.vue'
 
@@ -17,6 +17,9 @@ const props = defineProps({
     type: String,
   },
 })
+
+let mq = null
+let handler = null
 
 // REQUETE POUR RÉCUPÉRER LES INFORMATIONS DE L'UTILISATEUR
 onMounted(async () => {
@@ -34,6 +37,24 @@ onMounted(async () => {
     isLoading.value = false
     errorMessage.value = ''
   }
+})
+
+onMounted(() => {
+  mq = window.matchMedia('(min-width: 720px)')
+
+  if (mq.matches) actualSection.value = 1
+
+  handler = (e) => {
+    if (e.matches) {
+      actualSection.value = 1
+    }
+  }
+
+  mq.addEventListener('change', handler)
+})
+
+onBeforeUnmount(() => {
+  mq.removeEventListener('change', handler)
 })
 </script>
 
@@ -291,7 +312,7 @@ onMounted(async () => {
 
 /* ABOUT SECTION ----- */
 .profile__about-details {
-  border-radius: var(--radius);
+  border-radius: 0px 0px var(--radius) var(--radius);
   border: 1px solid var(--color-lightest-gray);
 }
 .profile__about-details img {
