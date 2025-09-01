@@ -5,6 +5,7 @@ import axios from 'axios'
 
 import OfferCard from '@/components/OfferCard.vue'
 import PricePopup from '@/components/PricePopup.vue'
+import { apiUrl } from '@/config'
 
 import { debounce } from 'lodash'
 
@@ -36,7 +37,6 @@ const closePricePopup = () => {
 
 // 3. searchTerm q
 const q = computed(() => route.query.q?.trim() || '')
-console.log('q ---->', q.value)
 
 // 4. pagination
 const totalPage = ref(null)
@@ -354,7 +354,7 @@ const fetchOffers = async () => {
   }
 
   try {
-    const response = await axios.get(`http://localhost:1337/api/offers`, { params })
+    const response = await axios.get(`${apiUrl}/api/offers`, { params })
 
     offersList.value = response.data
     totalPage.value = response.data.meta.pagination.pageCount

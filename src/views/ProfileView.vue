@@ -5,8 +5,9 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 import axios from 'axios'
 import OfferCard from '@/components/OfferCard.vue'
 
+import { apiUrl } from '@/config'
+
 const GlobalStore = inject('GlobalStore')
-console.log('userInfoCookie ---->', GlobalStore.userInfoCookie.value)
 
 const userInfo = ref('')
 const isLoading = ref(false)
@@ -27,10 +28,9 @@ onMounted(async () => {
 
   try {
     const { data } = await axios.get(
-      `http://localhost:1337/api/users/${props.id}?populate[0]=country&populate[1]=offers.images&populate[2]=avatar`,
+      `${apiUrl}/api/users/${props.id}?populate[0]=country&populate[1]=offers.images&populate[2]=avatar`,
     )
     userInfo.value = data
-    console.log('userInfo ---->', userInfo.value)
   } catch (error) {
     errorMessage.value = error
   } finally {

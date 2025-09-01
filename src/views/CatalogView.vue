@@ -6,9 +6,7 @@ import axios from 'axios'
 import Breadcrumb from '@/components/Breadcrumb.vue'
 import OfferCard from '@/components/OfferCard.vue'
 import PricePopup from '@/components/PricePopup.vue'
-
-// To do
-// Ajouter le bouton afficher les resultats dans les dropdown des filtres
+import { apiUrl } from '@/config'
 
 // ----------------------------------------------
 // 📄 PROPS / ROUTER / BASE VARIABLES
@@ -20,7 +18,6 @@ const props = defineProps({
     type: String,
   },
 })
-// console.log('main category id ---->', props.id)
 const route = useRoute()
 const router = useRouter()
 
@@ -85,7 +82,6 @@ const showDropdown = ref({
 })
 
 const toggleDropdown = (key) => {
-  console.log('toggleDropdown called for', key)
   for (const dropdown in showDropdown.value) {
     showDropdown.value[dropdown] =
       dropdown === key
@@ -318,23 +314,20 @@ const initFiltersFromQuery = () => {
 
 const fetchSizesByCategory = async (categorySlug) => {
   try {
-    const response = await axios.get(`http://localhost:1337/api/sizes/category/${categorySlug}`)
+    const response = await axios.get(`${apiUrl}/api/sizes/category/${categorySlug}`)
 
     availableSizes.value = response.data
     availableRefs.value.size = response.data
-
-    console.log('availableSizes ---->', availableSizes.value)
   } catch (error) {
     console.log('Erreur lors du chargement des tailles en fonction de la catégorie', error)
   }
 }
 const fetchBrandsByCategory = async (categorySlug) => {
   try {
-    const response = await axios.get(`http://localhost:1337/api/brands/category/${categorySlug}`)
+    const response = await axios.get(`${apiUrl}/api/brands/category/${categorySlug}`)
 
     availableBrands.value = response.data
     availableRefs.value.brand = response.data
-    console.log('availableBrands ---->', availableBrands.value)
   } catch (error) {
     console.log(
       'Erreur lors du chargement des marques en fonction des offres disponibles et de la catégorie',
@@ -343,11 +336,9 @@ const fetchBrandsByCategory = async (categorySlug) => {
 }
 const fetchColorsByCategory = async (categorySlug) => {
   try {
-    const response = await axios.get(`http://localhost:1337/api/colors/category/${categorySlug}`)
+    const response = await axios.get(`${apiUrl}/api/colors/category/${categorySlug}`)
     availableColors.value = response.data
     availableRefs.value.color = response.data
-
-    console.log('availableColors ---->', availableColors.value)
   } catch (error) {
     console.log('Erreur lors du chargement des couleurs en fonction des offres de la catégorie')
   }
@@ -355,11 +346,9 @@ const fetchColorsByCategory = async (categorySlug) => {
 
 const fetchMaterialsByCategory = async (categorySlug) => {
   try {
-    const response = await axios.get(`http://localhost:1337/api/materials/category/${categorySlug}`)
+    const response = await axios.get(`${apiUrl}/api/materials/category/${categorySlug}`)
     availableMaterials.value = response.data
     availableRefs.value.material = response.data
-
-    console.log('availableMaterials ---->', availableMaterials.value)
   } catch (error) {
     console.log('Erreur lors du chargement des matières en fonction des offres de la catégorie')
   }
@@ -369,7 +358,6 @@ const fetchCatalogOffers = async () => {
   if (!categoryData.value.attributes) return
 
   const categoryName = categoryData.value.attributes.name
-  console.log('categoryName ---->', categoryName)
 
   //// GESTION PARAMS
   const params = {}
@@ -431,7 +419,7 @@ const fetchCatalogOffers = async () => {
     params['sort'] = filters.value.sort
   }
 
-  const responseOffers = await axios.get(`http://localhost:1337/api/offers?populate=*&`, {
+  const responseOffers = await axios.get(`${apiUrl}/api/offers?populate=*&`, {
     params,
   })
 
@@ -449,8 +437,6 @@ const fetchCatalogOffers = async () => {
 // ----------------------------------------------
 
 const collectCategoryNames = (category) => {
-  console.log('category in collectCategoryNames ---->', category)
-
   if (category?.attributes?.children?.data?.length > 0) {
     for (const child of category.attributes.children.data) {
       categoryChildren.push({ displayName: child.attributes.displayName, id: child.id })
@@ -597,10 +583,9 @@ onMounted(async () => {
   isLoading.value = true
   try {
     const response = await axios.get(
-      `http://localhost:1337/api/categories/${props.id}?populate[0]=children&populate[1]=children.children&populate[2]=children.children.children&populate[3]=children.children.children.children&populate[4]=parent&populate[5]=parent.parent&populate[6]=parent.parent.parent&populate[7]=parent.parent.parent.parent&populate[8]=parent.parent.parent.parent.parent`,
+      `${apiUrl}/api/categories/${props.id}?populate[0]=children&populate[1]=children.children&populate[2]=children.children.children&populate[3]=children.children.children.children&populate[4]=parent&populate[5]=parent.parent&populate[6]=parent.parent.parent&populate[7]=parent.parent.parent.parent&populate[8]=parent.parent.parent.parent.parent`,
     )
     categoryData.value = response.data.data
-    console.log('categoryData ---->', categoryData.value)
 
     initFiltersFromQuery()
 

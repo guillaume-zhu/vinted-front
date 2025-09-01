@@ -7,6 +7,7 @@ import _ from 'lodash'
 import OfferCard from '@/components/OfferCard.vue'
 import Dressing from '@/components/Dressing.vue'
 import PricePopup from '@/components/PricePopup.vue'
+import { apiUrl } from '@/config'
 
 const isLoading = ref(false)
 const errorMessage = ref('')
@@ -60,7 +61,7 @@ const searchDressingWithOffers = async (ownersQueue) => {
     const owner = ownersQueue.shift()
     try {
       const response = await axios.get(
-        `http://localhost:1337/api/users/${owner.id}?populate[0]=avatar&populate[1]=offers.images&populate[2]=offers.category&populate[3]=offers.brand&populate[4]=offers.size&populate[5]=offers.materials&populate[6]=offers.colors`,
+        `${apiUrl}/api/users/${owner.id}?populate[0]=avatar&populate[1]=offers.images&populate[2]=offers.category&populate[3]=offers.brand&populate[4]=offers.size&populate[5]=offers.materials&populate[6]=offers.colors`,
       )
 
       if (response.data.offers.length > 0) {
@@ -81,14 +82,12 @@ onMounted(async () => {
   try {
     ///////// RÉCUPÉRER LES 80 PREMIÈRES OFFRES
     /////// récupérer le nombre total d'offre avec une requete simple a charger
-    const responseTotalOffer = await axios.get(
-      `http://localhost:1337/api/offers?pagination[pageSize]=1`,
-    )
+    const responseTotalOffer = await axios.get(`${apiUrl}/api/offers?pagination[pageSize]=1`)
     totalOffer = responseTotalOffer.data.meta.pagination.total
 
     /////// récupérer tout les id avec une requete pour pageSize = total offres
     const responseAllOffersId = await axios.get(
-      `http://localhost:1337/api/offers?pagination[pageSize]=${totalOffer}&fields[0]=id`,
+      `${apiUrl}/api/offers?pagination[pageSize]=${totalOffer}&fields[0]=id`,
     )
     /////// stocker id dans tableau
     allOffersId.value = responseAllOffersId.data.data.map((allOffersId) => allOffersId.id)
@@ -103,14 +102,11 @@ onMounted(async () => {
     const first80OffersId = cutArray(randomizedAllOffersId.value, 80)[0]
 
     //// requête pour afficher les 80 premières offres en aléatoire
-    const { data } = await axios.get(
-      `http://localhost:1337/api/offers?pagination[pageSize]=80&populate=*`,
-      {
-        params: {
-          'filters[id][$in]': first80OffersId,
-        },
+    const { data } = await axios.get(`${apiUrl}/api/offers?pagination[pageSize]=80&populate=*`, {
+      params: {
+        'filters[id][$in]': first80OffersId,
       },
-    )
+    })
 
     // Attribution des lines d'offres découpées
     firstOffersLine.value = data.data.slice(0, 10)
@@ -123,7 +119,7 @@ onMounted(async () => {
 
     ///////// RÉCUPÉRER UN DRESSING ALÉATOIRE
     // Récupérer tout les id des utilisateurs dans un tableau
-    const responseAllOwnersId = await axios.get('http://localhost:1337/api/users?[fields][0]=id')
+    const responseAllOwnersId = await axios.get(`${apiUrl}/api/users?[fields][0]=id`)
     allOwnersId.value = responseAllOwnersId.data
 
     // Mélanger ce tableau d'id
@@ -148,7 +144,7 @@ const loadMoreOffer = async () => {
   pageSize += 80
 
   const responseOfferPlus = await axios.get(
-    `http://localhost:1337/api/offers?pagination[pageSize]=${pageSize}&populate=*`,
+    `${apiUrl}/api/offers?pagination[pageSize]=${pageSize}&populate=*`,
     {
       params: {
         'filters[id][$in]': randomizedAllOffersId.value.slice(80),

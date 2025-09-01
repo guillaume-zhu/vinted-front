@@ -5,6 +5,8 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import axios from 'axios'
 import CategoryDropdown from './CategoryDropdown.vue'
 import Login from './Login.vue'
+
+import { apiUrl } from '@/config'
 // ----------------------------------------------
 // 📄 PROPS / ROUTER / BASE VARIABLES
 // ----------------------------------------------
@@ -12,7 +14,6 @@ import Login from './Login.vue'
 const router = useRouter()
 const route = useRoute()
 const GlobalStore = inject('GlobalStore')
-console.log('is connected ? global userInfoCookie ---->', GlobalStore.userInfoCookie.value)
 
 // ----------------------------------------------
 // 🎯 HEADER VARIABLES
@@ -131,7 +132,7 @@ const close = () => {
 onMounted(async () => {
   try {
     const response = await axios.get(
-      `http://localhost:1337/api/categories/?filters[categoryLevel][$eq]=level1&populate[children][populate]=children`,
+      `${apiUrl}/api/categories/?filters[categoryLevel][$eq]=level1&populate[children][populate]=children`,
     )
 
     const desiredOrder = ['femmes', 'hommes', 'enfants', 'maison']
@@ -143,8 +144,6 @@ onMounted(async () => {
     categories.value = desiredOrder
       .map((name) => filtered.find((cat) => cat.attributes.name === name))
       .filter(Boolean)
-
-    console.log('categories.value ---->', categories.value)
   } catch (error) {
     console.log('Erreur lors du chargement des catégories', error)
   }

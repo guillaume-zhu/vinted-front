@@ -47,8 +47,6 @@ const buildBreadCrumbArray = () => {
       categoryLevel: current.categoryLevel,
     })
   }
-
-  console.log('breadCrumbArray ---->', breadCrumbArray.value)
 }
 
 onMounted(buildBreadCrumbArray)

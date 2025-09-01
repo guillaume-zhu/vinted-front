@@ -3,6 +3,8 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import axios from 'axios'
 import { RouterLink } from 'vue-router'
 
+import { apiUrl } from '@/config'
+
 /////////// CATEGORY DROPDOWN MENU
 const openStates = ref({})
 const categoryRefs = ref({})
@@ -111,7 +113,7 @@ const closeAllMenus = () => {
 onMounted(async () => {
   try {
     const response = await axios.get(
-      `http://localhost:1337/api/categories/?filters[categoryLevel][$eq]=level1&populate[children][populate]=children`,
+      `${apiUrl}/api/categories/?filters[categoryLevel][$eq]=level1&populate[children][populate]=children`,
     )
 
     const desiredOrder = ['femmes', 'hommes', 'enfants', 'maison']

@@ -4,6 +4,8 @@ import axios from 'axios'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 
+import { apiUrl } from '@/config'
+
 const GlobalStore = inject('GlobalStore')
 const isLoading = ref(false)
 const userInfo = ref(null)
@@ -94,7 +96,7 @@ onMounted(async () => {
 
   try {
     const response = await axios.get(
-      `http://localhost:1337/api/users/${GlobalStore.userInfoCookie.value.id}?populate[0]=country`,
+      `${apiUrl}/api/users/${GlobalStore.userInfoCookie.value.id}?populate[0]=country`,
     )
 
     userInfo.value = response.data
@@ -124,13 +126,9 @@ const handleSubmit = async () => {
   }
 
   try {
-    console.log('body ---->', body)
-
-    const response = await axios.put(`http://localhost:1337/api/users/${userInfo.value.id}`, body, {
+    const response = await axios.put(`${apiUrl}/api/users/${userInfo.value.id}`, body, {
       headers: { Authorization: `Bearer ` + GlobalStore.userInfoCookie.value.token },
     })
-
-    console.log('Réponse requete update body account ---->', response.data)
   } catch (error) {
     console.log(`Erreur lors de la requête d'envoi du formilaire`, error)
   } finally {

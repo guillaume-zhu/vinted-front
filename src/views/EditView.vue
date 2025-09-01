@@ -4,6 +4,8 @@ import axios from 'axios'
 import { debounce } from 'lodash'
 import { useRouter } from 'vue-router'
 
+import { apiUrl } from '@/config'
+
 // -----------------------------------------
 // BASE VARIABLES
 // -----------------------------------------
@@ -336,7 +338,7 @@ const isDisabledMaterial = (m) => {
 const fetchLevel1 = async () => {
   try {
     const response = await axios.get(
-      'http://localhost:1337/api/categories?filters[categoryLevel][$eq]=level1&populate[0]=children&populate[1]=children.children&populate[2]=children.children.children&populate[3]=children.children.children.children',
+      `${apiUrl}/api/categories?filters[categoryLevel][$eq]=level1&populate[0]=children&populate[1]=children.children&populate[2]=children.children.children&populate[3]=children.children.children.children`,
     )
 
     firstCategories.value = response.data.data
@@ -349,7 +351,7 @@ const fetchLevel1 = async () => {
 const filterCategories = async (textInput) => {
   try {
     const response = await axios.get(
-      `http://localhost:1337/api/categories/?filters[displayName][$containsi]=${textInput}&[populate[0]=parent&populate[1]=parent.parent&populate[2]=parent.parent.parent&populate[3]=parent.parent.parent.parent&populate[4]=parent.parent.parent.parent.parent&populate[5]=children&pagination[pageSize]=200`,
+      `${apiUrl}/api/categories/?filters[displayName][$containsi]=${textInput}&[populate[0]=parent&populate[1]=parent.parent&populate[2]=parent.parent.parent&populate[3]=parent.parent.parent.parent&populate[4]=parent.parent.parent.parent.parent&populate[5]=children&pagination[pageSize]=200`,
     )
     filteredCategories.value = response.data.data
 
@@ -379,7 +381,7 @@ const debouncedFilterCategories = debounce((value) => {
 const fetchPopularBrands = async () => {
   try {
     const response = await axios.get(
-      `http://localhost:1337/api/brands?filters[isPopular]=true&pagination[pageSize]=50`,
+      `${apiUrl}/api/brands?filters[isPopular]=true&pagination[pageSize]=50`,
     )
 
     availableBrand.value = response.data.data
@@ -391,7 +393,7 @@ const fetchPopularBrands = async () => {
 const filterBrands = async (textInput) => {
   try {
     const response = await axios.get(
-      `http://localhost:1337/api/brands?filters[displayName][$containsi]=${textInput}&pagination[pageSize]=100`,
+      `${apiUrl}/api/brands?filters[displayName][$containsi]=${textInput}&pagination[pageSize]=100`,
     )
     filteredBrand.value = response.data.data
   } catch (error) {
@@ -406,9 +408,7 @@ const debouncedFilterBrands = debounce((value) => {
 // 3. Size Input
 const fetchSizes = async (categoryName) => {
   try {
-    const response = await axios.get(
-      `http://localhost:1337/api/sizes/category/${categoryName}?onlySizes=true`,
-    )
+    const response = await axios.get(`${apiUrl}/api/sizes/category/${categoryName}?onlySizes=true`)
 
     availableSizes.value = response.data
 
@@ -423,7 +423,7 @@ const fetchSizes = async (categoryName) => {
 // 4. Colors Input
 const fetchColors = async () => {
   try {
-    const response = await axios.get('http://localhost:1337/api/colors?pagination[pageSize]=50')
+    const response = await axios.get(`${apiUrl}/api/colors?pagination[pageSize]=50`)
 
     availableColors.value = response.data.data
   } catch (error) {
@@ -434,7 +434,7 @@ const fetchColors = async () => {
 // 5. Materials Input
 const fetchMaterials = async () => {
   try {
-    const response = await axios.get('http://localhost:1337/api/materials?pagination[pageSize]=100')
+    const response = await axios.get(`${apiUrl}/api/materials?pagination[pageSize]=100`)
 
     availableMaterials.value = response.data.data.sort((a, b) =>
       a.attributes.displayName.localeCompare(b.attributes.displayName),
@@ -523,14 +523,10 @@ const handleSubmit = async () => {
   //   }
 
   try {
-    const response = await axios.put(
-      `http://localhost:1337/api/offers/${props.id}?populate=*`,
-      formData,
-      {
-        headers: { Authorization: 'Bearer ' + GlobalStore.userInfoCookie.value.token },
-        // 'Content-Type': 'multipart/form-data',
-      },
-    )
+    const response = await axios.put(`${apiUrl}/api/offers/${props.id}?populate=*`, formData, {
+      headers: { Authorization: 'Bearer ' + GlobalStore.userInfoCookie.value.token },
+      // 'Content-Type': 'multipart/form-data',
+    })
 
     const newOffer = response.data.data
     console.log('response newOffer--->', newOffer)
@@ -547,7 +543,7 @@ const handleSubmit = async () => {
 const fetchOfferInfo = async () => {
   isLoading.value = true
   try {
-    const response = await axios.get(`http://localhost:1337/api/offers/${props.id}?populate=*`)
+    const response = await axios.get(`${apiUrl}/api/offers/${props.id}?populate=*`)
 
     offerInfo.value = response.data.data
 

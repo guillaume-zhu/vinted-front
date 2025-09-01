@@ -9,6 +9,7 @@ import OfferCard from '@/components/OfferCard.vue'
 import PricePopup from '@/components/PricePopup.vue'
 
 import fallbackAvatar from '@/assets/img/user-profile.webp'
+import { apiUrl } from '@/config'
 
 // -----------------------------------------
 // BASE VARIABLES
@@ -90,7 +91,7 @@ onMounted(async () => {
 
   try {
     // Récupérer offerInfo
-    const { data } = await axios.get(`http://localhost:1337/api/offers/${props.id}?populate=*`)
+    const { data } = await axios.get(`${apiUrl}/api/offers/${props.id}?populate=*`)
 
     offerInfo.value = data.data
     category.value = offerInfo.value.attributes.category.data
@@ -100,14 +101,14 @@ onMounted(async () => {
 
     // Récupérer category breadcrumb
     const responseCategory = await axios.get(
-      `http://localhost:1337/api/categories/${category.value.id}?populate[0]=parent&populate[1]=parent.parent&populate[2]=parent.parent.parent&populate[3]=parent.parent.parent.parent&populate[4]=parent.parent.parent.parent.parent`,
+      `${apiUrl}/api/categories/${category.value.id}?populate[0]=parent&populate[1]=parent.parent&populate[2]=parent.parent.parent&populate[3]=parent.parent.parent.parent&populate[4]=parent.parent.parent.parent.parent`,
     )
 
     breadCrumb.value = responseCategory.data.data
 
     // Récupérer ownerInfo
     const responseOwnerInfo = await axios.get(
-      `http://localhost:1337/api/users/${ownerId.value}?populate[0]=avatar&populate[1]=offers.images&populate[2]=offers.category&populate[3]=offers.brand&populate[4]=offers.size&populate[5]=offers.materials&populate[6]=offers.colors&populate[7]=country`,
+      `${apiUrl}/api/users/${ownerId.value}?populate[0]=avatar&populate[1]=offers.images&populate[2]=offers.category&populate[3]=offers.brand&populate[4]=offers.size&populate[5]=offers.materials&populate[6]=offers.colors&populate[7]=country`,
     )
 
     ownerInfo.value = responseOwnerInfo.data
@@ -124,7 +125,7 @@ onMounted(async () => {
 // 2. Delete offer
 const deleteOffer = async () => {
   try {
-    const response = await axios.delete(`http://localhost:1337/api/offers/${props.id}`, {
+    const response = await axios.delete(`${apiUrl}/api/offers/${props.id}`, {
       headers: { Authorization: 'Bearer ' + GlobalStore.userInfoCookie.value.token },
     })
 

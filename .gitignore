@@ -28,3 +28,7 @@ coverage
 *.sw?
 
 *.tsbuildinfo
+
+# Environnements locaux
+.env.local
+.env.*.local

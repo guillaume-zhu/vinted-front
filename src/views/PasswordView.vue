@@ -9,6 +9,8 @@ const confirmPassword = ref(null)
 const errorMessage = ref('')
 const successMessage = ref('')
 
+import { apiUrl } from '@/config'
+
 const handleChangePassword = async () => {
   /////// Requete changePassword ( vérifie s'il manque un mdp / vérifie si currentPassword correspond au compte / met à jour le mdp hash  )
 
@@ -26,7 +28,7 @@ const handleChangePassword = async () => {
   // si oui lancer la requête
   try {
     const response = await axios.post(
-      'http://localhost:1337/api/users-permissions/change-password',
+      `${apiUrl}/api/users-permissions/change-password`,
       { currentPassword: currentPassword.value, newPassword: newPassword.value },
       {
         headers: {

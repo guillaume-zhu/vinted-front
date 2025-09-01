@@ -7,6 +7,8 @@ import 'vue-select/dist/vue-select.css'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 
+import { apiUrl } from '@/config'
+
 const GlobalStore = inject('GlobalStore')
 const userInfo = ref('')
 const isLoading = ref(false)
@@ -18,11 +20,10 @@ onMounted(async () => {
   isLoading.value = true
   try {
     const { data } = await axios.get(
-      `http://localhost:1337/api/users/${GlobalStore.userInfoCookie.value.id}?populate[0]=country`,
+      `${apiUrl}/api/users/${GlobalStore.userInfoCookie.value.id}?populate[0]=country`,
     )
 
     userInfo.value = data
-    console.log('userInfo ---->', userInfo.value)
 
     errorMessage.value = ''
   } catch (error) {
@@ -40,8 +41,7 @@ const countries = ref([])
 // Requête fonction pour récupérer la liste des pays depuis le back
 const fetchCountries = async () => {
   try {
-    const { data } = await axios.get('http://localhost:1337/api/countries')
-    console.log('data --->', data)
+    const { data } = await axios.get(`${apiUrl}/api/countries`)
     countries.value = data.data.map((country) => {
       return {
         value: country.id,
@@ -49,8 +49,6 @@ const fetchCountries = async () => {
         isoCode: country.attributes.isoCode,
       }
     })
-
-    console.log('countries after mapping ---->', countries.value)
   } catch (error) {
     console.log('Erreur lors du chargement des pays :', error)
   }
@@ -444,7 +442,7 @@ const handleSubmit = async () => {
     //// Faire la requête
     try {
       const response = await axios.put(
-        `http://localhost:1337/api/users/${userInfo.value.id}?populate[0]=avatar`,
+        `${apiUrl}/api/users/${userInfo.value.id}?populate[0]=avatar`,
         formData,
         {
           headers: {
@@ -499,13 +497,9 @@ const handleSubmit = async () => {
     /// Faire la requête
 
     try {
-      const response = await axios.put(
-        `http://localhost:1337/api/users/${userInfo.value.id}`,
-        body,
-        {
-          headers: { Authorization: `Bearer ` + GlobalStore.userInfoCookie.value.token },
-        },
-      )
+      const response = await axios.put(`${apiUrl}/api/users/${userInfo.value.id}`, body, {
+        headers: { Authorization: `Bearer ` + GlobalStore.userInfoCookie.value.token },
+      })
 
       console.log('Réponse requete update body ---->', response.data)
     } catch (error) {

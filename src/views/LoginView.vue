@@ -3,10 +3,11 @@ import { ref, inject } from 'vue'
 import axios from 'axios'
 import { useRoute, useRouter } from 'vue-router'
 
+import { apiUrl } from '@/config'
+
 const router = useRouter()
 const route = useRoute()
 const GlobalStore = inject('GlobalStore')
-// console.log('GlobalStore ---->', GlobalStore)
 
 const tryConnection = ref('')
 const wantSignUp = ref('')
@@ -52,7 +53,7 @@ const logIn = async () => {
 
     // Requête pour se connecter
     try {
-      const { data } = await axios.post('http://localhost:1337/api/auth/local', {
+      const { data } = await axios.post(`${apiUrl}/api/auth/local`, {
         identifier: email.value,
         password: password.value,
       })
@@ -64,9 +65,7 @@ const logIn = async () => {
       const userToken = data.jwt
 
       // Requête avec l'id pour obtenir l'objet utilisateur
-      const dataUserInfos = await axios.get(
-        `http://localhost:1337/api/users/${userId}?populate[0]=avatar`,
-      )
+      const dataUserInfos = await axios.get(`${apiUrl}7/api/users/${userId}?populate[0]=avatar`)
 
       // Stockage des infos objet utilisateur
       const userInfo = dataUserInfos.data
@@ -95,7 +94,7 @@ const signUp = async () => {
   } else {
     isLogging.value = true
     try {
-      const { data } = await axios.post('http://localhost:1337/api/auth/local/register', {
+      const { data } = await axios.post(`${apiUrl}37/api/auth/local/register`, {
         username: username.value,
         email: email.value,
         password: password.value,

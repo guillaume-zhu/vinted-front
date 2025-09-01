@@ -4,6 +4,8 @@ import axios from 'axios'
 import { computed } from 'vue'
 import { loadStripe } from '@stripe/stripe-js'
 
+import { apiUrl } from '@/config'
+
 // -----------------------------------------
 // BASE VARIABLES
 // -----------------------------------------
@@ -53,15 +55,14 @@ const totalPrice = computed(() => {
 
 // 1. offerInfo and UserInfo
 const fetchOfferInfo = async () => {
-  const response = await axios.get(`http://localhost:1337/api/offers/${props.id}?populate=*`)
+  const response = await axios.get(`${apiUrl}/api/offers/${props.id}?populate=*`)
   offerInfo.value = response.data.data
   console.log('offerInfo ---->', offerInfo.value)
 
   const responseUser = await axios.get(
-    `http://localhost:1337/api/users/${GlobalStore.userInfoCookie.value.id}?populate[0]=country`,
+    `${apiUrl}/api/users/${GlobalStore.userInfoCookie.value.id}?populate[0]=country`,
   )
   userInfo.value = responseUser.data
-  console.log('userInfo ---->', userInfo.value)
 }
 
 // 2. Stripe payement
@@ -72,7 +73,7 @@ const handlePayment = async () => {
     const stripeToken = token.id
 
     const response = await axios.post(
-      `http://localhost:1337/api/offers/buy`,
+      `${apiUrl}/api/offers/buy`,
       {
         token: stripeToken,
         amount: offerInfo.value.attributes.price,
